@@ -74,9 +74,13 @@ body {
   font-size: 18px;
   margin: 0;
   padding: 0;
-  line-height: 1.5;
-}
+  line-height: 1.6; /* Aumentei um pouco para facilitar leitura */
 
+  /* --- CORREÇÃO DE PESO DA FONTE --- */
+  -webkit-font-smoothing: antialiased; /* Afina a fonte no Chrome/Safari */
+  -moz-osx-font-smoothing: grayscale; /* Afina a fonte no Firefox/Mac */
+  text-rendering: optimizeLegibility;
+}
 /* Tipografia de Títulos (Antenna Black) */
 h1,
 h2,
@@ -87,6 +91,9 @@ h4,
   font-weight: 900;
   text-transform: uppercase;
   margin-bottom: 0.5rem;
+
+  /* --- CORREÇÃO DE ESPAÇAMENTO --- */
+  letter-spacing: 1.5px; /* Separa as letras elegantemente */
 }
 
 /* --- 4. CABEÇALHO (HEADER) --- */
@@ -158,6 +165,9 @@ img {
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  /* Ajuste fino para não ficar grudado */
+  letter-spacing: 0.5px;
 }
 
 .card-evento-nome {
