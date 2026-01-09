@@ -196,12 +196,13 @@ window.abrirModal = function (dataISO) {
 
   // Botão Admin (Só aparece se logado)
   let btnAdmin = "";
-  if (ESTADO.isAdmin) {
+ /*if (ESTADO.isAdmin) {
     if (evento.id) {
       btnAdmin = `<button id="btnEditar" class="btn-admin-action">🛠️ GERENCIAR ESCALAS</button>`;
     } else {
       btnAdmin = `<div style="text-align:center; padding:10px; color:#999; font-size:0.8rem;">Criação de eventos em dias vazios em breve.</div>`;
-    }
+    }*/
+    btnAdmin = `<button id="btnEditar" class="btn-admin-action">🛠️ GERENCIAR AGENDA</button>`;
   }
 
   // Montagem do Modal
@@ -230,9 +231,9 @@ window.abrirModal = function (dataISO) {
   modalOverlay.classList.add("active");
 
   // Bind do botão Editar
-  if (ESTADO.isAdmin && evento.id) {
-    document.getElementById("btnEditar").onclick = () =>
-      ativarModoEdicao(evento);
+  if (ESTADO.isAdmin) {
+        document.getElementById('btnEditar').onclick = () => ativarModoEdicao(evento);
+    }
   }
 };
 
@@ -265,19 +266,66 @@ function gerarHTMLLeitura(evento) {
 function ativarModoEdicao(evento) {
   const area = document.getElementById("areaConteudo");
   const btnEditar = document.getElementById("btnEditar");
-  if (btnEditar) btnEditar.style.display = "none"; // Esconde botão
+  if (btnEditar) btnEditar.style.display = "none";
 
-  // Gera opções do Select
   const optionsEquipes = ESTADO.listaEquipes
     .map((eq) => `<option value="${eq.id}">${eq.nome_equipe}</option>`)
     .join("");
 
+  // Prepara valores iniciais
+  const tituloVal = evento.titulo || "Novo Evento";
+  // Mapeamento simples de cores para o Select (Hardcoded IDs do Seed)
+  // 1=Verde, 2=Branco, 3=Vermelho, 4=Roxo, 5=Rosa, 6=Dourado (Ajuste conforme seu banco)
+  const corAtualId = evento.cor_id || evento.liturgia_cores?.id || 1; // Default Verde
+
   let htmlEditor = `
-        <h3 style="color:var(--cor-vinho); margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:5px;">Editando Escalas</h3>
+        <h3 style="color:var(--cor-vinho); margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:5px;">Editar Evento</h3>
+        
+        <!-- EDITOR DO CABEÇALHO (TÍTULO E COR) -->
+        <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #e0e0e0; margin-bottom:15px;">
+            <label style="font-size:0.8rem; font-weight:bold; color:#888;">NOME DA CELEBRAÇÃO</label>
+            <input type="text" id="editTitulo" value="${tituloVal}" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; font-weight:bold; font-size:1rem; margin-top:5px;">
+            
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <div style="flex:1;">
+                    <label style="font-size:0.8rem; font-weight:bold; color:#888;">COR LITÚRGICA</label>
+                    <select id="editCor" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; margin-top:5px;">
+                        <option value="1" ${
+                          corAtualId == 1 ? "selected" : ""
+                        }>Verde (Comum)</option>
+                        <option value="2" ${
+                          corAtualId == 2 ? "selected" : ""
+                        }>Branco (Festas)</option>
+                        <option value="3" ${
+                          corAtualId == 3 ? "selected" : ""
+                        }>Vermelho (Mártires)</option>
+                        <option value="4" ${
+                          corAtualId == 4 ? "selected" : ""
+                        }>Roxo (Advento/Quaresma)</option>
+                        <option value="5" ${
+                          corAtualId == 5 ? "selected" : ""
+                        }>Rosa (Gaudete)</option>
+                    </select>
+                </div>
+                <div style="flex:1;">
+                    <label style="font-size:0.8rem; font-weight:bold; color:#888;">TIPO</label>
+                    <select id="editTipo" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; margin-top:5px;">
+                        <option value="comum" ${
+                          !evento.is_solenidade ? "selected" : ""
+                        }>Comum/Memória</option>
+                        <option value="solenidade" ${
+                          evento.is_solenidade ? "selected" : ""
+                        }>Solenidade (Destaque)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <h4 style="color:#666; font-size:0.9rem; margin-bottom:10px;">Escalas e Horários</h4>
         <div id="listaEditor" style="display:flex; flex-direction:column; gap:15px;">
     `;
 
-  // Cria inputs para escalas existentes
+  // Escalas
   if (evento.escalas) {
     evento.escalas.forEach((esc, index) => {
       htmlEditor += gerarLinhaEditor(esc, index, optionsEquipes);
@@ -288,7 +336,7 @@ function ativarModoEdicao(evento) {
         <button onclick="adicionarNovaEscala()" style="margin-top:15px; background:#f0f0f0; border:1px dashed #ccc; padding:10px; width:100%; border-radius:6px; cursor:pointer; font-weight:bold; color:#555;">➕ Adicionar Horário</button>
         
         <div style="margin-top:25px; display:flex; gap:10px;">
-            <button onclick="salvarEdicoes()" style="flex:1; background:var(--cor-verde); color:#fff; border:none; padding:12px; border-radius:6px; font-weight:bold; cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,0.2);">💾 SALVAR</button>
+            <button onclick="salvarEdicoes()" style="flex:1; background:var(--cor-verde); color:#fff; border:none; padding:12px; border-radius:6px; font-weight:bold; cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,0.2);">💾 SALVAR TUDO</button>
             <button onclick="fecharModalForce()" style="background:#eee; border:none; padding:12px 20px; border-radius:6px; cursor:pointer; color:#555;">Cancelar</button>
         </div>
     `;
@@ -380,11 +428,31 @@ window.removerLinha = function (btn) {
 };
 
 window.salvarEdicoes = async function () {
+  // 1. Coleta dados do Cabeçalho
+  const novoTitulo = document.getElementById("editTitulo").value;
+  const novoCorId = document.getElementById("editCor").value;
+  const tipoEvento = document.getElementById("editTipo").value;
+
+  if (!novoTitulo) {
+    alert("O evento precisa de um nome!");
+    return;
+  }
+
+  // Objeto Evento Base
+  const dadosEvento = {
+    id: eventoEmEdicao.id, // Null se for novo
+    data: eventoEmEdicao.data, // Data ISO mantida
+    titulo: novoTitulo,
+    // Mantemos o tempo litúrgico original ou definimos padrão se for novo
+    tempo_liturgico: eventoEmEdicao.tempo_liturgico || "Paroquial",
+    cor_id: parseInt(novoCorId),
+    is_solenidade: tipoEvento === "solenidade",
+    is_festa: false,
+  };
+
+  // 2. Coleta Escalas
   const linhas = document.querySelectorAll(".editor-row");
   const novasEscalas = [];
-  const eventoId = eventoEmEdicao.id;
-
-  // Coleta dados
   linhas.forEach((row) => {
     const hora = row.querySelector(".edit-hora").value;
     const leit = row.querySelector(".edit-leitura").value || null;
@@ -392,7 +460,6 @@ window.salvarEdicoes = async function () {
 
     if (hora) {
       novasEscalas.push({
-        evento_id: eventoId,
         hora_celebracao: hora,
         equipe_leitura_id: leit,
         equipe_canto_id: cant,
@@ -403,27 +470,14 @@ window.salvarEdicoes = async function () {
   try {
     const area = document.getElementById("areaConteudo");
     area.innerHTML =
-      '<div style="text-align:center; padding:40px; color:var(--cor-vinho); font-weight:bold;"><p>💾 Salvando alterações...</p></div>';
+      '<div style="text-align:center; padding:40px; color:var(--cor-vinho); font-weight:bold;"><p>💾 Processando...</p></div>';
 
-    // 1. Apaga antigas
-    const { error: errDel } = await window.api.client
-      .from("escalas")
-      .delete()
-      .eq("evento_id", eventoId);
-    if (errDel) throw errDel;
+    // Chama a nova função da API
+    await window.api.salvarEventoCompleto(dadosEvento, novasEscalas);
 
-    // 2. Insere novas
-    if (novasEscalas.length > 0) {
-      const { error: errIns } = await window.api.client
-        .from("escalas")
-        .insert(novasEscalas);
-      if (errIns) throw errIns;
-    }
-
-    // 3. Sucesso
-    alert("✅ Escalas atualizadas com sucesso!");
+    alert("✅ Agenda atualizada com sucesso!");
     fecharModalForce();
-    carregarMes(ESTADO.anoAtual, ESTADO.mesAtual); // Recarrega calendário
+    carregarMes(ESTADO.anoAtual, ESTADO.mesAtual);
   } catch (err) {
     alert("Erro ao salvar: " + err.message);
     console.error(err);

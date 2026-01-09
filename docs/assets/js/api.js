@@ -14,8 +14,11 @@ const _supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 window.api = {
   client: _supabaseClient,
 
-  // 1. Buscar Eventos do Mês
+  // ... (Mantenha buscarEventos, checkSession e listarEquipes iguais) ...
+  // Vou reescrever aqui apenas o que muda:
+
   buscarEventos: async function (ano, mes) {
+    // (Mantenha o código igual ao anterior)
     const mesStr = String(mes).padStart(2, "0");
     const inicio = `${ano}-${mesStr}-01`;
     const ultimoDia = new Date(ano, mes, 0).getDate();
@@ -45,47 +48,78 @@ window.api = {
     return data;
   },
 
-  // 2. Verificar Sessão (Login)
   checkSession: async function () {
     const { data } = await _supabaseClient.auth.getSession();
-    return data.session; // Retorna o usuário se logado, ou null
+    return data.session;
   },
 
-  // 3. Listar Todas as Equipes (Para o Dropdown)
   listarEquipes: async function () {
     const { data, error } = await _supabaseClient
       .from("equipes")
       .select("*")
       .order("nome_equipe");
+    if (error) return [];
+    return data;
+  },
 
-    if (error) {
-      console.error("Erro equipes:", error);
-      return [];
+  // --- NOVO: SALVAR EVENTO COMPLETO ---
+  salvarEventoCompleto: async function (eventoDados, escalasLista) {
+    let eventoId = eventoDados.id;
+
+    // 1. Salvar ou Criar o Evento Base (Título, Cor, Data)
+    // Se não tem ID, remove do objeto para o banco gerar
+    const payloadEvento = {
+      data: eventoDados.data,
+      titulo: eventoDados.titulo,
+      tempo_liturgico: eventoDados.tempo_liturgico || "Tempo Comum",
+      // Precisamos do ID da cor. Se veio objeto, extrai. Se não, usa Default (1=Verde)
+      // No app.js vamos garantir que mandamos o cor_id certo.
+      cor_id: eventoDados.cor_id || 1,
+      is_solenidade: eventoDados.is_solenidade || false,
+      is_festa: eventoDados.is_festa || false,
+    };
+
+    if (eventoId) {
+      // Update
+      const { error } = await _supabaseClient
+        .from("eventos_base")
+        .update(payloadEvento)
+        .eq("id", eventoId);
+      if (error) throw error;
+    } else {
+      // Insert
+      const { data, error } = await _supabaseClient
+        .from("eventos_base")
+        .insert(payloadEvento)
+        .select(); // Retorna o ID criado
+      if (error) throw error;
+      eventoId = data[0].id;
     }
-    return data;
-  },
 
-  // 4. Salvar Escala (Nova ou Edição)
-  salvarEscala: async function (dados) {
-    const { data, error } = await _supabaseClient
-      .from("escalas")
-      .upsert(dados) // Upsert: Se tem ID atualiza, se não tem cria
-      .select();
-
-    if (error) throw error;
-    return data;
-  },
-
-  // 5. Deletar Escala
-  deletarEscala: async function (id) {
-    const { error } = await _supabaseClient
+    // 2. Salvar as Escalas (Apaga antigas e recria, como antes)
+    // A. Delete
+    const { error: errDel } = await _supabaseClient
       .from("escalas")
       .delete()
-      .eq("id", id);
-    if (error) throw error;
+      .eq("evento_id", eventoId);
+    if (errDel) throw errDel;
+
+    // B. Insert
+    if (escalasLista.length > 0) {
+      // Adiciona o eventoId correto nas escalas
+      const escalasComId = escalasLista.map((e) => ({
+        ...e,
+        evento_id: eventoId,
+      }));
+      const { error: errIns } = await _supabaseClient
+        .from("escalas")
+        .insert(escalasComId);
+      if (errIns) throw errIns;
+    }
+
+    return true;
   },
 
-  // 6. Logout
   logout: async function () {
     await _supabaseClient.auth.signOut();
     window.location.reload();
