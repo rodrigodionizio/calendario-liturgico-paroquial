@@ -1,20 +1,16 @@
-import os
 from pathlib import Path
 
 def create_project_structure():
-    # Nome do Repositório
-    root_folder = "calendario-liturgico-paroquial"
-    
     # Definição da Árvore de Diretórios
     directories = [
-        f"{root_folder}/backend_automacao",  # Scripts Python
-        f"{root_folder}/database",           # SQL e Backups
-        f"{root_folder}/docs/assets/css",    # Frontend - Estilos
-        f"{root_folder}/docs/assets/js",     # Frontend - Scripts
-        f"{root_folder}/docs/assets/img",    # Frontend - Imagens
+        "backend_automacao",     # Scripts Python
+        "database",              # SQL e Backups
+        "docs/assets/css",       # Frontend - Estilos
+        "docs/assets/js",        # Frontend - Scripts
+        "docs/assets/img",       # Frontend - Imagens
     ]
 
-    print(f"🚀 Iniciando a construção do projeto: {root_folder}")
+    print("🚀 Iniciando a construção do projeto na raiz do repositório")
 
     # 1. Criação das Pastas
     for directory in directories:
@@ -23,9 +19,8 @@ def create_project_structure():
 
     # 2. Criação dos Arquivos Base com Conteúdo Profissional
     
-    # 2.1 .gitignore (Essencial para não subir lixo para o GitHub)
-    gitignore_content = """
-# Python
+    # 2.1 .gitignore
+    gitignore_content = """# Python
 __pycache__/
 *.py[cod]
 venv/
@@ -39,10 +34,9 @@ Thumbs.db
 .vscode/
 .idea/
 """
-    
+
     # 2.2 README.md
-    readme_content = """
-# Calendário Litúrgico Paroquial
+    readme_content = """# Calendário Litúrgico Paroquial
 
 Sistema WebApp para gestão e divulgação de escalas litúrgicas paroquiais.
 
@@ -69,7 +63,7 @@ Sistema WebApp para gestão e divulgação de escalas litúrgicas paroquiais.
     <title>Calendário Litúrgico Paroquial</title>
     <!-- CSS -->
     <link rel="stylesheet" href="assets/css/styles.css">
-    <!-- Bootstrap CDN (Opcional, podemos baixar depois) -->
+    <!-- Bootstrap CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
@@ -97,12 +91,12 @@ Sistema WebApp para gestão e divulgação de escalas litúrgicas paroquiais.
 </html>
 """
 
-    # 2.4 CSS Base (styles.css) com Variáveis Litúrgicas
+    # 2.4 CSS Base (styles.css)
     css_content = """/* Cores Litúrgicas Padrão */
 :root {
     --cor-verde-comum: #2e7d32;   /* Tempo Comum */
     --cor-roxo-advento: #4a148c;  /* Advento/Quaresma */
-    --cor-branco-festas: #f5f5f5; /* Solenidades (Fundo) */
+    --cor-branco-festas: #f5f5f5; /* Solenidades */
     --cor-vermelho-martires: #b71c1c;
     --cor-rosa-laetare: #ec407a;
     --cor-texto-padrao: #212529;
@@ -121,16 +115,16 @@ body {
 """
 
     # 2.5 Script SQL Inicial (schema.sql)
-    sql_content = """-- Tabela de Referência Litúrgica (Dados do GCatholic)
+    sql_content = """-- Tabela de Referência Litúrgica
 CREATE TABLE liturgia_diaria (
     id SERIAL PRIMARY KEY,
     data_calendario DATE UNIQUE NOT NULL,
-    semana_ordinal INT,        -- Ex: 3 (para 3ª semana)
-    dia_semana VARCHAR(20),    -- Ex: Quinta-feira
-    tempo_liturgico VARCHAR(50), -- Ex: Quaresma, Comum
-    cor VARCHAR(20),           -- Ex: Roxo, Verde
-    santo_festa VARCHAR(150),  -- Ex: São Pedro e São Paulo
-    grau VARCHAR(50)           -- Solenidade, Festa, Memória
+    semana_ordinal INT,
+    dia_semana VARCHAR(20),
+    tempo_liturgico VARCHAR(50),
+    cor VARCHAR(20),
+    santo_festa VARCHAR(150),
+    grau VARCHAR(50)
 );
 
 -- Tabela de Escalas da Paróquia
@@ -140,20 +134,20 @@ CREATE TABLE escalas (
     hora TIME NOT NULL,
     equipe_leitura VARCHAR(100),
     equipe_canto VARCHAR(100),
-    responsavel_contato VARCHAR(50) -- Telefone/Zap
+    responsavel_contato VARCHAR(50)
 );
 """
 
     # Dicionário de arquivos para criar
     files_to_create = {
-        f"{root_folder}/.gitignore": gitignore_content,
-        f"{root_folder}/README.md": readme_content,
-        f"{root_folder}/docs/index.html": html_content,
-        f"{root_folder}/docs/assets/css/styles.css": css_content,
-        f"{root_folder}/database/schema.sql": sql_content,
-        f"{root_folder}/backend_automacao/gerador_datas.py": "# Todo: Algoritmo de Datas Móveis",
-        f"{root_folder}/docs/assets/js/app.js": "console.log('App iniciado');",
-        f"{root_folder}/docs/assets/js/api.js": "console.log('Módulo API pronto');"
+        ".gitignore": gitignore_content,
+        "README.md": readme_content,
+        "docs/index.html": html_content,
+        "docs/assets/css/styles.css": css_content,
+        "database/schema.sql": sql_content,
+        "backend_automacao/gerador_datas.py": "# Todo: Algoritmo de Datas Móveis",
+        "docs/assets/js/app.js": "console.log('App iniciado');",
+        "docs/assets/js/api.js": "console.log('Módulo API pronto');"
     }
 
     # Gravação dos arquivos
@@ -163,7 +157,7 @@ CREATE TABLE escalas (
         print(f"   📄 Arquivo gerado: {filepath}")
 
     print("\n✅ Estrutura criada com sucesso!")
-    print(f"👉 Próximo passo: Abra a pasta '{root_folder}' no VS Code.")
+    print("👉 Próximo passo: Abra o repositório no VS Code.")
 
 if __name__ == "__main__":
     create_project_structure()

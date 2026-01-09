@@ -1,0 +1,336 @@
+/* 
+ * ARQUIVO: styles.css
+ * PROJETO: Calendário Litúrgico Paroquial 2026
+ * IDENTIDADE: Paróquia Senhor Bom Jesus
+ */
+
+/* --- 1. IMPORTAÇÃO DE FONTES LOCAIS (.otf) --- */
+/* Certifique-se que os arquivos na pasta 'fonts' têm exatamente estes nomes */
+
+@font-face {
+  font-family: "AntennaCond";
+  src: url("../fonts/antennacond.otf") format("opentype");
+  font-weight: 400; /* Regular */
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "AntennaCond";
+  src: url("../fonts/antennacond-italic.otf") format("opentype");
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "AntennaCond";
+  src: url("../fonts/antennacond-bold.otf") format("opentype");
+  font-weight: 700; /* Bold */
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "AntennaCond";
+  src: url("../fonts/antennacond-black.otf") format("opentype");
+  font-weight: 900; /* Black/Extra Bold para Títulos */
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "AntennaCond";
+  src: url("../fonts/antennacond-light.otf") format("opentype");
+  font-weight: 300; /* Light */
+  font-style: normal;
+}
+
+/* --- 2. VARIÁVEIS DO SISTEMA (ROOT) --- */
+:root {
+  /* Paleta Institucional */
+  --cor-cereja: #c82038; /* Ações e Destaques */
+  --cor-vinho: #a41d31; /* Cabeçalho e Rodapé */
+  --cor-dourado: #fbb558; /* Ícones e Bordas */
+  --cor-bege: #fceccb; /* Fundo da Página */
+
+  /* Texto */
+  --text-primary: #2c0e12; /* Quase preto */
+  --text-light: #fff8e7; /* Bege claro para texto sobre fundo escuro */
+
+  /* Fontes */
+  --font-titulo: "AntennaCond", sans-serif;
+  --font-texto: "AntennaCond", sans-serif;
+
+  /* Cores Litúrgicas */
+  --liturgia-verde: #2e7d32;
+  --liturgia-roxo: #6a1b9a;
+  --liturgia-vermelho: #d32f2f;
+  --liturgia-branco: #ffffff;
+  --liturgia-rosa: #ec407a;
+}
+
+/* --- 3. BASE --- */
+body {
+  background-color: var(--cor-bege);
+  color: var(--text-primary);
+  font-family: var(--font-texto);
+  font-size: 18px;
+  margin: 0;
+  padding: 0;
+  line-height: 1.5;
+}
+
+/* Tipografia de Títulos (Antenna Black) */
+h1,
+h2,
+h3,
+h4,
+.brand-font {
+  font-family: var(--font-titulo);
+  font-weight: 900;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+/* --- 4. CABEÇALHO (HEADER) --- */
+header {
+  background-color: var(--cor-vinho);
+  width: 100%;
+  min-height: 100px; /* Garante que o header apareça mesmo sem imagem */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 5px solid var(--cor-dourado);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  padding: 15px 0;
+  margin-bottom: 30px;
+}
+
+/* --- 5. CONTROLE DE IMAGENS --- */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.header-logo {
+  max-height: 70px; /* Altura controlada */
+  width: auto;
+  object-fit: contain;
+}
+
+.footer-logo {
+  max-width: 180px;
+  height: auto;
+  margin-bottom: 15px;
+  opacity: 0.9;
+}
+
+/* --- 6. CONTAINER PRINCIPAL --- */
+.container-liturgia {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+/* --- 7. CARDS DO CALENDÁRIO --- */
+.card-dia {
+  background-color: #ffffff;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  overflow: hidden; /* Para a faixa lateral não vazar */
+}
+
+.card-lateral-cor {
+  width: 12px;
+  flex-shrink: 0;
+  /* A cor é definida pelas classes utilitárias abaixo */
+}
+
+.card-conteudo {
+  padding: 20px;
+  width: 100%;
+}
+
+.card-data {
+  border-bottom: 1px solid var(--cor-bege);
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-evento-nome {
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  margin-bottom: 15px;
+}
+
+/* Tabela de Escalas */
+.table-escala {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+.table-escala td {
+  padding: 8px 4px;
+  border-bottom: 1px dashed #eee;
+  vertical-align: top; /* Alinha texto no topo */
+}
+.table-escala tr:last-child td {
+  border-bottom: none;
+}
+
+.badge-funcao {
+  background-color: var(--cor-bege);
+  color: var(--cor-vinho);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+}
+
+/* --- 8. CLASSES LITÚRGICAS (Utilitárias) --- */
+.bg-liturgia-verde {
+  background-color: var(--liturgia-verde);
+}
+.bg-liturgia-roxo {
+  background-color: var(--liturgia-roxo);
+}
+.bg-liturgia-vermelho {
+  background-color: var(--liturgia-vermelho);
+}
+.bg-liturgia-rosa {
+  background-color: var(--liturgia-rosa);
+}
+.bg-liturgia-branco {
+  background-color: var(--liturgia-branco);
+  border-right: 1px solid #e0e0e0; /* Borda sutil para branco */
+}
+.bg-liturgia-dourado {
+  background-color: var(--cor-dourado);
+}
+
+.txt-liturgia-verde {
+  color: var(--liturgia-verde);
+}
+.txt-liturgia-roxo {
+  color: var(--liturgia-roxo);
+}
+.txt-liturgia-vermelho {
+  color: var(--liturgia-vermelho);
+}
+
+/* --- 9. RODAPÉ (FOOTER) --- */
+.main-footer {
+  background-color: var(--cor-vinho);
+  color: var(--cor-bege);
+  padding: 50px 20px 20px 20px;
+  border-top: 5px solid var(--cor-dourado);
+  margin-top: 50px;
+}
+
+.footer-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  /* Layout Responsivo: Cria colunas automáticas */
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+}
+
+.footer-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-heading {
+  color: var(--cor-dourado);
+  font-size: 1.1rem;
+  border-bottom: 1px solid rgba(251, 181, 88, 0.3);
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.footer-col p {
+  margin: 5px 0;
+  font-size: 0.95rem;
+}
+.footer-subtitle {
+  font-style: italic;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+.footer-divider {
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.1);
+  margin: 10px 0;
+}
+
+.destaque-atendimento {
+  color: var(--cor-dourado) !important;
+  font-weight: bold;
+}
+.destaque-atendimento span {
+  font-weight: normal;
+  color: var(--cor-bege);
+}
+
+/* Botão WhatsApp */
+.btn-whatsapp {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--cor-bege);
+  text-decoration: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  width: fit-content;
+  margin-bottom: 15px;
+}
+.btn-whatsapp:hover {
+  background-color: #25d366;
+  border-color: #25d366;
+  color: #fff;
+  transform: translateX(5px);
+}
+
+.social-links {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+}
+.social-links a {
+  color: var(--cor-bege);
+  transition: transform 0.2s;
+}
+.social-links a:hover {
+  color: var(--cor-dourado);
+  transform: scale(1.1);
+}
+
+.footer-copyright {
+  text-align: center;
+  font-size: 0.8rem;
+  opacity: 0.6;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Ajuste Mobile */
+@media (max-width: 768px) {
+  .footer-container {
+    text-align: center;
+  }
+  .footer-col {
+    align-items: center;
+  }
+  .header-logo {
+    margin: 0 auto;
+  }
+}
