@@ -506,118 +506,155 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") fecharModalForce();
 });
 // ==========================================================================
-// 6. FILTROS & SIDEBAR (NOVO MÓDULO)
+// 6. MÓDULO DE FILTROS & SIDEBAR
+// Gerencia a renderização dos checkboxes e a lógica visual de filtragem
 // ==========================================================================
 
-// Chama isso no DOMContentLoaded
+/**
+ * Inicializa a Sidebar de Filtros
+ * Busca as equipes no banco (se necessário) e cria os checkboxes dinamicamente.
+ * Deve ser chamado no DOMContentLoaded.
+ */
 async function inicializarSidebar() {
-  // 1. Carrega Equipes se ainda não carregou
-  if (ESTADO.listaEquipes.length === 0) {
-    ESTADO.listaEquipes = await window.api.listarEquipes();
+  const containerEquipes = document.getElementById("filtro-equipes");
+
+  // Segurança: Se o elemento não existir no HTML, aborta para não dar erro
+  if (!containerEquipes) {
+    console.warn("Elemento #filtro-equipes não encontrado na Sidebar.");
+    return;
   }
 
-  const containerEquipes = document.querySelector(
-    ".filter-group:first-of-type"
-  ); // O primeiro grupo é de equipes
+  // 1. Carrega Equipes do Banco (se ainda não estiverem em memória)
+  if (ESTADO.listaEquipes.length === 0) {
+    try {
+      // Exibe estado de carregamento
+      containerEquipes.innerHTML =
+        '<div style="padding:10px; color:#888;">Carregando...</div>';
+      ESTADO.listaEquipes = await window.api.listarEquipes();
+    } catch (err) {
+      containerEquipes.innerHTML =
+        '<div style="color:red; font-size:0.8rem;">Erro ao carregar equipes.</div>';
+      console.error("Erro Sidebar:", err);
+      return;
+    }
+  }
 
-  // Limpa o HTML estático
-  containerEquipes.innerHTML = `<h3>EQUIPES PAROQUIAIS</h3>
+  // 2. Renderiza o Cabeçalho e a Opção "Todas"
+  let html = `
+        <h3 style="margin-bottom:10px;">FILTRAR POR EQUIPE</h3>
         <div class="filter-item" onclick="limparFiltros()">
-            <span class="checkbox-custom checked" id="check-all"></span> <strong>TODAS AS EQUIPES</strong>
+            <span class="checkbox-custom checked" id="check-all"></span> 
+            <strong>TODAS AS EQUIPES</strong>
         </div>`;
 
-  // Cria checkboxes dinâmicos
+  // 3. Renderiza Checkboxes Dinâmicos para cada Equipe
+  // Usamos onclick inline chamando window.toggleFiltro para garantir o bind correto
   ESTADO.listaEquipes.forEach((eq) => {
-    const div = document.createElement("div");
-    div.className = "filter-item";
-    div.onclick = () => toggleFiltro(eq.id, div);
-    div.innerHTML = `<span class="checkbox-custom" data-id="${eq.id}"></span> ${eq.nome_equipe}`;
-    containerEquipes.appendChild(div);
+    html += `
+        <div class="filter-item" onclick="window.toggleFiltro(${eq.id}, this)">
+            <span class="checkbox-custom" data-id="${eq.id}"></span> 
+            ${eq.nome_equipe}
+        </div>`;
   });
+
+  containerEquipes.innerHTML = html;
 }
 
-// Estado dos Filtros (Set de IDs selecionados)
-let filtrosAtivos = new Set();
-
-function toggleFiltro(equipeId, divElement) {
+/**
+ * Alterna o estado de um filtro específico (Liga/Desliga)
+ * @param {number} equipeId - ID da equipe clicada
+ * @param {HTMLElement} divElement - O elemento HTML clicado (para mudar classe visual)
+ */
+window.toggleFiltro = function (equipeId, divElement) {
   const check = divElement.querySelector(".checkbox-custom");
   const checkAll = document.getElementById("check-all");
 
-  // Lógica: Se clicar em uma equipe, desmarca "Todas" e foca nela
-  // Se clicar na mesma, remove.
-
-  if (filtrosAtivos.has(equipeId)) {
-    filtrosAtivos.delete(equipeId);
+  // Lógica de Toggle
+  if (ESTADO.filtrosAtivos.has(equipeId)) {
+    ESTADO.filtrosAtivos.delete(equipeId); // Remove do Set
     check.classList.remove("checked");
   } else {
-    filtrosAtivos.add(equipeId);
+    ESTADO.filtrosAtivos.add(equipeId); // Adiciona ao Set
     check.classList.add("checked");
   }
 
-  // Se não tiver nenhum filtro, marca "Todas"
-  if (filtrosAtivos.size === 0) {
+  // Lógica do Checkbox "Todas"
+  // Se nenhum filtro específico estiver ativo, "Todas" fica marcado visualmente
+  if (ESTADO.filtrosAtivos.size === 0) {
     checkAll.classList.add("checked");
   } else {
     checkAll.classList.remove("checked");
   }
 
+  // Aplica as mudanças no Grid
   aplicarFiltrosVisuais();
-}
+};
 
-function limparFiltros() {
-  filtrosAtivos.clear();
-  // Reseta visual dos checks
-  document
-    .querySelectorAll(".checkbox-custom")
-    .forEach((el) => el.classList.remove("checked"));
-  document.getElementById("check-all").classList.add("checked");
+/**
+ * Limpa todos os filtros ativos (Reseta para "Ver Tudo")
+ */
+window.limparFiltros = function () {
+  ESTADO.filtrosAtivos.clear();
+
+  // Reseta visualmente todos os checkboxes
+  document.querySelectorAll(".filter-item .checkbox-custom").forEach((el) => {
+    if (el.id !== "check-all") el.classList.remove("checked");
+  });
+
+  // Marca o "Todas"
+  const checkAll = document.getElementById("check-all");
+  if (checkAll) checkAll.classList.add("checked");
+
   aplicarFiltrosVisuais();
-}
+};
 
+/**
+ * Percorre o Grid do Calendário e aplica classes CSS
+ * Esconde dias que não correspondem aos filtros ativos
+ */
 function aplicarFiltrosVisuais() {
-  const celulas = document.querySelectorAll(".day-cell");
+  // Seleciona apenas células de dias válidos (ignora mês anterior/próximo)
+  const celulas = document.querySelectorAll(".day-cell:not(.other-month)");
 
-  // Se filtro vazio, mostra tudo
-  if (filtrosAtivos.size === 0) {
+  // Cenário 1: Nenhum filtro ativo -> Mostra tudo (Limpa classes de filtro)
+  if (ESTADO.filtrosAtivos.size === 0) {
     celulas.forEach((cel) => {
       cel.classList.remove("hidden-by-filter", "highlight-filter");
     });
     return;
   }
 
-  // Itera sobre cada dia do grid
+  // Cenário 2: Filtros Ativos -> Verifica dia a dia
   celulas.forEach((cel) => {
-    // Ignora dias de outro mês
-    if (cel.classList.contains("other-month")) return;
-
-    // Pega os dados do evento associado (precisamos salvar o ID no DOM ou buscar no ESTADO)
-    // Truque: Vamos recuperar o evento pelo click attribute ou data attribute
-    const onclickAttr = cel.getAttribute("onclick");
-    if (!onclickAttr) return; // Dia vazio sem clique
-
-    const dataISO = onclickAttr.match(/'([^']+)'/)[1]; // Extrai a data '2026-01-01'
+    // Recupera o ID do dia pelo atributo data-iso que adicionamos no HTML
+    const dataISO = cel.getAttribute("data-iso");
     const evento = ESTADO.dadosEventos[dataISO];
-
-    let temEquipeFiltrada = false;
+    let match = false;
 
     if (evento && evento.escalas) {
-      // Verifica se alguma escala desse dia tem a equipe filtrada
+      // Verifica se alguma escala do dia pertence a uma equipe filtrada
       for (let esc of evento.escalas) {
-        const idLeit = esc.equipe_leitura?.id;
-        const idCant = esc.equipe_canto?.id;
+        const idLeit = esc.equipe_leitura?.id || esc.equipe_leitura_id;
+        const idCant = esc.equipe_canto?.id || esc.equipe_canto_id;
 
-        if (filtrosAtivos.has(idLeit) || filtrosAtivos.has(idCant)) {
-          temEquipeFiltrada = true;
-          break;
+        // Se Leitura OU Canto bater com o filtro, mostra o dia
+        if (
+          ESTADO.filtrosAtivos.has(idLeit) ||
+          ESTADO.filtrosAtivos.has(idCant)
+        ) {
+          match = true;
+          break; // Achou um match, não precisa checar o resto do dia
         }
       }
     }
 
-    // Aplica classe CSS
-    if (temEquipeFiltrada) {
+    // Aplica o estado visual
+    if (match) {
+      // Dia corresponde ao filtro -> Destaca
       cel.classList.remove("hidden-by-filter");
       cel.classList.add("highlight-filter");
     } else {
+      // Dia não corresponde -> Esconde (Opacidade baixa)
       cel.classList.add("hidden-by-filter");
       cel.classList.remove("highlight-filter");
     }

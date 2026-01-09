@@ -40,30 +40,17 @@
     <!-- ==========================================================================
          LAYOUT PRINCIPAL (SIDEBAR + CONTEÚDO)
     ========================================================================== -->
-    <div class="app-layout">
-      <!-- SIDEBAR: FILTROS E NAVEGAÇÃO SECUNDÁRIA -->
       <aside class="sidebar">
-        <!-- Mockup de Mini Calendário -->
+        <!-- Mockup de Mini Calendário (Pode manter fixo por enquanto) -->
         <div class="mini-calendar">Mini Calendar</div>
 
-        <!-- Filtros de Equipes -->
-        <div class="filter-group">
-          <h3>Equipes Paroquiais</h3>
-          <div class="filter-item">
-            <span class="checkbox-custom checked"></span> RCC
-          </div>
-          <div class="filter-item">
-            <span class="checkbox-custom checked"></span> Catequese
-          </div>
-          <div class="filter-item">
-            <span class="checkbox-custom checked"></span> Pastoral Familiar
-          </div>
-          <div class="filter-item">
-            <span class="checkbox-custom"></span> Dízimo
-          </div>
+        <!-- Filtros de Equipes (ÁREA DINÂMICA) -->
+        <!-- O id="filtro-equipes" é crucial para o JS encontrar este lugar -->
+        <div class="filter-group" id="filtro-equipes">
+          <h3>Carregando Equipes...</h3>
         </div>
 
-        <!-- Filtros de Visualização -->
+        <!-- Filtros de Visualização (Mantém estático ou remove se não for usar agora) -->
         <div class="filter-group">
           <h3>Visualização</h3>
           <div class="filter-item">
@@ -74,7 +61,6 @@
           </div>
         </div>
       </aside>
-
       <!-- ÁREA DE CONTEÚDO (COM SCROLL PRÓPRIO) -->
       <main class="main-content">
         <div class="scroll-wrapper">
