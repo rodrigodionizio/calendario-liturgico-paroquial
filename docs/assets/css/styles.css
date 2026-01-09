@@ -1129,3 +1129,53 @@ header {
         padding-top: 10px;
     }
 }
+/* --- BOTÃO MENU MOBILE (Padrão: Escondido no Desktop) --- */
+#btn-mobile-menu {
+    display: none;
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 5px;
+}
+
+/* --- MÁSCARA ESCURA (Overlay) --- */
+#sidebar-overlay {
+    display: none;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 99; /* Atrás da sidebar, na frente de tudo */
+    backdrop-filter: blur(2px);
+}
+#sidebar-overlay.active { display: block; }
+
+/* --- AJUSTES MOBILE --- */
+@media (max-width: 768px) {
+    /* Mostra o botão de menu */
+    #btn-mobile-menu { display: block; }
+    
+    /* Header ajustado */
+    header { justify-content: space-between; padding: 0 15px; }
+    .header-logo-img { max-height: 40px; } /* Logo um pouco menor */
+
+    /* TRANSFORMAÇÃO DA SIDEBAR EM GAVETA */
+    .sidebar {
+        display: flex !important; /* Força aparecer */
+        position: fixed;
+        top: 0; left: 0;
+        height: 100vh;
+        width: 280px; /* Largura da gaveta */
+        background-color: #fff;
+        z-index: 100; /* Acima de tudo */
+        box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+        
+        /* Estado Fechado (Fora da tela) */
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    /* Estado Aberto (Classe adicionada via JS) */
+    .sidebar.active {
+        transform: translateX(0);
+    }
+}
