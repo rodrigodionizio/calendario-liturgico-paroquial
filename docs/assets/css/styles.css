@@ -987,3 +987,18 @@ header {
     opacity: 1;
   }
 }
+
+/* --- ESTILOS DE FILTRO --- */
+
+/* Esconde dias que não atendem ao filtro */
+.day-cell.hidden-by-filter {
+    opacity: 0.1; /* Fica quase invisível */
+    pointer-events: none; /* Não clicável */
+    filter: grayscale(100%);
+}
+
+/* Destaca dias filtrados */
+.day-cell.highlight-filter {
+    background-color: #fff9e6; /* Fundo levemente amarelo */
+    border: 2px solid var(--cor-dourado);
+}

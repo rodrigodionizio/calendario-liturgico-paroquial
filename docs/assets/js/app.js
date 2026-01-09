@@ -505,3 +505,121 @@ window.fecharModalForce = () => {
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") fecharModalForce();
 });
+// ==========================================================================
+// 6. FILTROS & SIDEBAR (NOVO MÓDULO)
+// ==========================================================================
+
+// Chama isso no DOMContentLoaded
+async function inicializarSidebar() {
+  // 1. Carrega Equipes se ainda não carregou
+  if (ESTADO.listaEquipes.length === 0) {
+    ESTADO.listaEquipes = await window.api.listarEquipes();
+  }
+
+  const containerEquipes = document.querySelector(
+    ".filter-group:first-of-type"
+  ); // O primeiro grupo é de equipes
+
+  // Limpa o HTML estático
+  containerEquipes.innerHTML = `<h3>EQUIPES PAROQUIAIS</h3>
+        <div class="filter-item" onclick="limparFiltros()">
+            <span class="checkbox-custom checked" id="check-all"></span> <strong>TODAS AS EQUIPES</strong>
+        </div>`;
+
+  // Cria checkboxes dinâmicos
+  ESTADO.listaEquipes.forEach((eq) => {
+    const div = document.createElement("div");
+    div.className = "filter-item";
+    div.onclick = () => toggleFiltro(eq.id, div);
+    div.innerHTML = `<span class="checkbox-custom" data-id="${eq.id}"></span> ${eq.nome_equipe}`;
+    containerEquipes.appendChild(div);
+  });
+}
+
+// Estado dos Filtros (Set de IDs selecionados)
+let filtrosAtivos = new Set();
+
+function toggleFiltro(equipeId, divElement) {
+  const check = divElement.querySelector(".checkbox-custom");
+  const checkAll = document.getElementById("check-all");
+
+  // Lógica: Se clicar em uma equipe, desmarca "Todas" e foca nela
+  // Se clicar na mesma, remove.
+
+  if (filtrosAtivos.has(equipeId)) {
+    filtrosAtivos.delete(equipeId);
+    check.classList.remove("checked");
+  } else {
+    filtrosAtivos.add(equipeId);
+    check.classList.add("checked");
+  }
+
+  // Se não tiver nenhum filtro, marca "Todas"
+  if (filtrosAtivos.size === 0) {
+    checkAll.classList.add("checked");
+  } else {
+    checkAll.classList.remove("checked");
+  }
+
+  aplicarFiltrosVisuais();
+}
+
+function limparFiltros() {
+  filtrosAtivos.clear();
+  // Reseta visual dos checks
+  document
+    .querySelectorAll(".checkbox-custom")
+    .forEach((el) => el.classList.remove("checked"));
+  document.getElementById("check-all").classList.add("checked");
+  aplicarFiltrosVisuais();
+}
+
+function aplicarFiltrosVisuais() {
+  const celulas = document.querySelectorAll(".day-cell");
+
+  // Se filtro vazio, mostra tudo
+  if (filtrosAtivos.size === 0) {
+    celulas.forEach((cel) => {
+      cel.classList.remove("hidden-by-filter", "highlight-filter");
+    });
+    return;
+  }
+
+  // Itera sobre cada dia do grid
+  celulas.forEach((cel) => {
+    // Ignora dias de outro mês
+    if (cel.classList.contains("other-month")) return;
+
+    // Pega os dados do evento associado (precisamos salvar o ID no DOM ou buscar no ESTADO)
+    // Truque: Vamos recuperar o evento pelo click attribute ou data attribute
+    const onclickAttr = cel.getAttribute("onclick");
+    if (!onclickAttr) return; // Dia vazio sem clique
+
+    const dataISO = onclickAttr.match(/'([^']+)'/)[1]; // Extrai a data '2026-01-01'
+    const evento = ESTADO.dadosEventos[dataISO];
+
+    let temEquipeFiltrada = false;
+
+    if (evento && evento.escalas) {
+      // Verifica se alguma escala desse dia tem a equipe filtrada
+      for (let esc of evento.escalas) {
+        const idLeit = esc.equipe_leitura?.id;
+        const idCant = esc.equipe_canto?.id;
+
+        if (filtrosAtivos.has(idLeit) || filtrosAtivos.has(idCant)) {
+          temEquipeFiltrada = true;
+          break;
+        }
+      }
+    }
+
+    // Aplica classe CSS
+    if (temEquipeFiltrada) {
+      cel.classList.remove("hidden-by-filter");
+      cel.classList.add("highlight-filter");
+    } else {
+      cel.classList.add("hidden-by-filter");
+      cel.classList.remove("highlight-filter");
+    }
+  });
+}
