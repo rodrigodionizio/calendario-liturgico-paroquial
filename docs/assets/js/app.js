@@ -233,11 +233,46 @@ function ativarModoEdicao(evento) {
   if (btnEditar) btnEditar.style.display = "none";
 
   const tituloVal = evento.titulo || "Novo Evento";
-  const tempoVal = evento.tempo_liturgico || "Tempo Comum";
+  const tempoVal = evento.tempo_liturgico || "Paroquial";
   const corAtualId = evento.cor_id || evento.liturgia_cores?.id || 1;
 
-  // Lista de Tempos Litúrgicos Padrão
-  const temposLiturgicos = [
+  // --- LÓGICA DE AGRUPAMENTO DE EQUIPES ---
+  // Separa as equipes por tipo para facilitar a escolha
+  const equipesLeitura = ESTADO.listaEquipes.filter(
+    (e) => e.tipo_atuacao === "Leitura" || e.tipo_atuacao === "Ambos"
+  );
+  const equipesCanto = ESTADO.listaEquipes.filter(
+    (e) => e.tipo_atuacao === "Canto" || e.tipo_atuacao === "Ambos"
+  );
+
+  // Função Helper para gerar options agrupados
+  const gerarOptions = (lista, selecionadoId) => {
+    let html = '<option value="">-- Selecione --</option>';
+    // Ordena alfabeticamente
+    lista.sort((a, b) => a.nome_equipe.localeCompare(b.nome_equipe));
+
+    lista.forEach((eq) => {
+      const sel = eq.id === selecionadoId ? "selected" : "";
+      // Adiciona uma dica visual se for 'Ambos'
+      const label =
+        eq.tipo_atuacao === "Ambos"
+          ? `${eq.nome_equipe} (Geral)`
+          : eq.nome_equipe;
+      html += `<option value="${eq.id}" ${sel}>${label}</option>`;
+    });
+    return html;
+  };
+
+  // Prepara HTML dos selects para passar para a função de linha
+  // IMPORTANTE: Vamos passar as listas cruas para a função gerarLinhaEditor gerar o HTML específico de cada linha
+  window.cacheEquipesLeitura = equipesLeitura; // Guarda temporariamente
+  window.cacheEquipesCanto = equipesCanto;
+
+  // ... (Resto do Formulário de Cabeçalho igual) ...
+  // Vou resumir aqui para focar na mudança:
+
+  // Lista Tempos
+  const tempos = [
     "Tempo Comum",
     "Advento",
     "Tempo do Natal",
@@ -247,74 +282,59 @@ function ativarModoEdicao(evento) {
     "Tempo Pascal",
     "Paroquial",
   ];
-
-  // Gera opções do Select de Tempos
-  const optionsTempos = temposLiturgicos
+  const optionsTempo = tempos
     .map(
       (t) =>
         `<option value="${t}" ${t === tempoVal ? "selected" : ""}>${t}</option>`
     )
     .join("");
 
-  // Gera o formulário
   let htmlEditor = `
         <h3 style="color:var(--cor-vinho); margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:5px;">Editar Evento</h3>
-        
-        <!-- EDITOR DE CABEÇALHO -->
         <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #e0e0e0; margin-bottom:15px;">
+            <!-- Inputs de Título, Cor, etc (Mantém igual) -->
+            <label style="font-size:0.7rem; font-weight:bold; color:#888;">TÍTULO</label>
+            <input type="text" id="editTitulo" value="${tituloVal}" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; font-weight:bold; font-size:1rem; margin-top:5px; margin-bottom:10px;">
             
-            <!-- Título -->
-            <label style="font-size:0.75rem; font-weight:bold; color:#888;">TÍTULO DO EVENTO / CELEBRAÇÃO</label>
-            <input type="text" id="editTitulo" value="${tituloVal}" placeholder="Ex: Missa Dominical" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; font-weight:bold; font-size:1rem; margin-top:5px; margin-bottom:15px;">
-            
-            <!-- Linha 1: Tempo e Tipo -->
             <div style="display:flex; gap:10px; margin-bottom:10px;">
                 <div style="flex:1;">
-                    <label style="font-size:0.75rem; font-weight:bold; color:#888;">TEMPO LITÚRGICO</label>
-                    <select id="editTempo" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; margin-top:5px;">
-                        ${optionsTempos}
-                        <option value="Outro" ${
-                          !temposLiturgicos.includes(tempoVal) ? "selected" : ""
-                        }>Outro...</option>
-                    </select>
+                    <label style="font-size:0.7rem; font-weight:bold; color:#888;">TEMPO</label>
+                    <select id="editTempo" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">${optionsTempo}</select>
                 </div>
                 <div style="flex:1;">
-                    <label style="font-size:0.75rem; font-weight:bold; color:#888;">TIPO</label>
-                    <select id="editTipo" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; margin-top:5px;">
+                    <label style="font-size:0.7rem; font-weight:bold; color:#888;">TIPO</label>
+                    <select id="editTipo" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
                         <option value="comum" ${
                           !evento.is_solenidade ? "selected" : ""
-                        }>Comum / Memória</option>
+                        }>Comum</option>
                         <option value="solenidade" ${
                           evento.is_solenidade ? "selected" : ""
-                        }>Solenidade (Destaque)</option>
+                        }>Solenidade</option>
                     </select>
                 </div>
             </div>
-
-            <!-- Linha 2: Cor Litúrgica -->
             <div>
-                <label style="font-size:0.75rem; font-weight:bold; color:#888;">COR LITÚRGICA</label>
-                <select id="editCor" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; margin-top:5px;">
+                <label style="font-size:0.7rem; font-weight:bold; color:#888;">COR</label>
+                <select id="editCor" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
                     <option value="1" ${
                       corAtualId == 1 ? "selected" : ""
-                    }>Verde (Esperança/Comum)</option>
+                    }>Verde</option>
                     <option value="2" ${
                       corAtualId == 2 ? "selected" : ""
-                    }>Branco (Festas/Alegria)</option>
+                    }>Branco</option>
                     <option value="3" ${
                       corAtualId == 3 ? "selected" : ""
-                    }>Vermelho (Mártires/Espírito)</option>
+                    }>Vermelho</option>
                     <option value="4" ${
                       corAtualId == 4 ? "selected" : ""
-                    }>Roxo (Penitência/Advento)</option>
+                    }>Roxo</option>
                     <option value="5" ${
                       corAtualId == 5 ? "selected" : ""
-                    }>Rosa (Gaudete/Laetare)</option>
+                    }>Rosa</option>
                 </select>
             </div>
         </div>
-
-        <h4 style="color:#666; font-size:0.9rem; margin-bottom:10px;">Escalas e Horários</h4>
+        <h4 style="color:#666; font-size:0.9rem; margin-bottom:10px;">Escalas</h4>
         <div id="listaEditor" style="display:flex; flex-direction:column; gap:15px;">`;
 
   if (evento.escalas) {
@@ -340,46 +360,41 @@ function gerarLinhaEditor(escala, index) {
     ? escala.hora_celebracao.substring(0, 5)
     : "19:00";
 
-  // Helpers de seleção
-  const selLeit = (id) => (id === idLeit ? "selected" : "");
-  const selCant = (id) => (id === idCant ? "selected" : "");
+  // Função interna para gerar options baseado na lista correta
+  const buildOpts = (lista, selectedId) => {
+    let h = '<option value="">-- Selecione --</option>';
+    lista.forEach((eq) => {
+      const sel = eq.id === selectedId ? "selected" : "";
+      h += `<option value="${eq.id}" ${sel}>${eq.nome_equipe}</option>`;
+    });
+    return h;
+  };
 
   return `
-    <div class="editor-row" style="background:#fff; padding:15px; border-radius:8px; border:1px solid #e0e0e0; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-        <div style="display:flex; justify-content:space-between; margin-bottom:10px; border-bottom:1px solid #f5f5f5; padding-bottom:5px;">
+    <div class="editor-row" style="background:#fff; padding:15px; border-radius:8px; border:1px solid #e0e0e0;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px; border-bottom:1px solid #f5f5f5;">
             <label style="font-size:0.8rem; font-weight:bold; color:#888;">HORÁRIO</label>
-            <button onclick="removerLinha(this)" style="color:#D32F2F; border:none; background:none; cursor:pointer; font-size:0.8rem;">🗑️ Excluir</button>
+            <button onclick="removerLinha(this)" style="color:red; border:none; background:none; cursor:pointer;">🗑️</button>
         </div>
         <input type="time" class="edit-hora" value="${horaVal}" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; margin-bottom:10px; font-weight:bold;">
         <div style="display:grid; gap:10px;">
-            <div>
-                <label style="font-size:0.75rem; font-weight:bold; color:#666; display:block; margin-bottom:2px;">LEITURA</label>
-                <select class="edit-leitura" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; background:#fff;">
-                    <option value="">-- Selecione --</option>
-                    ${ESTADO.listaEquipes
-                      .map(
-                        (eq) =>
-                          `<option value="${eq.id}" ${selLeit(eq.id)}>${
-                            eq.nome_equipe
-                          }</option>`
-                      )
-                      .join("")}
-                </select>
-            </div>
-            <div>
-                <label style="font-size:0.75rem; font-weight:bold; color:#666; display:block; margin-bottom:2px;">CANTO</label>
-                <select class="edit-canto" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; background:#fff;">
-                    <option value="">-- Selecione --</option>
-                    ${ESTADO.listaEquipes
-                      .map(
-                        (eq) =>
-                          `<option value="${eq.id}" ${selCant(eq.id)}>${
-                            eq.nome_equipe
-                          }</option>`
-                      )
-                      .join("")}
-                </select>
-            </div>
+            <div><label style="font-size:0.7rem; font-weight:bold; color:#666;">LEITURA</label>
+            <!-- Usa a lista filtrada de Leitura -->
+            <select class="edit-leitura" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
+                ${buildOpts(
+                  window.cacheEquipesLeitura || ESTADO.listaEquipes,
+                  idLeit
+                )}
+            </select></div>
+            
+            <div><label style="font-size:0.7rem; font-weight:bold; color:#666;">CANTO</label>
+            <!-- Usa a lista filtrada de Canto -->
+            <select class="edit-canto" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
+                ${buildOpts(
+                  window.cacheEquipesCanto || ESTADO.listaEquipes,
+                  idCant
+                )}
+            </select></div>
         </div>
     </div>`;
 }
@@ -516,31 +531,42 @@ document.addEventListener("keydown", (e) => {
  * Deve ser chamado no DOMContentLoaded.
  */
 async function inicializarSidebar() {
-  console.log("🔄 Iniciando Sidebar...");
+    const containerEquipes = document.getElementById('filtro-equipes');
+    if (!containerEquipes) return;
 
-  const containerEquipes = document.getElementById("filtro-equipes");
-
-  if (!containerEquipes) {
-    console.error(
-      "❌ ERRO CRÍTICO: Elemento #filtro-equipes não encontrado no HTML!"
-    );
-    return;
-  }
-
-  // 1. Carrega Equipes
-  if (ESTADO.listaEquipes.length === 0) {
-    try {
-      console.log("📡 Buscando equipes no banco...");
-      ESTADO.listaEquipes = await window.api.listarEquipes();
-      console.log(`✅ Equipes carregadas: ${ESTADO.listaEquipes.length}`);
-    } catch (err) {
-      containerEquipes.innerHTML =
-        '<div style="color:red; font-size:0.8rem;">Erro ao conectar.</div>';
-      console.error("Erro API Equipes:", err);
-      return;
+    // Carrega Equipes
+    if (ESTADO.listaEquipes.length === 0) {
+        ESTADO.listaEquipes = await window.api.listarEquipes();
     }
-  }
 
+    containerEquipes.innerHTML = ''; // Limpa loading
+
+    // Título
+    const h3 = document.createElement('h3');
+    h3.innerText = 'FILTRAR POR EQUIPE';
+    containerEquipes.appendChild(h3);
+
+    // Item "Todas"
+    const divAll = document.createElement('div');
+    divAll.className = 'filter-item';
+    divAll.onclick = () => window.limparFiltros();
+    divAll.innerHTML = `<span class="checkbox-custom checked" id="check-all"></span> <strong>TODAS AS EQUIPES</strong>`;
+    containerEquipes.appendChild(divAll);
+
+    // Items Dinâmicos
+    ESTADO.listaEquipes.forEach(eq => {
+        const div = document.createElement('div');
+        div.className = 'filter-item';
+        
+        // BIND SEGURO DO CLIQUE
+        div.addEventListener('click', function() {
+            window.toggleFiltro(eq.id, this);
+        });
+
+        div.innerHTML = `<span class="checkbox-custom" data-id="${eq.id}"></span> ${eq.nome_equipe}`;
+        containerEquipes.appendChild(div);
+    });
+}
   if (ESTADO.listaEquipes.length === 0) {
     containerEquipes.innerHTML =
       '<div style="padding:10px;">Nenhuma equipe cadastrada.</div>';
@@ -616,52 +642,43 @@ window.limparFiltros = function () {
  * Esconde dias que não correspondem aos filtros ativos
  */
 function aplicarFiltrosVisuais() {
-  // Seleciona apenas células de dias válidos (ignora mês anterior/próximo)
-  const celulas = document.querySelectorAll(".day-cell:not(.other-month)");
+    const celulas = document.querySelectorAll('.day-cell:not(.other-month)');
+    
+    // Sem filtro = mostra tudo
+    if (ESTADO.filtrosAtivos.size === 0) {
+        celulas.forEach(cel => {
+            cel.classList.remove('hidden-by-filter', 'highlight-filter');
+        });
+        return;
+    }
 
-  // Cenário 1: Nenhum filtro ativo -> Mostra tudo (Limpa classes de filtro)
-  if (ESTADO.filtrosAtivos.size === 0) {
-    celulas.forEach((cel) => {
-      cel.classList.remove("hidden-by-filter", "highlight-filter");
-    });
-    return;
-  }
+    // Com filtro
+    celulas.forEach(cel => {
+        // JEITO SEGURO: Ler do data-attribute
+        const dataISO = cel.getAttribute('data-iso');
+        const evento = ESTADO.dadosEventos[dataISO];
+        let match = false;
 
-  // Cenário 2: Filtros Ativos -> Verifica dia a dia
-  celulas.forEach((cel) => {
-    // Recupera o ID do dia pelo atributo data-iso que adicionamos no HTML
-    const dataISO = cel.getAttribute("data-iso");
-    const evento = ESTADO.dadosEventos[dataISO];
-    let match = false;
-
-    if (evento && evento.escalas) {
-      // Verifica se alguma escala do dia pertence a uma equipe filtrada
-      for (let esc of evento.escalas) {
-        const idLeit = esc.equipe_leitura?.id || esc.equipe_leitura_id;
-        const idCant = esc.equipe_canto?.id || esc.equipe_canto_id;
-
-        // Se Leitura OU Canto bater com o filtro, mostra o dia
-        if (
-          ESTADO.filtrosAtivos.has(idLeit) ||
-          ESTADO.filtrosAtivos.has(idCant)
-        ) {
-          match = true;
-          break; // Achou um match, não precisa checar o resto do dia
+        if (evento && evento.escalas) {
+            for (let esc of evento.escalas) {
+                const idLeit = esc.equipe_leitura?.id || esc.equipe_leitura_id;
+                const idCant = esc.equipe_canto?.id || esc.equipe_canto_id;
+                
+                if (ESTADO.filtrosAtivos.has(idLeit) || ESTADO.filtrosAtivos.has(idCant)) {
+                    match = true;
+                    break;
+                }
+            }
         }
-      }
-    }
 
-    // Aplica o estado visual
-    if (match) {
-      // Dia corresponde ao filtro -> Destaca
-      cel.classList.remove("hidden-by-filter");
-      cel.classList.add("highlight-filter");
-    } else {
-      // Dia não corresponde -> Esconde (Opacidade baixa)
-      cel.classList.add("hidden-by-filter");
-      cel.classList.remove("highlight-filter");
-    }
-  });
+        if (match) {
+            cel.classList.remove('hidden-by-filter');
+            cel.classList.add('highlight-filter');
+        } else {
+            cel.classList.add('hidden-by-filter');
+            cel.classList.remove('highlight-filter');
+        }
+    });
 }
 
 // ==========================================================================
