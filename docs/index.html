@@ -24,7 +24,7 @@
   <body>
     <!-- ==========================================================================
          CABEÇALHO (HEADER)
-         Contém a Logo Principal
+         Contém a Logo Principal e Botão de Login/Logout (via JS)
     ========================================================================== -->
     <header>
       <div class="header-logo-container">
@@ -39,18 +39,21 @@
 
     <!-- ==========================================================================
          LAYOUT PRINCIPAL (SIDEBAR + CONTEÚDO)
+         Estrutura Flexbox: Sidebar Fixa (Desktop) + Main Scrollável
     ========================================================================== -->
+    <div class="app-layout">
+      <!-- SIDEBAR: FILTROS E NAVEGAÇÃO SECUNDÁRIA -->
       <aside class="sidebar">
-        <!-- Mockup de Mini Calendário (Pode manter fixo por enquanto) -->
+        <!-- Mockup de Mini Calendário -->
         <div class="mini-calendar">Mini Calendar</div>
 
-        <!-- Filtros de Equipes (ÁREA DINÂMICA) -->
-        <!-- O id="filtro-equipes" é crucial para o JS encontrar este lugar -->
+        <!-- ÁREA DINÂMICA DE FILTROS (EQUIPES) -->
+        <!-- O JS busca no banco e injeta os checkboxes aqui -->
         <div class="filter-group" id="filtro-equipes">
           <h3>Carregando Equipes...</h3>
         </div>
 
-        <!-- Filtros de Visualização (Mantém estático ou remove se não for usar agora) -->
+        <!-- ÁREA ESTÁTICA (VISUALIZAÇÃO) -->
         <div class="filter-group">
           <h3>Visualização</h3>
           <div class="filter-item">
@@ -61,10 +64,11 @@
           </div>
         </div>
       </aside>
+
       <!-- ÁREA DE CONTEÚDO (COM SCROLL PRÓPRIO) -->
       <main class="main-content">
         <div class="scroll-wrapper">
-          <!-- Navegação do Mês -->
+          <!-- NAVEGAÇÃO DO MÊS (Header Interno) -->
           <div class="month-header">
             <h1 class="month-name">Carregando...</h1>
             <div class="nav-buttons">
@@ -99,6 +103,7 @@
               Buscando dados litúrgicos...
             </div>
           </div>
+
           <!-- ==========================================================================
                      RODAPÉ (FOOTER)
                      Integrado ao scroll da página principal
@@ -195,11 +200,8 @@
     </div>
 
     <!-- ==========================================================================
-         SCRIPTS API E APLICAÇÃO
+         SCRIPTS (ORDEM OBRIGATÓRIA: LIB -> API -> APP)
     ========================================================================== -->
-
-    <!-- 1. Biblioteca do Supabase (Obrigatório vir antes de tudo) -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <!-- 2. Módulo de Conexão (Cria window.api) -->
     <script src="assets/js/api.js"></script>
