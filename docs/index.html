@@ -80,7 +80,7 @@
         <div class="scroll-wrapper">
           <!-- Navegação do Mês -->
           <div class="month-header">
-            <h1 class="month-name">Janeiro 2026</h1>
+            <h1 class="month-name">Carregando...</h1>
             <div class="nav-buttons">
               <button class="btn-nav" aria-label="Mês Anterior">&lt;</button>
               <button class="btn-nav">Hoje</button>
@@ -89,6 +89,7 @@
           </div>
 
           <!-- GRID DO CALENDÁRIO (VISÃO MENSAL) -->
+          <!-- O JavaScript vai injetar os dias aqui dentro -->
           <div class="calendar-wrapper">
             <!-- Cabeçalhos dos Dias -->
             <div class="day-header">Dom</div>
@@ -99,73 +100,19 @@
             <div class="day-header">Sex</div>
             <div class="day-header">Sáb</div>
 
-            <!-- Dias do Mês Anterior (Desativados) -->
-            <div class="day-cell other-month">
-              <span class="day-number">28</span>
+            <!-- Placeholder de Carregamento -->
+            <div
+              style="
+                grid-column: 1 / -1;
+                padding: 50px;
+                text-align: center;
+                color: #999;
+                font-style: italic;
+              "
+            >
+              Buscando dados litúrgicos...
             </div>
-            <div class="day-cell other-month">
-              <span class="day-number">29</span>
-            </div>
-            <div class="day-cell other-month">
-              <span class="day-number">30</span>
-            </div>
-            <div class="day-cell other-month">
-              <span class="day-number">31</span>
-            </div>
-
-            <!-- DIA 01 (SOLENIDADE) -->
-            <div class="day-cell" onclick="abrirModal('dia01')">
-              <span class="day-number">1</span>
-              <div class="pill solenidade">Mãe de Deus</div>
-            </div>
-
-            <div class="day-cell"><span class="day-number">2</span></div>
-            <div class="day-cell"><span class="day-number">3</span></div>
-
-            <!-- DIA 04 (DOMINGO - BRANCO) -->
-            <div class="day-cell" onclick="abrirModal('dia04')">
-              <span class="day-number">4</span>
-              <div class="pill">07:30 Missa</div>
-              <div class="pill">19:00 Missa</div>
-            </div>
-
-            <!-- Dias da Semana (Vazios para exemplo) -->
-            <div class="day-cell"><span class="day-number">5</span></div>
-            <div class="day-cell"><span class="day-number">6</span></div>
-            <div class="day-cell"><span class="day-number">7</span></div>
-            <div class="day-cell"><span class="day-number">8</span></div>
-            <div class="day-cell"><span class="day-number">9</span></div>
-            <div class="day-cell"><span class="day-number">10</span></div>
-            <div class="day-cell"><span class="day-number">11</span></div>
-            <div class="day-cell"><span class="day-number">12</span></div>
-            <div class="day-cell"><span class="day-number">13</span></div>
-            <div class="day-cell"><span class="day-number">14</span></div>
-            <div class="day-cell"><span class="day-number">15</span></div>
-            <div class="day-cell"><span class="day-number">16</span></div>
-            <div class="day-cell"><span class="day-number">17</span></div>
-
-            <!-- DIA 18 (DOMINGO - VERDE) -->
-            <div class="day-cell" onclick="abrirModal('dia18')">
-              <span class="day-number">18</span>
-              <div class="pill">Missa Dom.</div>
-            </div>
-
-            <!-- Restante do Mês -->
-            <div class="day-cell"><span class="day-number">19</span></div>
-            <div class="day-cell"><span class="day-number">20</span></div>
-            <div class="day-cell"><span class="day-number">21</span></div>
-            <div class="day-cell"><span class="day-number">22</span></div>
-            <div class="day-cell"><span class="day-number">23</span></div>
-            <div class="day-cell"><span class="day-number">24</span></div>
-            <div class="day-cell"><span class="day-number">25</span></div>
-            <div class="day-cell"><span class="day-number">26</span></div>
-            <div class="day-cell"><span class="day-number">27</span></div>
-            <div class="day-cell"><span class="day-number">28</span></div>
-            <div class="day-cell"><span class="day-number">29</span></div>
-            <div class="day-cell"><span class="day-number">30</span></div>
-            <div class="day-cell"><span class="day-number">31</span></div>
           </div>
-
           <!-- ==========================================================================
                      RODAPÉ (FOOTER)
                      Integrado ao scroll da página principal
