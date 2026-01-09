@@ -621,3 +621,12 @@ window.fecharModalForce = () => {
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") fecharModalForce();
 });
+// --- MENU MOBILE ---
+window.toggleSidebarMobile = function () {
+  const sidebar = document.querySelector(".sidebar");
+  const overlay = document.getElementById("sidebar-overlay");
+
+  // Alterna a classe 'active'
+  sidebar.classList.toggle("active");
+  overlay.classList.toggle("active");
+};
