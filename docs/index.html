@@ -48,43 +48,7 @@
         <div class="mini-calendar">Mini Calendar</div>
 
         <!-- Botão de Ação -->
-        <div style="margin-bottom: 20px">
-          <button
-            onclick="window.print()"
-            style="
-              width: 100%;
-              padding: 12px;
-              background: var(--cor-vinho);
-              color: #fff;
-              border: none;
-              border-radius: 8px;
-              cursor: pointer;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              gap: 8px;
-              font-family: 'AntennaCond', sans-serif;
-              font-weight: bold;
-              font-size: 1rem;
-              transition: 0.2s;
-            "
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"
-              />
-              <path d="M6 14h12v8H6z" />
-            </svg>
-            IMPRIMIR MÊS
-          </button>
-        </div>
+        <button onclick="prepararImpressao()" ...>🖨️ IMPRIMIR LISTA</button>
 
         <!-- ÁREA DINÂMICA DE FILTROS (EQUIPES) -->
         <!-- O JS busca no banco e injeta os checkboxes aqui -->
@@ -238,6 +202,39 @@
       <div id="modalContent"></div>
     </div>
 
+    <!-- ==========================================================================
+         ÁREA DE IMPRESSÃO (RELATÓRIO OCULTO)
+    ========================================================================== -->
+    <div id="relatorio-impressao" class="print-only">
+      <header class="print-header">
+        <img
+          src="assets/img/logo-paroquia-colorida.png"
+          alt="Logo"
+          class="print-logo"
+        />
+        <div class="print-info">
+          <h1>Escala Litúrgica Mensal</h1>
+          <h2 id="print-month-title">Janeiro 2026</h2>
+        </div>
+      </header>
+
+      <table class="print-table">
+        <thead>
+          <tr>
+            <th width="15%">Data</th>
+            <th width="35%">Liturgia / Evento</th>
+            <th width="50%">Escalas (Horário • Leitura • Canto)</th>
+          </tr>
+        </thead>
+        <tbody id="print-table-body">
+          <!-- JS vai preencher aqui -->
+        </tbody>
+      </table>
+
+      <footer class="print-footer">
+        Gerado pelo Sistema Paroquial • Paróquia Senhor Bom Jesus
+      </footer>
+    </div>
     <!-- ==========================================================================
          SCRIPTS (ORDEM OBRIGATÓRIA: LIB -> API -> APP)
     ========================================================================== -->

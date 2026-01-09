@@ -663,3 +663,80 @@ function aplicarFiltrosVisuais() {
     }
   });
 }
+
+// ==========================================================================
+// 7. GERADOR DE RELATÓRIO DE IMPRESSÃO (LISTA A4)
+// ==========================================================================
+
+window.prepararImpressao = function () {
+  const tbody = document.getElementById("print-table-body");
+  const title = document.getElementById("print-month-title");
+
+  // Atualiza título com o mês atual
+  title.textContent = document.querySelector(".month-name").textContent;
+  tbody.innerHTML = ""; // Limpa anterior
+
+  // 1. Pega todos os eventos e ordena por data
+  const listaEventos = Object.values(ESTADO.dadosEventos).sort((a, b) =>
+    a.data.localeCompare(b.data)
+  );
+
+  let html = "";
+
+  // 2. Monta as linhas da tabela
+  listaEventos.forEach((ev) => {
+    // Pula dias sem escalas e sem título relevante (opcional, mas limpa o papel)
+    if ((!ev.escalas || ev.escalas.length === 0) && !ev.is_solenidade) return;
+
+    // Formata Data
+    const dateObj = new Date(ev.data + "T12:00:00");
+    const dia = dateObj.getDate().toString().padStart(2, "0");
+    const sem = dateObj
+      .toLocaleString("pt-BR", { weekday: "short" })
+      .toUpperCase();
+
+    // Formata Escalas (Lista Vertical na célula)
+    let escalasHTML = "";
+    if (ev.escalas && ev.escalas.length > 0) {
+      ev.escalas.forEach((esc) => {
+        const hora = esc.hora_celebracao.substring(0, 5);
+        const leit = esc.equipe_leitura?.nome_equipe || "-";
+        const cant = esc.equipe_canto?.nome_equipe || "-";
+
+        escalasHTML += `
+                <div class="print-escala-row">
+                    <span class="print-hora">${hora}</span>
+                    <span class="print-equipes">
+                        <strong>📖 ${leit}</strong> • 🎵 ${cant}
+                    </span>
+                </div>`;
+      });
+    } else {
+      escalasHTML =
+        '<span style="color:#999; font-style:italic">Sem escalas cadastradas</span>';
+    }
+
+    // Estilo especial para Solenidades
+    const rowClass = ev.is_solenidade ? "row-solenidade" : "";
+
+    html += `
+        <tr class="${rowClass}">
+            <td class="col-data">
+                <span class="dia-grande">${dia}</span>
+                <span class="dia-sem">${sem}</span>
+            </td>
+            <td class="col-evento">
+                <div class="print-titulo">${ev.titulo}</div>
+                <div class="print-liturgia">${ev.tempo_liturgico}</div>
+            </td>
+            <td class="col-escalas">
+                ${escalasHTML}
+            </td>
+        </tr>`;
+  });
+
+  tbody.innerHTML = html;
+
+  // 3. Chama a impressão nativa
+  setTimeout(() => window.print(), 300); // Pequeno delay para renderizar DOM
+};

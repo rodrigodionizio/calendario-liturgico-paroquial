@@ -1006,60 +1006,99 @@ header {
 /* ==========================================================================
    9. ESTILOS DE IMPRESSÃO (PDF A4)
    ========================================================================== */
+/* Esconde o relatório na tela normal */
+.print-only { display: none; }
+
 @media print {
-    /* Esconde tudo que não é conteúdo */
-    header, .sidebar, .nav-buttons, footer, .modal-overlay, button {
-        display: none !important;
+    /* 1. Esconde a Aplicação Web */
+    .app-layout, header, .modal-overlay { 
+        display: none !important; 
     }
 
-    /* Reseta layout para fluxo normal */
-    body, .app-layout, .main-content, .scroll-wrapper {
-        height: auto !important;
-        overflow: visible !important;
+    /* 2. Mostra e Configura o Relatório */
+    .print-only {
         display: block !important;
-        background-color: white !important;
-        margin: 0 !important;
-        padding: 0 !important;
+        background: white;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        color: #000;
+        padding: 0;
     }
 
-    /* Ajusta o Grid para caber na folha */
-    .calendar-wrapper {
-        border: 1px solid #000 !important;
-        box-shadow: none !important;
-        grid-template-columns: repeat(7, 1fr) !important;
-        gap: 0 !important; /* Bordas coladas */
-    }
-
-    .day-cell {
-        min-height: 80px !important; /* Menor para caber */
-        border: 1px solid #ccc !important;
-        page-break-inside: avoid; /* Não quebrar dia no meio da folha */
-        background-color: white !important;
-        color: black !important;
-    }
-
-    /* Pílulas em modo econômico (Borda fina, fundo branco) */
-    .pill {
-        border: 1px solid #000 !important;
-        background-color: transparent !important;
-        color: #000 !important;
-        font-weight: bold;
-        font-size: 8pt !important;
-    }
-
-    /* Título do Mês Centralizado */
-    .month-header {
-        justify-content: center !important;
-        margin-bottom: 20px !important;
-    }
-    .month-name {
-        color: black !important;
-        font-size: 24pt !important;
-    }
-
-    /* Forçar orientação paisagem se possível (alguns browsers aceitam) */
+    /* Layout da Página A4 */
     @page {
-        size: A4 landscape;
-        margin: 1cm;
+        size: A4;
+        margin: 1.5cm;
+    }
+
+    /* Cabeçalho do Relatório */
+    .print-header {
+        display: flex;
+        align-items: center;
+        border-bottom: 2px solid #000;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
+    .print-logo { height: 60px; margin-right: 20px; }
+    .print-info h1 { margin: 0; font-size: 18pt; text-transform: uppercase; }
+    .print-info h2 { margin: 0; font-size: 14pt; color: #444; }
+
+    /* Tabela */
+    .print-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .print-table th {
+        border-bottom: 2px solid #000;
+        text-align: left;
+        padding: 10px;
+        font-size: 10pt;
+        text-transform: uppercase;
+    }
+
+    .print-table td {
+        border-bottom: 1px solid #ccc;
+        padding: 10px;
+        vertical-align: top;
+    }
+
+    /* Evita quebrar uma linha de evento no meio da página */
+    tr { page-break-inside: avoid; }
+
+    /* Estilos das Colunas */
+    .col-data { text-align: center; background: #f9f9f9; }
+    .dia-grande { display: block; font-size: 16pt; font-weight: bold; }
+    .dia-sem { display: block; font-size: 8pt; text-transform: uppercase; }
+
+    .col-evento .print-titulo { font-weight: bold; font-size: 11pt; margin-bottom: 4px; }
+    .col-evento .print-liturgia { font-size: 9pt; font-style: italic; color: #555; }
+
+    /* Escalas */
+    .print-escala-row {
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+    }
+    .print-hora {
+        background: #000; color: #fff;
+        padding: 2px 6px; border-radius: 4px;
+        font-weight: bold; font-size: 9pt;
+        margin-right: 10px;
+        -webkit-print-color-adjust: exact; /* Força impressão do fundo preto */
+    }
+    .print-equipes { font-size: 10pt; }
+
+    /* Destaque Solenidade */
+    .row-solenidade td {
+        background-color: #f0f0f0 !important;
+        -webkit-print-color-adjust: exact;
+    }
+
+    .print-footer {
+        margin-top: 30px;
+        text-align: center;
+        font-size: 8pt;
+        border-top: 1px solid #ccc;
+        padding-top: 10px;
     }
 }
