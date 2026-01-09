@@ -1002,3 +1002,64 @@ header {
     background-color: #fff9e6; /* Fundo levemente amarelo */
     border: 2px solid var(--cor-dourado);
 }
+
+/* ==========================================================================
+   9. ESTILOS DE IMPRESSÃO (PDF A4)
+   ========================================================================== */
+@media print {
+    /* Esconde tudo que não é conteúdo */
+    header, .sidebar, .nav-buttons, footer, .modal-overlay, button {
+        display: none !important;
+    }
+
+    /* Reseta layout para fluxo normal */
+    body, .app-layout, .main-content, .scroll-wrapper {
+        height: auto !important;
+        overflow: visible !important;
+        display: block !important;
+        background-color: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Ajusta o Grid para caber na folha */
+    .calendar-wrapper {
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+        grid-template-columns: repeat(7, 1fr) !important;
+        gap: 0 !important; /* Bordas coladas */
+    }
+
+    .day-cell {
+        min-height: 80px !important; /* Menor para caber */
+        border: 1px solid #ccc !important;
+        page-break-inside: avoid; /* Não quebrar dia no meio da folha */
+        background-color: white !important;
+        color: black !important;
+    }
+
+    /* Pílulas em modo econômico (Borda fina, fundo branco) */
+    .pill {
+        border: 1px solid #000 !important;
+        background-color: transparent !important;
+        color: #000 !important;
+        font-weight: bold;
+        font-size: 8pt !important;
+    }
+
+    /* Título do Mês Centralizado */
+    .month-header {
+        justify-content: center !important;
+        margin-bottom: 20px !important;
+    }
+    .month-name {
+        color: black !important;
+        font-size: 24pt !important;
+    }
+
+    /* Forçar orientação paisagem se possível (alguns browsers aceitam) */
+    @page {
+        size: A4 landscape;
+        margin: 1cm;
+    }
+}
