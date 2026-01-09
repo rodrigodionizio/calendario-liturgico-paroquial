@@ -531,64 +531,64 @@ document.addEventListener("keydown", (e) => {
  * Deve ser chamado no DOMContentLoaded.
  */
 async function inicializarSidebar() {
-    const containerEquipes = document.getElementById('filtro-equipes');
-    if (!containerEquipes) return;
+  const containerEquipes = document.getElementById("filtro-equipes");
+  if (!containerEquipes) return;
 
-    // Carrega Equipes
-    if (ESTADO.listaEquipes.length === 0) {
-        ESTADO.listaEquipes = await window.api.listarEquipes();
-    }
-
-    containerEquipes.innerHTML = ''; // Limpa loading
-
-    // Título
-    const h3 = document.createElement('h3');
-    h3.innerText = 'FILTRAR POR EQUIPE';
-    containerEquipes.appendChild(h3);
-
-    // Item "Todas"
-    const divAll = document.createElement('div');
-    divAll.className = 'filter-item';
-    divAll.onclick = () => window.limparFiltros();
-    divAll.innerHTML = `<span class="checkbox-custom checked" id="check-all"></span> <strong>TODAS AS EQUIPES</strong>`;
-    containerEquipes.appendChild(divAll);
-
-    // Items Dinâmicos
-    ESTADO.listaEquipes.forEach(eq => {
-        const div = document.createElement('div');
-        div.className = 'filter-item';
-        
-        // BIND SEGURO DO CLIQUE
-        div.addEventListener('click', function() {
-            window.toggleFiltro(eq.id, this);
-        });
-
-        div.innerHTML = `<span class="checkbox-custom" data-id="${eq.id}"></span> ${eq.nome_equipe}`;
-        containerEquipes.appendChild(div);
-    });
-}
+  // Carrega Equipes
   if (ESTADO.listaEquipes.length === 0) {
-    containerEquipes.innerHTML =
-      '<div style="padding:10px;">Nenhuma equipe cadastrada.</div>';
-    return;
+    ESTADO.listaEquipes = await window.api.listarEquipes();
   }
 
-  // 2. Renderiza
-  let html = `<h3>FILTRAR POR EQUIPE</h3>
+  containerEquipes.innerHTML = ""; // Limpa loading
+
+  // Título
+  const h3 = document.createElement("h3");
+  h3.innerText = "FILTRAR POR EQUIPE";
+  containerEquipes.appendChild(h3);
+
+  // Item "Todas"
+  const divAll = document.createElement("div");
+  divAll.className = "filter-item";
+  divAll.onclick = () => window.limparFiltros();
+  divAll.innerHTML = `<span class="checkbox-custom checked" id="check-all"></span> <strong>TODAS AS EQUIPES</strong>`;
+  containerEquipes.appendChild(divAll);
+
+  // Items Dinâmicos
+  ESTADO.listaEquipes.forEach((eq) => {
+    const div = document.createElement("div");
+    div.className = "filter-item";
+
+    // BIND SEGURO DO CLIQUE
+    div.addEventListener("click", function () {
+      window.toggleFiltro(eq.id, this);
+    });
+
+    div.innerHTML = `<span class="checkbox-custom" data-id="${eq.id}"></span> ${eq.nome_equipe}`;
+    containerEquipes.appendChild(div);
+  });
+}
+if (ESTADO.listaEquipes.length === 0) {
+  containerEquipes.innerHTML =
+    '<div style="padding:10px;">Nenhuma equipe cadastrada.</div>';
+  return;
+}
+
+// 2. Renderiza
+let html = `<h3>FILTRAR POR EQUIPE</h3>
         <div class="filter-item" onclick="limparFiltros()">
             <span class="checkbox-custom checked" id="check-all"></span> <strong>TODAS AS EQUIPES</strong>
         </div>`;
 
-  ESTADO.listaEquipes.forEach((eq) => {
-    html += `
+ESTADO.listaEquipes.forEach((eq) => {
+  html += `
         <div class="filter-item" onclick="window.toggleFiltro(${eq.id}, this)">
             <span class="checkbox-custom" data-id="${eq.id}"></span> ${eq.nome_equipe}
         </div>`;
-  });
+});
 
-  containerEquipes.innerHTML = html;
-  console.log("🎨 Sidebar renderizada com sucesso.");
-}
+containerEquipes.innerHTML = html;
+console.log("🎨 Sidebar renderizada com sucesso.");
+
 /**
  * Alterna o estado de um filtro específico (Liga/Desliga)
  * @param {number} equipeId - ID da equipe clicada
@@ -642,43 +642,46 @@ window.limparFiltros = function () {
  * Esconde dias que não correspondem aos filtros ativos
  */
 function aplicarFiltrosVisuais() {
-    const celulas = document.querySelectorAll('.day-cell:not(.other-month)');
-    
-    // Sem filtro = mostra tudo
-    if (ESTADO.filtrosAtivos.size === 0) {
-        celulas.forEach(cel => {
-            cel.classList.remove('hidden-by-filter', 'highlight-filter');
-        });
-        return;
+  const celulas = document.querySelectorAll(".day-cell:not(.other-month)");
+
+  // Sem filtro = mostra tudo
+  if (ESTADO.filtrosAtivos.size === 0) {
+    celulas.forEach((cel) => {
+      cel.classList.remove("hidden-by-filter", "highlight-filter");
+    });
+    return;
+  }
+
+  // Com filtro
+  celulas.forEach((cel) => {
+    // JEITO SEGURO: Ler do data-attribute
+    const dataISO = cel.getAttribute("data-iso");
+    const evento = ESTADO.dadosEventos[dataISO];
+    let match = false;
+
+    if (evento && evento.escalas) {
+      for (let esc of evento.escalas) {
+        const idLeit = esc.equipe_leitura?.id || esc.equipe_leitura_id;
+        const idCant = esc.equipe_canto?.id || esc.equipe_canto_id;
+
+        if (
+          ESTADO.filtrosAtivos.has(idLeit) ||
+          ESTADO.filtrosAtivos.has(idCant)
+        ) {
+          match = true;
+          break;
+        }
+      }
     }
 
-    // Com filtro
-    celulas.forEach(cel => {
-        // JEITO SEGURO: Ler do data-attribute
-        const dataISO = cel.getAttribute('data-iso');
-        const evento = ESTADO.dadosEventos[dataISO];
-        let match = false;
-
-        if (evento && evento.escalas) {
-            for (let esc of evento.escalas) {
-                const idLeit = esc.equipe_leitura?.id || esc.equipe_leitura_id;
-                const idCant = esc.equipe_canto?.id || esc.equipe_canto_id;
-                
-                if (ESTADO.filtrosAtivos.has(idLeit) || ESTADO.filtrosAtivos.has(idCant)) {
-                    match = true;
-                    break;
-                }
-            }
-        }
-
-        if (match) {
-            cel.classList.remove('hidden-by-filter');
-            cel.classList.add('highlight-filter');
-        } else {
-            cel.classList.add('hidden-by-filter');
-            cel.classList.remove('highlight-filter');
-        }
-    });
+    if (match) {
+      cel.classList.remove("hidden-by-filter");
+      cel.classList.add("highlight-filter");
+    } else {
+      cel.classList.add("hidden-by-filter");
+      cel.classList.remove("highlight-filter");
+    }
+  });
 }
 
 // ==========================================================================
