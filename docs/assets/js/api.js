@@ -4,7 +4,8 @@
  */
 
 const SUPABASE_URL = "https://gmfmebnodmtozpzhlgvk.supabase.co"; // Cole sua URL aqui
-const SUPABASE_KEY = "sb_publishable_RMPwNX8_KskU2_I26XUnBA_mx2-SQyC"; // Cole sua chave ANON aqui
+const SUPABASE_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtZm1lYm5vZG10b3pwemhsZ3ZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5NzU3MzIsImV4cCI6MjA4MzU1MTczMn0.29rhpFJ0I-ywPbHb4sgcdmNHaM_rJidCeaV3Cfos6Ro"; // Cole sua chave ANON aqui
 
 // O objeto 'supabase' é criado globalmente pela biblioteca que colocamos no HTML
 // Mas precisamos instanciá-lo assim:
