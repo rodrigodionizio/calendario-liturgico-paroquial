@@ -1,6 +1,6 @@
 /*
  * ARQUIVO: api.js
- * ATENÇÃO: Nunca suba a 'service_role' aqui. Apenas a 'anon'.
+ *DESCRIÇÃO: Conexão Supabase + Auth + Dados
  */
 
 const SUPABASE_URL = "https://gmfmebnodmtozpzhlgvk.supabase.co"; // Cole sua URL aqui
@@ -11,31 +11,26 @@ const SUPABASE_KEY =
 // Mas precisamos instanciá-lo assim:
 const _supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Exportamos uma função global para o app.js usar
 window.api = {
   client: _supabaseClient,
 
-  // Função de busca
+  // 1. Buscar Eventos do Mês
   buscarEventos: async function (ano, mes) {
-    // Ajuste técnico: garantir formato YYYY-MM-DD
     const mesStr = String(mes).padStart(2, "0");
     const inicio = `${ano}-${mesStr}-01`;
-    // Truque seguro: pegar o último dia do mês via JS
     const ultimoDia = new Date(ano, mes, 0).getDate();
     const fim = `${ano}-${mesStr}-${ultimoDia}`;
-
-    console.log(`🔍 Buscando eventos de ${inicio} até ${fim}...`);
 
     const { data, error } = await _supabaseClient
       .from("eventos_base")
       .select(
         `
-                id, data, titulo, tempo_liturgico, is_solenidade,
+                *,
                 liturgia_cores ( hex_code ),
                 escalas (
-                    hora_celebracao,
-                    equipe_leitura:equipes!equipe_leitura_id(nome_equipe),
-                    equipe_canto:equipes!equipe_canto_id(nome_equipe)
+                    id, hora_celebracao,
+                    equipe_leitura:equipes!equipe_leitura_id(id, nome_equipe),
+                    equipe_canto:equipes!equipe_canto_id(id, nome_equipe)
                 )
             `
       )
@@ -44,11 +39,55 @@ window.api = {
       .order("data", { ascending: true });
 
     if (error) {
-      console.error("❌ Erro Supabase:", error);
+      console.error("Erro busca:", error);
       return [];
     }
-
-    console.log(`✅ Encontrados ${data.length} eventos.`);
     return data;
+  },
+
+  // 2. Verificar Sessão (Login)
+  checkSession: async function () {
+    const { data } = await _supabaseClient.auth.getSession();
+    return data.session; // Retorna o usuário se logado, ou null
+  },
+
+  // 3. Listar Todas as Equipes (Para o Dropdown)
+  listarEquipes: async function () {
+    const { data, error } = await _supabaseClient
+      .from("equipes")
+      .select("*")
+      .order("nome_equipe");
+
+    if (error) {
+      console.error("Erro equipes:", error);
+      return [];
+    }
+    return data;
+  },
+
+  // 4. Salvar Escala (Nova ou Edição)
+  salvarEscala: async function (dados) {
+    const { data, error } = await _supabaseClient
+      .from("escalas")
+      .upsert(dados) // Upsert: Se tem ID atualiza, se não tem cria
+      .select();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // 5. Deletar Escala
+  deletarEscala: async function (id) {
+    const { error } = await _supabaseClient
+      .from("escalas")
+      .delete()
+      .eq("id", id);
+    if (error) throw error;
+  },
+
+  // 6. Logout
+  logout: async function () {
+    await _supabaseClient.auth.signOut();
+    window.location.reload();
   },
 };
