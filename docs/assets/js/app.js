@@ -233,48 +233,87 @@ function ativarModoEdicao(evento) {
   if (btnEditar) btnEditar.style.display = "none";
 
   const tituloVal = evento.titulo || "Novo Evento";
+  const tempoVal = evento.tempo_liturgico || "Tempo Comum";
   const corAtualId = evento.cor_id || evento.liturgia_cores?.id || 1;
+
+  // Lista de Tempos Litúrgicos Padrão
+  const temposLiturgicos = [
+    "Tempo Comum",
+    "Advento",
+    "Tempo do Natal",
+    "Quaresma",
+    "Semana Santa",
+    "Tríduo Pascal",
+    "Tempo Pascal",
+    "Paroquial",
+  ];
+
+  // Gera opções do Select de Tempos
+  const optionsTempos = temposLiturgicos
+    .map(
+      (t) =>
+        `<option value="${t}" ${t === tempoVal ? "selected" : ""}>${t}</option>`
+    )
+    .join("");
 
   // Gera o formulário
   let htmlEditor = `
         <h3 style="color:var(--cor-vinho); margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:5px;">Editar Evento</h3>
+        
+        <!-- EDITOR DE CABEÇALHO -->
         <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #e0e0e0; margin-bottom:15px;">
-            <label style="font-size:0.8rem; font-weight:bold; color:#888;">NOME DA CELEBRAÇÃO</label>
-            <input type="text" id="editTitulo" value="${tituloVal}" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; font-weight:bold; font-size:1rem; margin-top:5px;">
-            <div style="display:flex; gap:10px; margin-top:10px;">
+            
+            <!-- Título -->
+            <label style="font-size:0.75rem; font-weight:bold; color:#888;">TÍTULO DO EVENTO / CELEBRAÇÃO</label>
+            <input type="text" id="editTitulo" value="${tituloVal}" placeholder="Ex: Missa Dominical" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; font-weight:bold; font-size:1rem; margin-top:5px; margin-bottom:15px;">
+            
+            <!-- Linha 1: Tempo e Tipo -->
+            <div style="display:flex; gap:10px; margin-bottom:10px;">
                 <div style="flex:1;">
-                    <label style="font-size:0.8rem; font-weight:bold; color:#888;">COR LITÚRGICA</label>
-                    <select id="editCor" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; margin-top:5px;">
-                        <option value="1" ${
-                          corAtualId == 1 ? "selected" : ""
-                        }>Verde (Comum)</option>
-                        <option value="2" ${
-                          corAtualId == 2 ? "selected" : ""
-                        }>Branco (Festas)</option>
-                        <option value="3" ${
-                          corAtualId == 3 ? "selected" : ""
-                        }>Vermelho (Mártires)</option>
-                        <option value="4" ${
-                          corAtualId == 4 ? "selected" : ""
-                        }>Roxo (Quaresma)</option>
-                        <option value="5" ${
-                          corAtualId == 5 ? "selected" : ""
-                        }>Rosa (Gaudete)</option>
+                    <label style="font-size:0.75rem; font-weight:bold; color:#888;">TEMPO LITÚRGICO</label>
+                    <select id="editTempo" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; margin-top:5px;">
+                        ${optionsTempos}
+                        <option value="Outro" ${
+                          !temposLiturgicos.includes(tempoVal) ? "selected" : ""
+                        }>Outro...</option>
                     </select>
                 </div>
                 <div style="flex:1;">
-                    <label style="font-size:0.8rem; font-weight:bold; color:#888;">TIPO</label>
+                    <label style="font-size:0.75rem; font-weight:bold; color:#888;">TIPO</label>
                     <select id="editTipo" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; margin-top:5px;">
                         <option value="comum" ${
                           !evento.is_solenidade ? "selected" : ""
-                        }>Comum</option>
+                        }>Comum / Memória</option>
                         <option value="solenidade" ${
                           evento.is_solenidade ? "selected" : ""
-                        }>Solenidade</option>
+                        }>Solenidade (Destaque)</option>
                     </select>
                 </div>
             </div>
+
+            <!-- Linha 2: Cor Litúrgica -->
+            <div>
+                <label style="font-size:0.75rem; font-weight:bold; color:#888;">COR LITÚRGICA</label>
+                <select id="editCor" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; margin-top:5px;">
+                    <option value="1" ${
+                      corAtualId == 1 ? "selected" : ""
+                    }>Verde (Esperança/Comum)</option>
+                    <option value="2" ${
+                      corAtualId == 2 ? "selected" : ""
+                    }>Branco (Festas/Alegria)</option>
+                    <option value="3" ${
+                      corAtualId == 3 ? "selected" : ""
+                    }>Vermelho (Mártires/Espírito)</option>
+                    <option value="4" ${
+                      corAtualId == 4 ? "selected" : ""
+                    }>Roxo (Penitência/Advento)</option>
+                    <option value="5" ${
+                      corAtualId == 5 ? "selected" : ""
+                    }>Rosa (Gaudete/Laetare)</option>
+                </select>
+            </div>
         </div>
+
         <h4 style="color:#666; font-size:0.9rem; margin-bottom:10px;">Escalas e Horários</h4>
         <div id="listaEditor" style="display:flex; flex-direction:column; gap:15px;">`;
 
@@ -365,19 +404,21 @@ window.removerLinha = function (btn) {
 
 window.salvarEdicoes = async function () {
   const novoTitulo = document.getElementById("editTitulo").value;
+  const novoTempo = document.getElementById("editTempo").value;
   const novoCorId = document.getElementById("editCor").value;
   const tipoEvento = document.getElementById("editTipo").value;
 
   if (!novoTitulo) {
-    alert("O evento precisa de um nome!");
+    alert("O evento precisa de um Título!");
     return;
   }
 
+  // Monta o objeto para salvar
   const dadosEvento = {
     id: eventoEmEdicao.id,
     data: eventoEmEdicao.data,
     titulo: novoTitulo,
-    tempo_liturgico: eventoEmEdicao.tempo_liturgico || "Paroquial",
+    tempo_liturgico: novoTempo, // Agora salva o tempo escolhido!
     cor_id: parseInt(novoCorId),
     is_solenidade: tipoEvento === "solenidade",
     is_festa: false,
@@ -389,6 +430,7 @@ window.salvarEdicoes = async function () {
     const hora = row.querySelector(".edit-hora").value;
     const leit = row.querySelector(".edit-leitura").value || null;
     const cant = row.querySelector(".edit-canto").value || null;
+
     if (hora) {
       novasEscalas.push({
         hora_celebracao: hora,
@@ -399,11 +441,16 @@ window.salvarEdicoes = async function () {
   });
 
   try {
-    document.getElementById("areaConteudo").innerHTML =
-      '<div style="text-align:center; padding:40px; font-weight:bold;">💾 Processando...</div>';
+    const area = document.getElementById("areaConteudo");
+    area.innerHTML =
+      '<div style="text-align:center; padding:40px; color:var(--cor-vinho); font-weight:bold;"><p>💾 Processando...</p></div>';
+
+    // Salva no Banco
     await window.api.salvarEventoCompleto(dadosEvento, novasEscalas);
+
     alert("✅ Agenda atualizada com sucesso!");
     fecharModalForce();
+    // Recarrega o grid para refletir o novo título e cor imediatamente
     carregarMes(ESTADO.anoAtual, ESTADO.mesAtual);
   } catch (err) {
     alert("Erro ao salvar: " + err.message);
