@@ -27,6 +27,25 @@
          Contém a Logo Principal e Botão de Login/Logout (via JS)
     ========================================================================== -->
     <header>
+      <!-- BOTÃO MENU MOBILE (Só aparece no celular) -->
+      <button
+        id="btn-mobile-menu"
+        onclick="toggleSidebarMobile()"
+        aria-label="Abrir Menu"
+      >
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
       <div class="header-logo-container">
         <!-- Logo Horizontal Negativa (Branca sobre Vinho) -->
         <img
@@ -244,7 +263,8 @@
     <div class="modal-overlay" id="modalOverlay">
       <div id="modalContent"></div>
     </div>
-
+    <!-- MÁSCARA ESCURA PARA FECHAR MENU MOBILE -->
+    <div id="sidebar-overlay" onclick="toggleSidebarMobile()"></div>
     <!-- ==========================================================================
          ÁREA DE IMPRESSÃO (RELATÓRIO OCULTO)
     ========================================================================== -->
@@ -278,6 +298,7 @@
         Gerado pelo Sistema Paroquial • Paróquia Senhor Bom Jesus
       </footer>
     </div>
+
     <!-- ==========================================================================
          SCRIPTS (ORDEM OBRIGATÓRIA: LIB -> API -> APP)
     ========================================================================== -->

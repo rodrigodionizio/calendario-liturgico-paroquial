@@ -458,13 +458,16 @@ header {
 }
 
 .sidebar {
-  width: 260px;
-  background-color: rgba(255, 255, 255, 0.6);
-  border-right: 1px solid rgba(0, 0, 0, 0.05);
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+    width: 260px;
+    background-color: rgba(255,255,255,0.6);
+    border-right: 1px solid rgba(0,0,0,0.05);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    /* Adicione isto para garantir altura total e evitar overflow feio */
+    height: 100vh; 
+    box-sizing: border-box;
 }
 
 .mini-calendar {
@@ -509,6 +512,30 @@ header {
   background-color: var(--cor-vinho);
 }
 
+/* O grupo de filtros específico (onde tem os checkboxes) */
+#filtro-equipes {
+    /* Permite scroll se a lista for grande */
+    overflow-y: auto;
+    flex: 1; /* Ocupa o espaço disponível, empurrando o resto para baixo */
+    padding-right: 5px; /* Espaço para a barra de rolagem não colar */
+    
+    /* Scrollbar bonita (estilo moderno) */
+    scrollbar-width: thin;
+    scrollbar-color: var(--cor-vinho) #eee;
+}
+
+/* Estilo para Webkit (Chrome/Edge) */
+#filtro-equipes::-webkit-scrollbar {
+    width: 6px;
+}
+#filtro-equipes::-webkit-scrollbar-track {
+    background: #eee;
+    border-radius: 3px;
+}
+#filtro-equipes::-webkit-scrollbar-thumb {
+    background-color: var(--cor-vinho);
+    border-radius: 3px;
+}
 /* ==========================================================================
    5. CONTEÚDO PRINCIPAL (CALENDÁRIO)
    ========================================================================== */
