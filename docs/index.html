@@ -1,371 +1,192 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Calendário Litúrgico 2026 | Paróquia Sr. Bom Jesus</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Calendário Litúrgico e Paroquial 2026 - Paróquia Senhor Bom Jesus">
+    <title>Liturgia Paroquial 2026 | Paróquia Sr. Bom Jesus</title>
+    
+    <!-- Estilos CSS (Design System e Layout) -->
+    <link rel="stylesheet" href="assets/css/styles.css">
+    
+    <!-- Favicon (Ícone da Aba) -->
+    <link rel="icon" type="image/png" href="assets/img/logo-paroquia-colorida.png">
+</head>
+<body>
 
-    <!-- CSS Personalizado -->
-    <link rel="stylesheet" href="assets/css/styles.css" />
-
-    <!-- Favicon (Opcional, se tiver ícone) -->
-    <!-- <link rel="icon" type="image/png" href="assets/img/icone.png"> -->
-  </head>
-  <body>
-    <!-- CABEÇALHO -->
+    <!-- ==========================================================================
+         CABEÇALHO (HEADER)
+         Contém a Logo Principal
+    ========================================================================== -->
     <header>
-      <!-- Logo Branca (Negativa) -->
-      <img
-        src="assets/img/logo-horizontal-negativa.png"
-        alt="Paróquia Senhor Bom Jesus"
-        class="header-logo"
-      />
+        <div class="header-logo-container">
+            <!-- Logo Horizontal Negativa (Branca sobre Vinho) -->
+            <img src="assets/img/logo-horizontal-negativa.png" alt="Paróquia Senhor Bom Jesus" class="header-logo-img">
+        </div>
     </header>
 
-    <!-- ÁREA DE CONTEÚDO -->
-    <main class="container-liturgia">
-      <!-- Título -->
-      <div style="text-align: center; margin-bottom: 40px">
-        <h2 style="color: var(--cor-cereja)">Calendário Litúrgico 2026</h2>
-        <p style="font-size: 1.1rem">Ano A - São Mateus</p>
-      </div>
-
-      <!-- CONTAINER DOS CARDS -->
-      <div id="calendar-container">
-        <!-- INICIO MOCKUP JANEIRO 2026 (SIMULAÇÃO) -->
-
-        <!-- 01 JAN - SOLENIDADE (Dourado) -->
-        <div class="card-dia">
-          <div class="card-lateral-cor bg-liturgia-dourado"></div>
-          <div class="card-conteudo">
-            <div class="card-data">
-              <span class="brand-font">01 JAN • Quinta-feira</span>
-              <span
-                style="
-                  color: var(--cor-dourado);
-                  font-weight: bold;
-                  font-size: 0.85rem;
-                "
-              >
-                Santa Maria, Mãe de Deus
-              </span>
+    <!-- ==========================================================================
+         LAYOUT PRINCIPAL (SIDEBAR + CONTEÚDO)
+    ========================================================================== -->
+    <div class="app-layout">
+        
+        <!-- SIDEBAR: FILTROS E NAVEGAÇÃO SECUNDÁRIA -->
+        <aside class="sidebar">
+            <!-- Mockup de Mini Calendário -->
+            <div class="mini-calendar">Mini Calendar</div>
+            
+            <!-- Filtros de Equipes -->
+            <div class="filter-group">
+                <h3>Equipes Paroquiais</h3>
+                <div class="filter-item"><span class="checkbox-custom checked"></span> RCC</div>
+                <div class="filter-item"><span class="checkbox-custom checked"></span> Catequese</div>
+                <div class="filter-item"><span class="checkbox-custom checked"></span> Pastoral Familiar</div>
+                <div class="filter-item"><span class="checkbox-custom"></span> Dízimo</div>
             </div>
-            <div class="card-evento-nome brand-font">
-              Solenidade da Santa Mãe de Deus
+            
+            <!-- Filtros de Visualização -->
+            <div class="filter-group">
+                <h3>Visualização</h3>
+                <div class="filter-item"><span class="checkbox-custom checked"></span> Solenidades</div>
+                <div class="filter-item"><span class="checkbox-custom"></span> Festas</div>
             </div>
-            <table class="table-escala">
-              <tr>
-                <td width="60"><span class="badge-funcao">19:30</span></td>
-                <td>
-                  <div class="escala-row">
-                    <span>Leitores:</span> <strong>Pastoral Familiar</strong>
-                  </div>
-                  <div class="escala-row">
-                    <span>Canto litúrgico:</span>
-                    <strong>Coral das Mães</strong>
-                  </div>
-                </td>
-              </tr>
-            </table>
-          </div>
-        </div>
+        </aside>
 
-        <!-- 04 JAN - DOMINGO (Branco - Epifania) -->
-        <div class="card-dia">
-          <div class="card-lateral-cor bg-liturgia-branco"></div>
-          <div class="card-conteudo">
-            <div class="card-data">
-              <span class="brand-font">04 JAN • Domingo</span>
-              <span
-                class="txt-liturgia-branco"
-                style="font-weight: bold; font-size: 0.85rem; color: #999"
-              >
-                Epifania do Senhor
-              </span>
+        <!-- ÁREA DE CONTEÚDO (COM SCROLL PRÓPRIO) -->
+        <main class="main-content">
+            
+            <div class="scroll-wrapper">
+                
+                <!-- Navegação do Mês -->
+                <div class="month-header">
+                    <h1 class="month-name">Janeiro 2026</h1>
+                    <div class="nav-buttons">
+                        <button class="btn-nav" aria-label="Mês Anterior">&lt;</button>
+                        <button class="btn-nav">Hoje</button>
+                        <button class="btn-nav" aria-label="Próximo Mês">&gt;</button>
+                    </div>
+                </div>
+
+                <!-- GRID DO CALENDÁRIO (VISÃO MENSAL) -->
+                <div class="calendar-wrapper">
+                    <!-- Cabeçalhos dos Dias -->
+                    <div class="day-header">Dom</div>
+                    <div class="day-header">Seg</div>
+                    <div class="day-header">Ter</div>
+                    <div class="day-header">Qua</div>
+                    <div class="day-header">Qui</div>
+                    <div class="day-header">Sex</div>
+                    <div class="day-header">Sáb</div>
+
+                    <!-- Dias do Mês Anterior (Desativados) -->
+                    <div class="day-cell other-month"><span class="day-number">28</span></div>
+                    <div class="day-cell other-month"><span class="day-number">29</span></div>
+                    <div class="day-cell other-month"><span class="day-number">30</span></div>
+                    <div class="day-cell other-month"><span class="day-number">31</span></div>
+
+                    <!-- DIA 01 (SOLENIDADE) -->
+                    <div class="day-cell" onclick="abrirModal('dia01')">
+                        <span class="day-number">1</span>
+                        <div class="pill solenidade">Mãe de Deus</div>
+                    </div>
+
+                    <div class="day-cell"><span class="day-number">2</span></div>
+                    <div class="day-cell"><span class="day-number">3</span></div>
+
+                    <!-- DIA 04 (DOMINGO - BRANCO) -->
+                    <div class="day-cell" onclick="abrirModal('dia04')">
+                        <span class="day-number">4</span>
+                        <div class="pill">07:30 Missa</div>
+                        <div class="pill">19:00 Missa</div>
+                    </div>
+                    
+                    <!-- Dias da Semana (Vazios para exemplo) -->
+                    <div class="day-cell"><span class="day-number">5</span></div>
+                    <div class="day-cell"><span class="day-number">6</span></div>
+                    <div class="day-cell"><span class="day-number">7</span></div>
+                    <div class="day-cell"><span class="day-number">8</span></div>
+                    <div class="day-cell"><span class="day-number">9</span></div>
+                    <div class="day-cell"><span class="day-number">10</span></div>
+                    <div class="day-cell"><span class="day-number">11</span></div>
+                    <div class="day-cell"><span class="day-number">12</span></div>
+                    <div class="day-cell"><span class="day-number">13</span></div>
+                    <div class="day-cell"><span class="day-number">14</span></div>
+                    <div class="day-cell"><span class="day-number">15</span></div>
+                    <div class="day-cell"><span class="day-number">16</span></div>
+                    <div class="day-cell"><span class="day-number">17</span></div>
+
+                    <!-- DIA 18 (DOMINGO - VERDE) -->
+                    <div class="day-cell" onclick="abrirModal('dia18')">
+                        <span class="day-number">18</span>
+                        <div class="pill">Missa Dom.</div>
+                    </div>
+                    
+                    <!-- Restante do Mês -->
+                    <div class="day-cell"><span class="day-number">19</span></div>
+                    <div class="day-cell"><span class="day-number">20</span></div>
+                    <div class="day-cell"><span class="day-number">21</span></div>
+                    <div class="day-cell"><span class="day-number">22</span></div>
+                    <div class="day-cell"><span class="day-number">23</span></div>
+                    <div class="day-cell"><span class="day-number">24</span></div>
+                    <div class="day-cell"><span class="day-number">25</span></div>
+                    <div class="day-cell"><span class="day-number">26</span></div>
+                    <div class="day-cell"><span class="day-number">27</span></div>
+                    <div class="day-cell"><span class="day-number">28</span></div>
+                    <div class="day-cell"><span class="day-number">29</span></div>
+                    <div class="day-cell"><span class="day-number">30</span></div>
+                    <div class="day-cell"><span class="day-number">31</span></div>
+                </div>
+
+                <!-- ==========================================================================
+                     RODAPÉ (FOOTER)
+                     Integrado ao scroll da página principal
+                ========================================================================== -->
+                <footer class="main-footer">
+                    <div class="footer-container">
+                        <!-- Coluna Identidade -->
+                        <div class="footer-col">
+                            <img src="assets/img/logo-horizontal-negativa.png" alt="Logo Rodapé" class="footer-logo">
+                            <p class="footer-subtitle">Itabirinha / MG</p>
+                        </div>
+                        
+                        <!-- Coluna Institucional -->
+                        <div class="footer-col">
+                            <h4 class="footer-heading">Informações</h4>
+                            <p><strong>Pároco:</strong> Pe. Hugo Damião Leal</p>
+                            <p>Diocese de Teófilo Otoni</p>
+                            <p class="destaque-atendimento" style="margin-top:10px;">Atendimento Paroquial<br><span>Todas as quartas-feiras</span></p>
+                        </div>
+                        
+                        <!-- Coluna Contato -->
+                        <div class="footer-col">
+                            <h4 class="footer-heading">Fale Conosco</h4>
+                            <a href="https://wa.me/553399428407" target="_blank" class="btn-whatsapp">
+                                <!-- SVG Whatsapp -->
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+                                (33) 9942-8407
+                            </a>
+                            <div class="social-links">
+                                <a href="https://www.instagram.com/bomjesusdeitabirinha/" target="_blank"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.85-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+                                <a href="https://www.youtube.com/@pascomdabomjesusitabirinha" target="_blank"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="footer-copyright">© 2026 Paróquia Senhor Bom Jesus - Itabirinha/MG</div>
+                </footer>
+
             </div>
-            <div class="card-evento-nome brand-font">Missa Dominical</div>
-            <table class="table-escala">
-              <tr>
-                <td width="60"><span class="badge-funcao">07:30</span></td>
-                <td>
-                  <div class="escala-row">
-                    <span>Leitores:</span> <strong>Catequese</strong>
-                  </div>
-                  <div class="escala-row">
-                    <span>Canto litúrgico:</span> <strong>Anjos de Deus</strong>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td><span class="badge-funcao">19:00</span></td>
-                <td>
-                  <div class="escala-row">
-                    <span>Leitores:</span> <strong>Dízimo</strong>
-                  </div>
-                  <div class="escala-row">
-                    <span>Canto litúrgico:</span>
-                    <strong>Ministério Jovem</strong>
-                  </div>
-                </td>
-              </tr>
-            </table>
-          </div>
-        </div>
+        </main>
+    </div>
 
-        <!-- 08 JAN - QUINTA (Verde) -->
-        <div class="card-dia">
-          <div class="card-lateral-cor bg-liturgia-verde"></div>
-          <div class="card-conteudo">
-            <div class="card-data">
-              <span class="brand-font">08 JAN • Quinta-feira</span>
-              <span
-                class="txt-liturgia-verde"
-                style="font-weight: bold; font-size: 0.85rem"
-              >
-                Tempo Comum
-              </span>
-            </div>
-            <div class="card-evento-nome brand-font">
-              Adoração e Santa Missa
-            </div>
-            <table class="table-escala">
-              <tr>
-                <td width="60"><span class="badge-funcao">19:30</span></td>
-                <td>
-                  <div class="escala-row">
-                    <span>Leitores:</span> <strong>Apostolado</strong>
-                  </div>
-                  <div class="escala-row">
-                    <span>Canto litúrgico:</span>
-                    <strong>Sagrado Coração</strong>
-                  </div>
-                </td>
-              </tr>
-            </table>
-          </div>
-        </div>
+    <!-- ==========================================================================
+         MODAL OVERLAY (POPUP DE DETALHES)
+         O conteúdo é injetado via JavaScript
+    ========================================================================== -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div id="modalContent"></div>
+    </div>
 
-        <!-- 11 JAN - DOMINGO (Branco - Batismo) -->
-        <div class="card-dia">
-          <div class="card-lateral-cor bg-liturgia-branco"></div>
-          <div class="card-conteudo">
-            <div class="card-data">
-              <span class="brand-font">11 JAN • Domingo</span>
-              <span
-                class="txt-liturgia-branco"
-                style="font-weight: bold; font-size: 0.85rem; color: #999"
-              >
-                Batismo do Senhor
-              </span>
-            </div>
-            <div class="card-evento-nome brand-font">Missa e Batizados</div>
-            <table class="table-escala">
-              <tr>
-                <td width="60"><span class="badge-funcao">07:30</span></td>
-                <td>
-                  <div class="escala-row">
-                    <span>Leitores:</span> <strong>Pastoral do Batismo</strong>
-                  </div>
-                  <div class="escala-row">
-                    <span>Canto litúrgico:</span> <strong>Grupo Kairós</strong>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td><span class="badge-funcao">19:00</span></td>
-                <td>
-                  <div class="escala-row">
-                    <span>Leitores:</span> <strong>RCC</strong>
-                  </div>
-                  <div class="escala-row">
-                    <span>Canto litúrgico:</span> <strong>Água Viva</strong>
-                  </div>
-                </td>
-              </tr>
-            </table>
-          </div>
-        </div>
-
-        <!-- 15 JAN - QUINTA (Verde) -->
-        <div class="card-dia">
-          <div class="card-lateral-cor bg-liturgia-verde"></div>
-          <div class="card-conteudo">
-            <div class="card-data">
-              <span class="brand-font">15 JAN • Quinta-feira</span>
-              <span
-                class="txt-liturgia-verde"
-                style="font-weight: bold; font-size: 0.85rem"
-              >
-                1ª Semana do Tempo Comum
-              </span>
-            </div>
-            <div class="card-evento-nome brand-font">Missa Semanal</div>
-            <table class="table-escala">
-              <tr>
-                <td width="60"><span class="badge-funcao">19:30</span></td>
-                <td>
-                  <div class="escala-row">
-                    <span>Leitores:</span> <strong>Terço dos Homens</strong>
-                  </div>
-                  <div class="escala-row">
-                    <span>Canto litúrgico:</span> <strong>Vozes de Deus</strong>
-                  </div>
-                </td>
-              </tr>
-            </table>
-          </div>
-        </div>
-
-        <!-- 18 JAN - DOMINGO (Verde) -->
-        <div class="card-dia">
-          <div class="card-lateral-cor bg-liturgia-verde"></div>
-          <div class="card-conteudo">
-            <div class="card-data">
-              <span class="brand-font">18 JAN • Domingo</span>
-              <span
-                class="txt-liturgia-verde"
-                style="font-weight: bold; font-size: 0.85rem"
-              >
-                2º Domingo do Tempo Comum
-              </span>
-            </div>
-            <div class="card-evento-nome brand-font">Missa Dominical</div>
-            <table class="table-escala">
-              <tr>
-                <td width="60"><span class="badge-funcao">07:30</span></td>
-                <td>
-                  <div class="escala-row">
-                    <span>Leitores:</span> <strong>Pascom</strong>
-                  </div>
-                  <div class="escala-row">
-                    <span>Canto litúrgico:</span>
-                    <strong>Jovens de Cristo</strong>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td><span class="badge-funcao">19:00</span></td>
-                <td>
-                  <div class="escala-row">
-                    <span>Leitores:</span> <strong>Legião de Maria</strong>
-                  </div>
-                  <div class="escala-row">
-                    <span>Canto litúrgico:</span>
-                    <strong>Coral Santa Cecília</strong>
-                  </div>
-                </td>
-              </tr>
-            </table>
-          </div>
-        </div>
-
-        <!-- FIM MOCKUP JANEIRO -->
-      </div>
-
-      <div
-        id="loading-status"
-        style="
-          text-align: center;
-          color: var(--cor-vinho);
-          display: none;
-          margin-top: 20px;
-        "
-      >
-        Carregando escalas...
-      </div>
-    </main>
-
-    <!-- RODAPÉ -->
-    <footer class="main-footer">
-      <div class="footer-container">
-        <!-- Coluna 1: Identidade -->
-        <div class="footer-col">
-          <img
-            src="assets/img/logo-horizontal-negativa.png"
-            alt="Paróquia Senhor Bom Jesus"
-            class="footer-logo"
-          />
-          <p class="brand-font footer-title">Paróquia Senhor Bom Jesus</p>
-          <p class="footer-subtitle">Itabirinha / MG</p>
-        </div>
-
-        <!-- Coluna 2: Institucional -->
-        <div class="footer-col">
-          <h4 class="footer-heading">Informações</h4>
-          <p><strong>Pároco:</strong> Pe. Hugo Damião Leal</p>
-          <p>Diocese de Teófilo Otoni</p>
-          <div class="footer-divider"></div>
-          <p class="destaque-atendimento">
-            Atendimento Paroquial<br />
-            <span>Todas as quartas-feiras</span>
-          </p>
-        </div>
-
-        <!-- Coluna 3: Contatos e Redes -->
-        <div class="footer-col">
-          <h4 class="footer-heading">Fale Conosco</h4>
-
-          <!-- Botão WhatsApp -->
-          <a
-            href="https://wa.me/553399428407"
-            target="_blank"
-            class="btn-whatsapp"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-              <path
-                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"
-              />
-            </svg>
-            (33) 9942-8407
-          </a>
-
-          <div class="social-links">
-            <!-- Instagram -->
-            <a
-              href="https://www.instagram.com/bomjesusdeitabirinha/"
-              target="_blank"
-              title="Instagram"
-            >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path
-                  d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.85-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
-                />
-              </svg>
-            </a>
-
-            <!-- YouTube -->
-            <a
-              href="https://www.youtube.com/@pascomdabomjesusitabirinha"
-              target="_blank"
-              title="YouTube"
-            >
-              <svg
-                width="28"
-                height="28"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path
-                  d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"
-                />
-              </svg>
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <div class="footer-copyright">
-        © 2026 Paróquia Senhor Bom Jesus - Itabirinha/MG
-      </div>
-    </footer>
-
-    <!-- SCRIPTS -->
-    <script src="assets/js/api.js"></script>
-    <script src="assets/js/app.js"></script>
-  </body>
+    <!-- Scripts da Aplicação -->
+    <script src="assets/js/app.js" defer></script>
+</body>
 </html>

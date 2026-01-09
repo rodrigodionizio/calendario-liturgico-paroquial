@@ -1,359 +1,362 @@
 /* 
- * ARQUIVO: styles.css
- * PROJETO: Calendário Litúrgico Paroquial 2026
- * IDENTIDADE: Paróquia Senhor Bom Jesus
+ * PROJECT: Liturgia Paroquial 2026
+ * DESCRIPTION: Arquivo principal de estilos com Design System Jubileu
+ * AUTHOR: Rodrigo & Dev AI
  */
 
-/* --- 1. IMPORTAÇÃO DE FONTES LOCAIS (.otf) --- */
-/* Certifique-se que os arquivos na pasta 'fonts' têm exatamente estes nomes */
-
-@font-face {
-  font-family: "AntennaCond";
-  src: url("../fonts/antennacond.otf") format("opentype");
-  font-weight: 400; /* Regular */
-  font-style: normal;
-}
-
-@font-face {
-  font-family: "AntennaCond";
-  src: url("../fonts/antennacond-italic.otf") format("opentype");
-  font-weight: 400;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: "AntennaCond";
-  src: url("../fonts/antennacond-bold.otf") format("opentype");
-  font-weight: 700; /* Bold */
-  font-style: normal;
-}
-
-@font-face {
-  font-family: "AntennaCond";
-  src: url("../fonts/antennacond-black.otf") format("opentype");
-  font-weight: 900; /* Black/Extra Bold para Títulos */
-  font-style: normal;
-}
-
-@font-face {
-  font-family: "AntennaCond";
-  src: url("../fonts/antennacond-light.otf") format("opentype");
-  font-weight: 300; /* Light */
-  font-style: normal;
-}
-
-/* --- 2. VARIÁVEIS DO SISTEMA (ROOT) --- */
+/* ==========================================================================
+   1. DESIGN SYSTEM & VARIÁVEIS
+   ========================================================================== */
 :root {
-  /* Paleta Institucional */
-  --cor-cereja: #c82038; /* Ações e Destaques */
-  --cor-vinho: #a41d31; /* Cabeçalho e Rodapé */
-  --cor-dourado: #fbb558; /* Ícones e Bordas */
-  --cor-bege: #fceccb; /* Fundo da Página */
-
-  /* Texto */
-  --text-primary: #2c0e12; /* Quase preto */
-  --text-light: #fff8e7; /* Bege claro para texto sobre fundo escuro */
-
-  /* Fontes */
-  --font-titulo: "AntennaCond", sans-serif;
-  --font-texto: "AntennaCond", sans-serif;
-
-  /* Cores Litúrgicas */
-  --liturgia-verde: #2e7d32;
-  --liturgia-roxo: #6a1b9a;
-  --liturgia-vermelho: #d32f2f;
-  --liturgia-branco: #ffffff;
-  --liturgia-rosa: #ec407a;
+    /* Paleta Institucional */
+    --cor-cereja:   #C82038;
+    --cor-vinho:    #A41D31;
+    --cor-dourado:  #FBB558;
+    --cor-bege:     #FCECCB;
+    --cor-fundo:    #FFF8E7;
+    --text-main:    #2C0E12;
+    
+    /* Liturgia Backgrounds (Tarjas) */
+    --bg-verde:   #2E7D32;
+    --bg-branco:  #F5F5F5;
+    --bg-dourado: #FBB558;
+    --bg-roxo:    #6A1B9A;
+    --bg-vermelho:#D32F2F;
+    
+    /* Liturgia Textos (Contraste Acessível) */
+    --txt-verde:    #2E7D32;
+    --txt-branco:   #666666; /* Cinza Escuro para ler no fundo claro */
+    --txt-dourado:  #A67C00;
+    --txt-roxo:     #6A1B9A;
+    --txt-vermelho: #D32F2F;
+    
+    /* UI Metrics */
+    --radius-main: 16px;
 }
 
-/* --- 3. BASE --- */
+/* ==========================================================================
+   2. FONT FACES & RESET
+   ========================================================================== */
+/* Copie aqui o conteúdo gerado pelo script python (mapear_fontes.py) */
+/* Exemplo de placeholder se não tiver rodado o script ainda: */
+@font-face { font-family: 'AntennaCond'; src: url('../fonts/antennacond.otf'); font-weight: 400; }
+@font-face { font-family: 'AntennaCond'; src: url('../fonts/antennacond-bold.otf'); font-weight: 700; }
+@font-face { font-family: 'AntennaCond'; src: url('../fonts/antennacond-black.otf'); font-weight: 900; }
+
 body {
-  background-color: var(--cor-bege);
-  color: var(--text-primary);
-  font-family: var(--font-texto);
-  font-size: 18px;
-  margin: 0;
-  padding: 0;
-  line-height: 1.6; /* Aumentei um pouco para facilitar leitura */
-
-  /* --- CORREÇÃO DE PESO DA FONTE --- */
-  -webkit-font-smoothing: antialiased; /* Afina a fonte no Chrome/Safari */
-  -moz-osx-font-smoothing: grayscale; /* Afina a fonte no Firefox/Mac */
-  text-rendering: optimizeLegibility;
-}
-/* Tipografia de Títulos (Antenna Black) */
-h1,
-h2,
-h3,
-h4,
-.brand-font {
-  font-family: var(--font-titulo);
-  font-weight: 900;
-  text-transform: uppercase;
-  margin-bottom: 0.5rem;
-
-  /* --- CORREÇÃO DE ESPAÇAMENTO --- */
-  letter-spacing: 1.5px; /* Separa as letras elegantemente */
+    background-color: var(--cor-fundo);
+    color: var(--text-main);
+    font-family: 'AntennaCond', 'Segoe UI', Tahoma, sans-serif;
+    margin: 0; padding: 0;
+    height: 100vh;
+    display: flex; flex-direction: column;
+    overflow: hidden; /* App-like feel, impede scroll no body */
 }
 
-/* --- 4. CABEÇALHO (HEADER) --- */
+/* ==========================================================================
+   3. HEADER (CABEÇALHO)
+   ========================================================================== */
 header {
-  background-color: var(--cor-vinho);
-  width: 100%;
-  min-height: 100px; /* Garante que o header apareça mesmo sem imagem */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-bottom: 5px solid var(--cor-dourado);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  padding: 15px 0;
-  margin-bottom: 30px;
+    background-color: var(--cor-vinho);
+    height: 70px;
+    padding: 0 20px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    z-index: 10;
+    border-bottom: 4px solid var(--cor-dourado);
 }
 
-/* --- 5. CONTROLE DE IMAGENS --- */
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
+.header-logo-container {
+    height: 50px; display: flex; align-items: center;
+}
+.header-logo-img {
+    height: 100%; width: auto; object-fit: contain;
 }
 
-.header-logo {
-  max-height: 70px; /* Altura controlada */
-  width: auto;
-  object-fit: contain;
+/* ==========================================================================
+   4. LAYOUT GERAL & SIDEBAR
+   ========================================================================== */
+.app-layout {
+    display: flex; flex: 1; overflow: hidden;
 }
 
-.footer-logo {
-  max-width: 180px;
-  height: auto;
-  margin-bottom: 15px;
-  opacity: 0.9;
+.sidebar {
+    width: 260px;
+    background-color: rgba(255,255,255,0.6);
+    border-right: 1px solid rgba(0,0,0,0.05);
+    padding: 20px;
+    display: flex; flex-direction: column; gap: 20px;
 }
 
-/* --- 6. CONTAINER PRINCIPAL --- */
-.container-liturgia {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 0 15px;
+.mini-calendar {
+    background: #fff; border-radius: 12px; height: 200px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(0,0,0,0.05); color: #aaa; font-size: 0.8rem;
 }
 
-/* --- 7. CARDS DO CALENDÁRIO --- */
-.card-dia {
-  background-color: #ffffff;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  display: flex;
-  overflow: hidden; /* Para a faixa lateral não vazar */
+.filter-group h3 {
+    font-size: 0.8rem; text-transform: uppercase;
+    color: var(--cor-vinho); margin-bottom: 10px;
+    opacity: 0.9; font-weight: 800;
 }
 
-.card-lateral-cor {
-  width: 12px;
-  flex-shrink: 0;
-  /* A cor é definida pelas classes utilitárias abaixo */
+.filter-item {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 8px; font-size: 0.9rem;
+    cursor: pointer; color: #444;
 }
 
-.card-conteudo {
-  padding: 15px; /* Reduzi de 20px para 15px para ganhar espaço */
-  width: 100%;
+.checkbox-custom {
+    width: 16px; height: 16px;
+    border: 2px solid var(--cor-vinho); border-radius: 4px;
+    display: inline-block;
+}
+.checkbox-custom.checked { background-color: var(--cor-vinho); }
+
+/* ==========================================================================
+   5. CONTEÚDO PRINCIPAL (CALENDÁRIO)
+   ========================================================================== */
+.main-content {
+    flex: 1;
+    padding: 0;
+    display: flex; flex-direction: column;
+    overflow-y: auto; /* Scroll apenas aqui */
 }
 
-.card-data {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05); /* Linha mais sutil */
-  padding-bottom: 5px;
-  margin-bottom: 8px;
-  /* Fonte um pouco menor para a data não brigar com o evento */
-  font-size: 0.95rem;
+.scroll-wrapper {
+    padding: 20px;
+    flex: 1;
+    display: flex; flex-direction: column;
 }
 
-.card-evento-nome {
-  font-size: 1.05rem; /* Levemente menor */
-  color: var(--text-primary);
-  margin-bottom: 8px;
-  letter-spacing: 0.5px;
+.month-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 15px;
 }
 
-/* Tabela Compacta */
-.table-escala td {
-  padding: 4px 4px; /* Bem menos padding vertical */
-  border-bottom: 1px dashed #eee;
-  vertical-align: top;
+.month-name {
+    font-size: 1.8rem; font-weight: 900;
+    color: var(--text-main); margin: 0;
 }
 
-/* Nova classe para alinhar Rótulo + Valor na mesma linha visual */
-.escala-row {
-  font-size: 0.9rem;
-  margin-bottom: 2px;
-  line-height: 1.3;
-  display: flex;
-  align-items: baseline; /* Alinha o texto pela base das letras */
-  gap: 5px;
+.nav-buttons { display: flex; gap: 10px; }
+.btn-nav {
+    border: 1px solid #ccc; background: transparent;
+    padding: 5px 15px; border-radius: 20px;
+    cursor: pointer; font-weight: 600;
+    transition: background 0.2s;
+}
+.btn-nav:hover { background: rgba(0,0,0,0.05); }
+
+/* Grid Container */
+.calendar-wrapper {
+    border: 1px solid #ddd;
+    border-radius: var(--radius-main);
+    overflow: hidden;
+    background-color: #ddd; /* Cor das linhas da grade */
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    margin-bottom: 40px;
 }
 
-.escala-row span {
-  color: #666; /* Cor cinza para o rótulo "Leitores:" tirar o peso */
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  min-width: 95px; /* Garante alinhamento vertical dos dois pontos */
+.day-header {
+    background-color: #fff; padding: 10px 0; text-align: center;
+    font-size: 0.75rem; font-weight: 800;
+    color: #888; text-transform: uppercase;
 }
 
-.escala-row strong {
-  color: var(--text-primary);
-  font-weight: 700;
+.day-cell {
+    background-color: #fff;
+    min-height: 120px; /* Altura Desktop */
+    padding: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+    position: relative;
+}
+.day-cell:hover { background-color: #fafafa; }
+
+.day-number {
+    font-weight: 700; font-size: 1rem;
+    color: #333; margin-bottom: 5px; display: block;
 }
 
-/* Badge de Horário mais discreto */
-.badge-funcao {
-  background-color: #f0f0f0; /* Cinza bem claro em vez de bege forte */
-  color: #555;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-weight: 600;
-  font-size: 0.75rem;
-  border: 1px solid #ddd;
+.other-month {
+    background-color: #f4f4f4; opacity: 0.5;
+    pointer-events: none;
 }
 
-/* --- 8. CLASSES LITÚRGICAS (Utilitárias) --- */
-.bg-liturgia-verde {
-  background-color: var(--liturgia-verde);
+/* Pílulas de Evento (Grid) */
+.pill {
+    font-size: 0.75rem; margin-bottom: 2px; padding: 3px 6px;
+    border-radius: 4px; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+    background-color: var(--cor-vinho); color: #fff;
+    border-left: 3px solid var(--cor-dourado);
 }
-.bg-liturgia-roxo {
-  background-color: var(--liturgia-roxo);
-}
-.bg-liturgia-vermelho {
-  background-color: var(--liturgia-vermelho);
-}
-.bg-liturgia-rosa {
-  background-color: var(--liturgia-rosa);
-}
-.bg-liturgia-branco {
-  background-color: var(--liturgia-branco);
-  border-right: 1px solid #e0e0e0; /* Borda sutil para branco */
-}
-.bg-liturgia-dourado {
-  background-color: var(--cor-dourado);
+.pill.solenidade {
+    background-color: var(--cor-dourado);
+    color: var(--cor-vinho);
+    border-left: 3px solid #fff;
 }
 
-.txt-liturgia-verde {
-  color: var(--liturgia-verde);
-}
-.txt-liturgia-roxo {
-  color: var(--liturgia-roxo);
-}
-.txt-liturgia-vermelho {
-  color: var(--liturgia-vermelho);
-}
-
-/* --- 9. RODAPÉ (FOOTER) --- */
+/* ==========================================================================
+   6. RODAPÉ (FOOTER)
+   ========================================================================== */
 .main-footer {
-  background-color: var(--cor-vinho);
-  color: var(--cor-bege);
-  padding: 50px 20px 20px 20px;
-  border-top: 5px solid var(--cor-dourado);
-  margin-top: 50px;
+    background-color: var(--cor-vinho);
+    color: var(--cor-bege);
+    padding: 50px 20px 20px 20px;
+    border-top: 5px solid var(--cor-dourado);
+    margin-top: auto;
 }
 
 .footer-container {
-  max-width: 1000px;
-  margin: 0 auto;
-  display: grid;
-  /* Layout Responsivo: Cria colunas automáticas */
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 40px;
+    max-width: 1000px; margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 40px;
 }
 
-.footer-col {
-  display: flex;
-  flex-direction: column;
-}
-
+.footer-logo { max-width: 180px; margin-bottom: 15px; opacity: 0.9; }
 .footer-heading {
-  color: var(--cor-dourado);
-  font-size: 1.1rem;
-  border-bottom: 1px solid rgba(251, 181, 88, 0.3);
-  padding-bottom: 10px;
-  margin-bottom: 15px;
+    color: var(--cor-dourado); font-size: 1.1rem;
+    border-bottom: 1px solid rgba(251, 181, 88, 0.3);
+    padding-bottom: 10px; margin-bottom: 15px;
+    font-weight: 800; text-transform: uppercase;
 }
+.footer-col p { margin: 5px 0; font-size: 0.95rem; }
+.footer-subtitle { font-style: italic; font-size: 0.9rem; opacity: 0.8; }
 
-.footer-col p {
-  margin: 5px 0;
-  font-size: 0.95rem;
-}
-.footer-subtitle {
-  font-style: italic;
-  font-size: 0.9rem;
-  opacity: 0.8;
-}
-.footer-divider {
-  height: 1px;
-  background-color: rgba(255, 255, 255, 0.1);
-  margin: 10px 0;
-}
+.destaque-atendimento { color: var(--cor-dourado) !important; font-weight: bold; }
+.destaque-atendimento span { font-weight: normal; color: var(--cor-bege); }
 
-.destaque-atendimento {
-  color: var(--cor-dourado) !important;
-  font-weight: bold;
-}
-.destaque-atendimento span {
-  font-weight: normal;
-  color: var(--cor-bege);
-}
-
-/* Botão WhatsApp */
 .btn-whatsapp {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background-color: rgba(255, 255, 255, 0.05);
-  color: var(--cor-bege);
-  text-decoration: none;
-  padding: 10px 15px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.3s ease;
-  width: fit-content;
-  margin-bottom: 15px;
+    display: flex; align-items: center; gap: 10px;
+    background-color: rgba(255,255,255,0.05); color: var(--cor-bege);
+    text-decoration: none; padding: 10px 15px; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.1); width: fit-content;
+    margin-bottom: 15px; font-size: 0.9rem; transition: 0.3s;
 }
-.btn-whatsapp:hover {
-  background-color: #25d366;
-  border-color: #25d366;
-  color: #fff;
-  transform: translateX(5px);
-}
+.btn-whatsapp:hover { background-color: #25D366; border-color: #25D366; color: #fff; }
 
-.social-links {
-  display: flex;
-  gap: 15px;
-  margin-top: 10px;
-}
-.social-links a {
-  color: var(--cor-bege);
-  transition: transform 0.2s;
-}
-.social-links a:hover {
-  color: var(--cor-dourado);
-  transform: scale(1.1);
-}
+.social-links { display: flex; gap: 15px; margin-top: 10px; }
+.social-links a { color: var(--cor-bege); transition: transform 0.2s; }
+.social-links a:hover { color: var(--cor-dourado); transform: scale(1.1); }
 
 .footer-copyright {
-  text-align: center;
-  font-size: 0.8rem;
-  opacity: 0.6;
-  margin-top: 40px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+    text-align: center; font-size: 0.8rem; opacity: 0.6;
+    margin-top: 40px; padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.05);
 }
 
-/* Ajuste Mobile */
-@media (max-width: 768px) {
-  .footer-container {
-    text-align: center;
-  }
-  .footer-col {
-    align-items: center;
-  }
-  .header-logo {
-    margin: 0 auto;
-  }
+/* ==========================================================================
+   7. COMPONENTE: MODAL (POPUP)
+   ========================================================================== */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(44, 14, 18, 0.5); backdrop-filter: blur(4px);
+    display: none; justify-content: center; align-items: center; z-index: 1000;
 }
+.modal-overlay.active { display: flex; animation: fadeIn 0.2s ease; }
+
+.modal-card {
+    background: #fff; border-radius: 16px; overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    position: relative; display: flex;
+    /* Mobile First Dimensions */
+    width: 95%; max-width: 400px; max-height: 85vh; overflow-y: auto;
+}
+
+.modal-sidebar-color { width: 10px; flex-shrink: 0; }
+.modal-body { padding: 20px; flex: 1; }
+
+.modal-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px;
+}
+.modal-day { font-size: 2rem; font-weight: 900; line-height: 1; color: var(--text-main); }
+.modal-month { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; color: var(--cor-vinho); }
+.modal-weekday { font-size: 0.75rem; color: #888; text-transform: uppercase; }
+
+.modal-liturgia { font-size: 0.85rem; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+.modal-titulo { font-size: 1.1rem; font-weight: 800; margin-bottom: 20px; color: var(--text-main); line-height: 1.2; }
+
+/* Lista de Escalas */
+.escala-item {
+    display: flex; align-items: flex-start;
+    border-bottom: 1px dashed #eee; padding-bottom: 8px; margin-bottom: 12px;
+}
+.escala-hora {
+    background: #f5f5f5; padding: 4px 8px; border-radius: 6px;
+    font-weight: 700; font-size: 0.8rem; margin-right: 10px; color: #555;
+}
+.equipe-row { display: flex; align-items: center; margin-bottom: 5px; flex-wrap: nowrap; }
+.equipe-icon { width: 16px; height: 16px; margin-right: 8px; opacity: 0.8; flex-shrink: 0; }
+.equipe-label { font-size: 0.7rem; text-transform: uppercase; color: #999; margin-right: 5px; font-weight: 600; width: 55px; flex-shrink: 0; }
+.equipe-val { font-weight: 700; color: var(--text-main); font-size: 0.9rem; white-space: normal; line-height: 1.2; }
+
+.btn-close {
+    position: absolute; top: 10px; right: 10px; cursor: pointer;
+    background: #eee; border-radius: 50%; width: 25px; height: 25px;
+    border: none; font-weight: bold; font-size: 1.2rem; color: #555;
+    display: flex; align-items: center; justify-content: center;
+}
+
+/* Utilitários de Cor para Modal */
+.bg-verde { background-color: var(--bg-verde); }
+.bg-branco { background-color: #e0e0e0; }
+.bg-dourado { background-color: var(--bg-dourado); }
+.txt-verde { color: var(--txt-verde); }
+.txt-branco { color: var(--txt-branco); }
+.txt-dourado { color: var(--txt-dourado); }
+
+/* ==========================================================================
+   8. RESPONSIVIDADE (MEDIA QUERIES)
+   ========================================================================== */
+
+/* DESKTOP (Telas maiores) */
+@media (min-width: 768px) {
+    .header-logo-container { height: 60px; margin: 0; }
+    header { justify-content: space-between; }
+    
+    .modal-card { width: 600px; max-width: 600px; }
+    .modal-body { padding: 35px; }
+    .modal-day { font-size: 2.8rem; }
+    .modal-titulo { font-size: 1.5rem; }
+    .modal-sidebar-color { width: 15px; }
+}
+
+/* MOBILE (Celulares) */
+@media (max-width: 768px) {
+    .sidebar { display: none; } /* Esconde filtros */
+    header { justify-content: center; }
+    
+    .month-name { font-size: 1.4rem; }
+    .day-header { font-size: 0.65rem; padding: 5px 0; }
+    
+    /* Grid Mobile */
+    .day-cell {
+        min-height: 55px; height: auto;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: flex-start;
+        padding: 4px;
+    }
+    
+    /* Pílulas Mobile (Bolinhas) */
+    .pill {
+        font-size: 0px; width: 6px; height: 6px;
+        padding: 0; border: none; border-radius: 50%;
+        display: inline-block; margin: 2px 1px;
+    }
+    
+    /* Footer Mobile */
+    .footer-container { text-align: center; }
+    .footer-col { align-items: center; }
+    .btn-whatsapp { margin: 0 auto 15px auto; }
+    .social-links { justify-content: center; }
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
