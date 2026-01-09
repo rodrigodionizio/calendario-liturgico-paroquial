@@ -1,12 +1,10 @@
 /*
  * ARQUIVO: app.js
- * DESCRIÇÃO: Controlador Principal - Renderização, Modais e Painel Admin
- * PROJETO: Liturgia Paroquial 2026
+ * DESCRIÇÃO: Controlador Principal - Versão Final Gold
  * AUTOR: Rodrigo & Dev AI
- * STATUS: Validado (Gold)
  */
 
-console.log("🚀 Sistema Litúrgico V4 Iniciado");
+console.log("🚀 Sistema Litúrgico Final Iniciado");
 
 // --- ESTADO GLOBAL ---
 const ESTADO = {
@@ -15,11 +13,14 @@ const ESTADO = {
   dadosEventos: {},
   isAdmin: false,
   listaEquipes: [],
+  filtrosAtivos: new Set(),
 };
 
 let eventoEmEdicao = null;
+// Cache para selects filtrados no editor
+let cacheEquipesLeitura = [];
+let cacheEquipesCanto = [];
 
-// --- ÍCONES ---
 const ICONS = {
   leitura:
     '<svg class="equipe-icon" viewBox="0 0 24 24" fill="currentColor" style="color:var(--cor-vinho)"><path d="M12 3v18.5c-2.3-.6-4.4-1-6.5-1-2.4 0-4.6.5-6.5 1.2V3.2C1.4 2.5 3.6 2 6 2c2.1 0 4.1.4 6 1zm10.5-.8c-1.9-.7-4.1-1.2-6.5-1.2v18.5c2.1 0 4.2.4 6.5 1V3.2z"/></svg>',
@@ -31,22 +32,33 @@ const ICONS = {
 // 1. INICIALIZAÇÃO
 // ==========================================================================
 document.addEventListener("DOMContentLoaded", async () => {
-  // Check Auth
+  // Auth
   const session = await window.api.checkSession();
   if (session) {
     ESTADO.isAdmin = true;
     console.log("👑 Admin: ", session.user.email);
     adicionarBotaoLogout();
-    ESTADO.listaEquipes = await window.api.listarEquipes();
   }
 
-  // Load Calendar
+  // Dados Básicos
+  ESTADO.listaEquipes = await window.api.listarEquipes();
+
+  // Prepara caches de equipes
+  cacheEquipesLeitura = ESTADO.listaEquipes.filter(
+    (e) => e.tipo_atuacao === "Leitura" || e.tipo_atuacao === "Ambos"
+  );
+  cacheEquipesCanto = ESTADO.listaEquipes.filter(
+    (e) => e.tipo_atuacao === "Canto" || e.tipo_atuacao === "Ambos"
+  );
+
+  // Inicia UI
+  inicializarSidebar();
   carregarMes(ESTADO.anoAtual, ESTADO.mesAtual);
   configurarBotoesNavegacao();
 });
 
 // ==========================================================================
-// 2. RENDERIZAÇÃO (GRID)
+// 2. RENDERIZAÇÃO
 // ==========================================================================
 async function carregarMes(ano, mes) {
   const nomeMes = new Date(ano, mes - 1).toLocaleString("pt-BR", {
@@ -55,9 +67,12 @@ async function carregarMes(ano, mes) {
   document.querySelector(".month-name").textContent = `${nomeMes} ${ano}`;
 
   const grid = document.querySelector(".calendar-wrapper");
-  const headers = grid.innerHTML
-    .match(/<div class="day-header">.*?<\/div>/g)
-    .join("");
+  // Salva headers
+  const headersMatch = grid.innerHTML.match(
+    /<div class="day-header">.*?<\/div>/g
+  );
+  const headers = headersMatch ? headersMatch.join("") : ""; // Fallback se não achar
+
   grid.innerHTML =
     headers +
     '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#888;">Carregando...</div>';
@@ -67,6 +82,7 @@ async function carregarMes(ano, mes) {
     ESTADO.dadosEventos = {};
     eventos.forEach((ev) => (ESTADO.dadosEventos[ev.data] = ev));
     renderizarGrid(ano, mes, grid, headers);
+    aplicarFiltrosVisuais(); // Re-aplica filtro se existir
   } catch (erro) {
     console.error(erro);
     grid.innerHTML =
@@ -76,27 +92,22 @@ async function carregarMes(ano, mes) {
 
 function renderizarGrid(ano, mes, gridElement, headersHTML) {
   let html = headersHTML;
-  const primeiroDiaSemana = new Date(ano, mes - 1, 1).getDay();
-  const ultimoDiaDoMes = new Date(ano, mes, 0).getDate();
-  const ultimoDiaMesAnterior = new Date(ano, mes - 1, 0).getDate();
+  const primeiroDia = new Date(ano, mes - 1, 1).getDay();
+  const ultimoDia = new Date(ano, mes, 0).getDate();
+  const ultimoDiaMesAnt = new Date(ano, mes - 1, 0).getDate();
 
-  // Dias Mês Anterior
-  for (let i = primeiroDiaSemana - 1; i >= 0; i--) {
-    const dia = ultimoDiaMesAnterior - i;
+  for (let i = primeiroDia - 1; i >= 0; i--) {
+    const dia = ultimoDiaMesAnt - i;
     html += `<div class="day-cell other-month"><span class="day-number">${dia}</span></div>`;
   }
 
-  // Dias Atuais
-  for (let dia = 1; dia <= ultimoDiaDoMes; dia++) {
+  for (let dia = 1; dia <= ultimoDia; dia++) {
     const dataISO = `${ano}-${String(mes).padStart(2, "0")}-${String(
       dia
     ).padStart(2, "0")}`;
     const evento = ESTADO.dadosEventos[dataISO];
     let conteudoHTML = "";
-    let clickAttr = "";
-
-    // Sempre permite clique (para poder criar evento em dia vazio)
-    clickAttr = `onclick="abrirModal('${dataISO}')"`;
+    let clickAttr = `onclick="abrirModal('${dataISO}')"`;
 
     if (evento) {
       let corHex = evento.liturgia_cores?.hex_code || "#2E7D32";
@@ -114,12 +125,11 @@ function renderizarGrid(ano, mes, gridElement, headersHTML) {
         });
       }
     }
-
-    html += `<div class="day-cell" ${clickAttr}><span class="day-number">${dia}</span>${conteudoHTML}</div>`;
+    // Adiciona data-iso para o filtro funcionar
+    html += `<div class="day-cell" data-iso="${dataISO}" ${clickAttr}><span class="day-number">${dia}</span>${conteudoHTML}</div>`;
   }
 
-  // Dias Próximo Mês
-  const totalCelulas = primeiroDiaSemana + ultimoDiaDoMes;
+  const totalCelulas = primeiroDia + ultimoDia;
   const resto = totalCelulas % 7;
   if (resto !== 0) {
     for (let i = 1; i <= 7 - resto; i++) {
@@ -130,17 +140,110 @@ function renderizarGrid(ano, mes, gridElement, headersHTML) {
 }
 
 // ==========================================================================
-// 3. MODAL DE DETALHES
+// 3. FILTROS DA SIDEBAR
+// ==========================================================================
+async function inicializarSidebar() {
+  const containerEquipes = document.getElementById("filtro-equipes");
+  if (!containerEquipes) return;
+
+  // Cabeçalho
+  containerEquipes.innerHTML = `<h3>FILTRAR POR EQUIPE</h3>
+        <div class="filter-item" onclick="limparFiltros()">
+            <span class="checkbox-custom checked" id="check-all"></span> <strong>TODAS AS EQUIPES</strong>
+        </div>`;
+
+  // Itens
+  ESTADO.listaEquipes.forEach((eq) => {
+    const div = document.createElement("div");
+    div.className = "filter-item";
+    // AddEventListener é mais seguro que onclick string
+    div.addEventListener("click", function () {
+      window.toggleFiltro(eq.id, this);
+    });
+    div.innerHTML = `<span class="checkbox-custom" data-id="${eq.id}"></span> ${eq.nome_equipe}`;
+    containerEquipes.appendChild(div);
+  });
+}
+
+window.toggleFiltro = function (equipeId, divElement) {
+  const check = divElement.querySelector(".checkbox-custom");
+  const checkAll = document.getElementById("check-all");
+
+  if (ESTADO.filtrosAtivos.has(equipeId)) {
+    ESTADO.filtrosAtivos.delete(equipeId);
+    check.classList.remove("checked");
+  } else {
+    ESTADO.filtrosAtivos.add(equipeId);
+    check.classList.add("checked");
+  }
+
+  if (ESTADO.filtrosAtivos.size === 0) {
+    checkAll.classList.add("checked");
+  } else {
+    checkAll.classList.remove("checked");
+  }
+  aplicarFiltrosVisuais();
+};
+
+window.limparFiltros = function () {
+  ESTADO.filtrosAtivos.clear();
+  document.querySelectorAll(".filter-item .checkbox-custom").forEach((el) => {
+    if (el.id !== "check-all") el.classList.remove("checked");
+  });
+  document.getElementById("check-all").classList.add("checked");
+  aplicarFiltrosVisuais();
+};
+
+function aplicarFiltrosVisuais() {
+  const celulas = document.querySelectorAll(".day-cell:not(.other-month)");
+
+  if (ESTADO.filtrosAtivos.size === 0) {
+    celulas.forEach((cel) =>
+      cel.classList.remove("hidden-by-filter", "highlight-filter")
+    );
+    return;
+  }
+
+  celulas.forEach((cel) => {
+    const dataISO = cel.getAttribute("data-iso");
+    const evento = ESTADO.dadosEventos[dataISO];
+    let match = false;
+
+    if (evento && evento.escalas) {
+      for (let esc of evento.escalas) {
+        const idLeit = esc.equipe_leitura?.id || esc.equipe_leitura_id;
+        const idCant = esc.equipe_canto?.id || esc.equipe_canto_id;
+        if (
+          ESTADO.filtrosAtivos.has(idLeit) ||
+          ESTADO.filtrosAtivos.has(idCant)
+        ) {
+          match = true;
+          break;
+        }
+      }
+    }
+
+    if (match) {
+      cel.classList.remove("hidden-by-filter");
+      cel.classList.add("highlight-filter");
+    } else {
+      cel.classList.add("hidden-by-filter");
+      cel.classList.remove("highlight-filter");
+    }
+  });
+}
+
+// ==========================================================================
+// 4. MODAL
 // ==========================================================================
 window.abrirModal = function (dataISO) {
   let evento = ESTADO.dadosEventos[dataISO];
 
-  // Mock para dia vazio (Criação)
   if (!evento) {
     evento = {
       id: null,
       data: dataISO,
-      titulo: "Sem Evento Cadastrado",
+      titulo: "Dia sem Evento",
       tempo_liturgico: "Paroquial",
       liturgia_cores: { hex_code: "#CCCCCC" },
       escalas: [],
@@ -152,7 +255,6 @@ window.abrirModal = function (dataISO) {
   const modalContent = document.getElementById("modalContent");
   const modalOverlay = document.getElementById("modalOverlay");
 
-  // Formatação Data
   const dataObj = new Date(dataISO + "T12:00:00");
   const diaNum = dataObj.getDate();
   const mesNome = dataObj
@@ -161,7 +263,6 @@ window.abrirModal = function (dataISO) {
     .replace(".", "");
   const diaSemana = dataObj.toLocaleString("pt-BR", { weekday: "long" });
 
-  // Cor
   let corHex = evento.liturgia_cores?.hex_code || "#ccc";
   let corTxt = corHex;
   if (corHex.toLowerCase() === "#ffffff") {
@@ -171,7 +272,6 @@ window.abrirModal = function (dataISO) {
 
   const conteudoHTML = gerarHTMLLeitura(evento);
 
-  // Botão Admin
   let btnAdmin = "";
   if (ESTADO.isAdmin) {
     btnAdmin = `<button id="btnEditar" class="btn-admin-action">🛠️ GERENCIAR AGENDA</button>`;
@@ -225,7 +325,7 @@ function gerarHTMLLeitura(evento) {
 }
 
 // ==========================================================================
-// 4. EDITOR (ADMIN)
+// 5. EDITOR (ADMIN)
 // ==========================================================================
 function ativarModoEdicao(evento) {
   const area = document.getElementById("areaConteudo");
@@ -235,41 +335,6 @@ function ativarModoEdicao(evento) {
   const tituloVal = evento.titulo || "Novo Evento";
   const tempoVal = evento.tempo_liturgico || "Paroquial";
   const corAtualId = evento.cor_id || evento.liturgia_cores?.id || 1;
-
-  // --- LÓGICA DE AGRUPAMENTO DE EQUIPES ---
-  // Separa as equipes por tipo para facilitar a escolha
-  const equipesLeitura = ESTADO.listaEquipes.filter(
-    (e) => e.tipo_atuacao === "Leitura" || e.tipo_atuacao === "Ambos"
-  );
-  const equipesCanto = ESTADO.listaEquipes.filter(
-    (e) => e.tipo_atuacao === "Canto" || e.tipo_atuacao === "Ambos"
-  );
-
-  // Função Helper para gerar options agrupados
-  const gerarOptions = (lista, selecionadoId) => {
-    let html = '<option value="">-- Selecione --</option>';
-    // Ordena alfabeticamente
-    lista.sort((a, b) => a.nome_equipe.localeCompare(b.nome_equipe));
-
-    lista.forEach((eq) => {
-      const sel = eq.id === selecionadoId ? "selected" : "";
-      // Adiciona uma dica visual se for 'Ambos'
-      const label =
-        eq.tipo_atuacao === "Ambos"
-          ? `${eq.nome_equipe} (Geral)`
-          : eq.nome_equipe;
-      html += `<option value="${eq.id}" ${sel}>${label}</option>`;
-    });
-    return html;
-  };
-
-  // Prepara HTML dos selects para passar para a função de linha
-  // IMPORTANTE: Vamos passar as listas cruas para a função gerarLinhaEditor gerar o HTML específico de cada linha
-  window.cacheEquipesLeitura = equipesLeitura; // Guarda temporariamente
-  window.cacheEquipesCanto = equipesCanto;
-
-  // ... (Resto do Formulário de Cabeçalho igual) ...
-  // Vou resumir aqui para focar na mudança:
 
   // Lista Tempos
   const tempos = [
@@ -292,7 +357,6 @@ function ativarModoEdicao(evento) {
   let htmlEditor = `
         <h3 style="color:var(--cor-vinho); margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:5px;">Editar Evento</h3>
         <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #e0e0e0; margin-bottom:15px;">
-            <!-- Inputs de Título, Cor, etc (Mantém igual) -->
             <label style="font-size:0.7rem; font-weight:bold; color:#888;">TÍTULO</label>
             <input type="text" id="editTitulo" value="${tituloVal}" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; font-weight:bold; font-size:1rem; margin-top:5px; margin-bottom:10px;">
             
@@ -360,12 +424,12 @@ function gerarLinhaEditor(escala, index) {
     ? escala.hora_celebracao.substring(0, 5)
     : "19:00";
 
-  // Função interna para gerar options baseado na lista correta
-  const buildOpts = (lista, selectedId) => {
+  // Helper para gerar options a partir do cache
+  const buildOpts = (lista, selId) => {
     let h = '<option value="">-- Selecione --</option>';
     lista.forEach((eq) => {
-      const sel = eq.id === selectedId ? "selected" : "";
-      h += `<option value="${eq.id}" ${sel}>${eq.nome_equipe}</option>`;
+      const s = eq.id === selId ? "selected" : "";
+      h += `<option value="${eq.id}" ${s}>${eq.nome_equipe}</option>`;
     });
     return h;
   };
@@ -379,42 +443,27 @@ function gerarLinhaEditor(escala, index) {
         <input type="time" class="edit-hora" value="${horaVal}" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; margin-bottom:10px; font-weight:bold;">
         <div style="display:grid; gap:10px;">
             <div><label style="font-size:0.7rem; font-weight:bold; color:#666;">LEITURA</label>
-            <!-- Usa a lista filtrada de Leitura -->
             <select class="edit-leitura" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
-                ${buildOpts(
-                  window.cacheEquipesLeitura || ESTADO.listaEquipes,
-                  idLeit
-                )}
+                ${buildOpts(cacheEquipesLeitura, idLeit)}
             </select></div>
-            
             <div><label style="font-size:0.7rem; font-weight:bold; color:#666;">CANTO</label>
-            <!-- Usa a lista filtrada de Canto -->
             <select class="edit-canto" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
-                ${buildOpts(
-                  window.cacheEquipesCanto || ESTADO.listaEquipes,
-                  idCant
-                )}
+                ${buildOpts(cacheEquipesCanto, idCant)}
             </select></div>
         </div>
     </div>`;
 }
 
-// Globais para botões HTML
 window.adicionarNovaEscala = function () {
   const lista = document.getElementById("listaEditor");
-  const nova = {
-    hora_celebracao: "19:00",
-    equipe_leitura_id: null,
-    equipe_canto_id: null,
-  };
   const div = document.createElement("div");
-  div.innerHTML = gerarLinhaEditor(nova, 999);
+  div.innerHTML = gerarLinhaEditor({ hora_celebracao: "19:00" }, 999);
   lista.appendChild(div.firstElementChild);
   div.firstElementChild.scrollIntoView({ behavior: "smooth" });
 };
 
 window.removerLinha = function (btn) {
-  if (confirm("Remover este horário?")) btn.closest(".editor-row").remove();
+  if (confirm("Remover?")) btn.closest(".editor-row").remove();
 };
 
 window.salvarEdicoes = async function () {
@@ -424,16 +473,15 @@ window.salvarEdicoes = async function () {
   const tipoEvento = document.getElementById("editTipo").value;
 
   if (!novoTitulo) {
-    alert("O evento precisa de um Título!");
+    alert("Informe o Título!");
     return;
   }
 
-  // Monta o objeto para salvar
   const dadosEvento = {
     id: eventoEmEdicao.id,
     data: eventoEmEdicao.data,
     titulo: novoTitulo,
-    tempo_liturgico: novoTempo, // Agora salva o tempo escolhido!
+    tempo_liturgico: novoTempo,
     cor_id: parseInt(novoCorId),
     is_solenidade: tipoEvento === "solenidade",
     is_festa: false,
@@ -445,37 +493,90 @@ window.salvarEdicoes = async function () {
     const hora = row.querySelector(".edit-hora").value;
     const leit = row.querySelector(".edit-leitura").value || null;
     const cant = row.querySelector(".edit-canto").value || null;
-
-    if (hora) {
+    if (hora)
       novasEscalas.push({
         hora_celebracao: hora,
         equipe_leitura_id: leit,
         equipe_canto_id: cant,
       });
-    }
   });
 
   try {
-    const area = document.getElementById("areaConteudo");
-    area.innerHTML =
-      '<div style="text-align:center; padding:40px; color:var(--cor-vinho); font-weight:bold;"><p>💾 Processando...</p></div>';
-
-    // Salva no Banco
+    document.getElementById("areaConteudo").innerHTML =
+      '<div style="text-align:center; padding:40px;">💾 Salvando...</div>';
     await window.api.salvarEventoCompleto(dadosEvento, novasEscalas);
-
-    alert("✅ Agenda atualizada com sucesso!");
+    alert("✅ Salvo com sucesso!");
     fecharModalForce();
-    // Recarrega o grid para refletir o novo título e cor imediatamente
     carregarMes(ESTADO.anoAtual, ESTADO.mesAtual);
   } catch (err) {
-    alert("Erro ao salvar: " + err.message);
+    alert("Erro: " + err.message);
     console.error(err);
     fecharModalForce();
   }
 };
 
 // ==========================================================================
-// 5. UTILS
+// 6. RELATÓRIO DE IMPRESSÃO
+// ==========================================================================
+window.prepararImpressao = function () {
+  const tbody = document.getElementById("print-table-body");
+  const title = document.getElementById("print-month-title");
+
+  title.textContent = document.querySelector(".month-name").textContent;
+  tbody.innerHTML = "";
+
+  // Ordena
+  const listaEventos = Object.values(ESTADO.dadosEventos).sort((a, b) =>
+    a.data.localeCompare(b.data)
+  );
+
+  let html = "";
+  listaEventos.forEach((ev) => {
+    // Verifica Filtro: Se o dia está oculto pelo filtro, não imprime
+    // (Mas como o filtro é visual, aqui checamos se o filtro está ativo)
+    // Se quisermos imprimir SÓ o filtrado, precisamos replicar a lógica do filtro aqui.
+    // Para V1, vamos imprimir TUDO que tem escala.
+
+    if ((!ev.escalas || ev.escalas.length === 0) && !ev.is_solenidade) return;
+
+    const dateObj = new Date(ev.data + "T12:00:00");
+    const dia = dateObj.getDate().toString().padStart(2, "0");
+    const sem = dateObj
+      .toLocaleString("pt-BR", { weekday: "short" })
+      .toUpperCase();
+
+    let escalasHTML = "";
+    if (ev.escalas && ev.escalas.length > 0) {
+      ev.escalas.forEach((esc) => {
+        const hora = esc.hora_celebracao.substring(0, 5);
+        const leit = esc.equipe_leitura?.nome_equipe || "-";
+        const cant = esc.equipe_canto?.nome_equipe || "-";
+        escalasHTML += `
+                <div class="print-escala-row">
+                    <span class="print-hora">${hora}</span>
+                    <span class="print-equipes"><strong>📖 ${leit}</strong> • 🎵 ${cant}</span>
+                </div>`;
+      });
+    } else {
+      escalasHTML =
+        '<span style="color:#999; font-style:italic">Sem escalas</span>';
+    }
+
+    const rowClass = ev.is_solenidade ? "row-solenidade" : "";
+    html += `
+        <tr class="${rowClass}">
+            <td class="col-data"><span class="dia-grande">${dia}</span><span class="dia-sem">${sem}</span></td>
+            <td class="col-evento"><div class="print-titulo">${ev.titulo}</div><div class="print-liturgia">${ev.tempo_liturgico}</div></td>
+            <td class="col-escalas">${escalasHTML}</td>
+        </tr>`;
+  });
+
+  tbody.innerHTML = html;
+  setTimeout(() => window.print(), 300);
+};
+
+// ==========================================================================
+// 7. UTILS
 // ==========================================================================
 function adicionarBotaoLogout() {
   const header = document.querySelector("header");
@@ -520,243 +621,3 @@ window.fecharModalForce = () => {
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") fecharModalForce();
 });
-// ==========================================================================
-// 6. MÓDULO DE FILTROS & SIDEBAR
-// Gerencia a renderização dos checkboxes e a lógica visual de filtragem
-// ==========================================================================
-
-/**
- * Inicializa a Sidebar de Filtros
- * Busca as equipes no banco (se necessário) e cria os checkboxes dinamicamente.
- * Deve ser chamado no DOMContentLoaded.
- */
-async function inicializarSidebar() {
-  const containerEquipes = document.getElementById("filtro-equipes");
-  if (!containerEquipes) return;
-
-  // Carrega Equipes
-  if (ESTADO.listaEquipes.length === 0) {
-    ESTADO.listaEquipes = await window.api.listarEquipes();
-  }
-
-  containerEquipes.innerHTML = ""; // Limpa loading
-
-  // Título
-  const h3 = document.createElement("h3");
-  h3.innerText = "FILTRAR POR EQUIPE";
-  containerEquipes.appendChild(h3);
-
-  // Item "Todas"
-  const divAll = document.createElement("div");
-  divAll.className = "filter-item";
-  divAll.onclick = () => window.limparFiltros();
-  divAll.innerHTML = `<span class="checkbox-custom checked" id="check-all"></span> <strong>TODAS AS EQUIPES</strong>`;
-  containerEquipes.appendChild(divAll);
-
-  // Items Dinâmicos
-  ESTADO.listaEquipes.forEach((eq) => {
-    const div = document.createElement("div");
-    div.className = "filter-item";
-
-    // BIND SEGURO DO CLIQUE
-    div.addEventListener("click", function () {
-      window.toggleFiltro(eq.id, this);
-    });
-
-    div.innerHTML = `<span class="checkbox-custom" data-id="${eq.id}"></span> ${eq.nome_equipe}`;
-    containerEquipes.appendChild(div);
-  });
-}
-if (ESTADO.listaEquipes.length === 0) {
-  containerEquipes.innerHTML =
-    '<div style="padding:10px;">Nenhuma equipe cadastrada.</div>';
-  return;
-}
-
-// 2. Renderiza
-let html = `<h3>FILTRAR POR EQUIPE</h3>
-        <div class="filter-item" onclick="limparFiltros()">
-            <span class="checkbox-custom checked" id="check-all"></span> <strong>TODAS AS EQUIPES</strong>
-        </div>`;
-
-ESTADO.listaEquipes.forEach((eq) => {
-  html += `
-        <div class="filter-item" onclick="window.toggleFiltro(${eq.id}, this)">
-            <span class="checkbox-custom" data-id="${eq.id}"></span> ${eq.nome_equipe}
-        </div>`;
-});
-
-containerEquipes.innerHTML = html;
-console.log("🎨 Sidebar renderizada com sucesso.");
-
-/**
- * Alterna o estado de um filtro específico (Liga/Desliga)
- * @param {number} equipeId - ID da equipe clicada
- * @param {HTMLElement} divElement - O elemento HTML clicado (para mudar classe visual)
- */
-window.toggleFiltro = function (equipeId, divElement) {
-  const check = divElement.querySelector(".checkbox-custom");
-  const checkAll = document.getElementById("check-all");
-
-  // Lógica de Toggle
-  if (ESTADO.filtrosAtivos.has(equipeId)) {
-    ESTADO.filtrosAtivos.delete(equipeId); // Remove do Set
-    check.classList.remove("checked");
-  } else {
-    ESTADO.filtrosAtivos.add(equipeId); // Adiciona ao Set
-    check.classList.add("checked");
-  }
-
-  // Lógica do Checkbox "Todas"
-  // Se nenhum filtro específico estiver ativo, "Todas" fica marcado visualmente
-  if (ESTADO.filtrosAtivos.size === 0) {
-    checkAll.classList.add("checked");
-  } else {
-    checkAll.classList.remove("checked");
-  }
-
-  // Aplica as mudanças no Grid
-  aplicarFiltrosVisuais();
-};
-
-/**
- * Limpa todos os filtros ativos (Reseta para "Ver Tudo")
- */
-window.limparFiltros = function () {
-  ESTADO.filtrosAtivos.clear();
-
-  // Reseta visualmente todos os checkboxes
-  document.querySelectorAll(".filter-item .checkbox-custom").forEach((el) => {
-    if (el.id !== "check-all") el.classList.remove("checked");
-  });
-
-  // Marca o "Todas"
-  const checkAll = document.getElementById("check-all");
-  if (checkAll) checkAll.classList.add("checked");
-
-  aplicarFiltrosVisuais();
-};
-
-/**
- * Percorre o Grid do Calendário e aplica classes CSS
- * Esconde dias que não correspondem aos filtros ativos
- */
-function aplicarFiltrosVisuais() {
-  const celulas = document.querySelectorAll(".day-cell:not(.other-month)");
-
-  // Sem filtro = mostra tudo
-  if (ESTADO.filtrosAtivos.size === 0) {
-    celulas.forEach((cel) => {
-      cel.classList.remove("hidden-by-filter", "highlight-filter");
-    });
-    return;
-  }
-
-  // Com filtro
-  celulas.forEach((cel) => {
-    // JEITO SEGURO: Ler do data-attribute
-    const dataISO = cel.getAttribute("data-iso");
-    const evento = ESTADO.dadosEventos[dataISO];
-    let match = false;
-
-    if (evento && evento.escalas) {
-      for (let esc of evento.escalas) {
-        const idLeit = esc.equipe_leitura?.id || esc.equipe_leitura_id;
-        const idCant = esc.equipe_canto?.id || esc.equipe_canto_id;
-
-        if (
-          ESTADO.filtrosAtivos.has(idLeit) ||
-          ESTADO.filtrosAtivos.has(idCant)
-        ) {
-          match = true;
-          break;
-        }
-      }
-    }
-
-    if (match) {
-      cel.classList.remove("hidden-by-filter");
-      cel.classList.add("highlight-filter");
-    } else {
-      cel.classList.add("hidden-by-filter");
-      cel.classList.remove("highlight-filter");
-    }
-  });
-}
-
-// ==========================================================================
-// 7. GERADOR DE RELATÓRIO DE IMPRESSÃO (LISTA A4)
-// ==========================================================================
-
-window.prepararImpressao = function () {
-  const tbody = document.getElementById("print-table-body");
-  const title = document.getElementById("print-month-title");
-
-  // Atualiza título com o mês atual
-  title.textContent = document.querySelector(".month-name").textContent;
-  tbody.innerHTML = ""; // Limpa anterior
-
-  // 1. Pega todos os eventos e ordena por data
-  const listaEventos = Object.values(ESTADO.dadosEventos).sort((a, b) =>
-    a.data.localeCompare(b.data)
-  );
-
-  let html = "";
-
-  // 2. Monta as linhas da tabela
-  listaEventos.forEach((ev) => {
-    // Pula dias sem escalas e sem título relevante (opcional, mas limpa o papel)
-    if ((!ev.escalas || ev.escalas.length === 0) && !ev.is_solenidade) return;
-
-    // Formata Data
-    const dateObj = new Date(ev.data + "T12:00:00");
-    const dia = dateObj.getDate().toString().padStart(2, "0");
-    const sem = dateObj
-      .toLocaleString("pt-BR", { weekday: "short" })
-      .toUpperCase();
-
-    // Formata Escalas (Lista Vertical na célula)
-    let escalasHTML = "";
-    if (ev.escalas && ev.escalas.length > 0) {
-      ev.escalas.forEach((esc) => {
-        const hora = esc.hora_celebracao.substring(0, 5);
-        const leit = esc.equipe_leitura?.nome_equipe || "-";
-        const cant = esc.equipe_canto?.nome_equipe || "-";
-
-        escalasHTML += `
-                <div class="print-escala-row">
-                    <span class="print-hora">${hora}</span>
-                    <span class="print-equipes">
-                        <strong>📖 ${leit}</strong> • 🎵 ${cant}
-                    </span>
-                </div>`;
-      });
-    } else {
-      escalasHTML =
-        '<span style="color:#999; font-style:italic">Sem escalas cadastradas</span>';
-    }
-
-    // Estilo especial para Solenidades
-    const rowClass = ev.is_solenidade ? "row-solenidade" : "";
-
-    html += `
-        <tr class="${rowClass}">
-            <td class="col-data">
-                <span class="dia-grande">${dia}</span>
-                <span class="dia-sem">${sem}</span>
-            </td>
-            <td class="col-evento">
-                <div class="print-titulo">${ev.titulo}</div>
-                <div class="print-liturgia">${ev.tempo_liturgico}</div>
-            </td>
-            <td class="col-escalas">
-                ${escalasHTML}
-            </td>
-        </tr>`;
-  });
-
-  tbody.innerHTML = html;
-
-  // 3. Chama a impressão nativa
-  setTimeout(() => window.print(), 300); // Pequeno delay para renderizar DOM
-};
