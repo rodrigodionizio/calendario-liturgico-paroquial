@@ -516,50 +516,53 @@ document.addEventListener("keydown", (e) => {
  * Deve ser chamado no DOMContentLoaded.
  */
 async function inicializarSidebar() {
+  console.log("🔄 Iniciando Sidebar...");
+
   const containerEquipes = document.getElementById("filtro-equipes");
 
-  // Segurança: Se o elemento não existir no HTML, aborta para não dar erro
   if (!containerEquipes) {
-    console.warn("Elemento #filtro-equipes não encontrado na Sidebar.");
+    console.error(
+      "❌ ERRO CRÍTICO: Elemento #filtro-equipes não encontrado no HTML!"
+    );
     return;
   }
 
-  // 1. Carrega Equipes do Banco (se ainda não estiverem em memória)
+  // 1. Carrega Equipes
   if (ESTADO.listaEquipes.length === 0) {
     try {
-      // Exibe estado de carregamento
-      containerEquipes.innerHTML =
-        '<div style="padding:10px; color:#888;">Carregando...</div>';
+      console.log("📡 Buscando equipes no banco...");
       ESTADO.listaEquipes = await window.api.listarEquipes();
+      console.log(`✅ Equipes carregadas: ${ESTADO.listaEquipes.length}`);
     } catch (err) {
       containerEquipes.innerHTML =
-        '<div style="color:red; font-size:0.8rem;">Erro ao carregar equipes.</div>';
-      console.error("Erro Sidebar:", err);
+        '<div style="color:red; font-size:0.8rem;">Erro ao conectar.</div>';
+      console.error("Erro API Equipes:", err);
       return;
     }
   }
 
-  // 2. Renderiza o Cabeçalho e a Opção "Todas"
-  let html = `
-        <h3 style="margin-bottom:10px;">FILTRAR POR EQUIPE</h3>
+  if (ESTADO.listaEquipes.length === 0) {
+    containerEquipes.innerHTML =
+      '<div style="padding:10px;">Nenhuma equipe cadastrada.</div>';
+    return;
+  }
+
+  // 2. Renderiza
+  let html = `<h3>FILTRAR POR EQUIPE</h3>
         <div class="filter-item" onclick="limparFiltros()">
-            <span class="checkbox-custom checked" id="check-all"></span> 
-            <strong>TODAS AS EQUIPES</strong>
+            <span class="checkbox-custom checked" id="check-all"></span> <strong>TODAS AS EQUIPES</strong>
         </div>`;
 
-  // 3. Renderiza Checkboxes Dinâmicos para cada Equipe
-  // Usamos onclick inline chamando window.toggleFiltro para garantir o bind correto
   ESTADO.listaEquipes.forEach((eq) => {
     html += `
         <div class="filter-item" onclick="window.toggleFiltro(${eq.id}, this)">
-            <span class="checkbox-custom" data-id="${eq.id}"></span> 
-            ${eq.nome_equipe}
+            <span class="checkbox-custom" data-id="${eq.id}"></span> ${eq.nome_equipe}
         </div>`;
   });
 
   containerEquipes.innerHTML = html;
+  console.log("🎨 Sidebar renderizada com sucesso.");
 }
-
 /**
  * Alterna o estado de um filtro específico (Liga/Desliga)
  * @param {number} equipeId - ID da equipe clicada
