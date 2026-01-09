@@ -47,8 +47,51 @@
         <!-- Mockup de Mini Calendário -->
         <div class="mini-calendar">Mini Calendar</div>
 
-        <!-- Botão de Ação -->
-        <button onclick="prepararImpressao()" ...>🖨️ IMPRIMIR LISTA</button>
+        <!-- Botão de Impressão (Estilo Oficial) -->
+        <div class="filter-group" style="margin-top: 20px">
+          <button
+            onclick="prepararImpressao()"
+            style="
+              width: 100%;
+              padding: 12px;
+              background-color: var(--cor-vinho);
+              color: #fff;
+              border: none;
+              border-radius: 8px;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 10px;
+              font-family: 'AntennaCond', sans-serif;
+              font-weight: bold;
+              font-size: 1rem;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+              transition: transform 0.2s;
+            "
+            onmouseover="this.style.transform='translateY(-2px)'"
+            onmouseout="this.style.transform='translateY(0)'"
+          >
+            <!-- Ícone Impressora SVG -->
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path
+                d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"
+              ></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            IMPRIMIR LISTA
+          </button>
+        </div>
 
         <!-- ÁREA DINÂMICA DE FILTROS (EQUIPES) -->
         <!-- O JS busca no banco e injeta os checkboxes aqui -->
