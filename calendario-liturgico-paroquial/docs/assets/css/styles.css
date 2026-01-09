@@ -1,0 +1,321 @@
+/* --- 1. IMPORTAÇÃO DE FONTES LOCAIS (.otf) --- */
+
+/* Texto Normal (Regular) */
+@font-face {
+  font-family: "AntennaCond";
+  src: url("../fonts/antennacond.otf") format("opentype");
+  font-weight: 400; /* Normal */
+  font-style: normal;
+}
+
+/* Texto Itálico */
+@font-face {
+  font-family: "AntennaCond";
+  src: url("../fonts/antennacond-italic.otf") format("opentype");
+  font-weight: 400;
+  font-style: italic;
+}
+
+/* Negrito (Bold) */
+@font-face {
+  font-family: "AntennaCond";
+  src: url("../fonts/antennacond-bold.otf") format("opentype");
+  font-weight: 700; /* Bold */
+  font-style: normal;
+}
+
+/* Títulos Pesados (Black) - Usaremos no lugar da Neulis por enquanto */
+@font-face {
+  font-family: "AntennaCond";
+  src: url("../fonts/antennacond-black.otf") format("opentype");
+  font-weight: 900; /* Extra Bold */
+  font-style: normal;
+}
+
+/* Fonte Leve (Light) - Para detalhes finos */
+@font-face {
+  font-family: "AntennaCond";
+  src: url("../fonts/antennacond-light.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+}
+
+/* --- 2. VARIÁVEIS DO SISTEMA (Atualizadas) --- */
+:root {
+  /* ... (Mantenha as cores iguais ao anterior) ... */
+  --cor-cereja: #c82038;
+  --cor-vinho: #a41d31;
+  --cor-dourado: #fbb558;
+  --cor-bege: #fceccb;
+  --text-primary: #2c0e12;
+
+  /* DEFINIÇÃO DAS FONTES */
+  /* Como não temos a Neulis, usaremos a Antenna Black para títulos */
+  --font-titulo: "AntennaCond", sans-serif;
+  --font-texto: "AntennaCond", sans-serif;
+
+  /* Configuração de Peso das Fontes */
+  --weight-titulo: 900; /* Black */
+  --weight-texto: 400; /* Regular */
+}
+
+/* Ajuste global para garantir que títulos fiquem grossos */
+h1,
+h2,
+h3,
+.brand-font {
+  font-family: var(--font-titulo);
+  font-weight: var(--weight-titulo);
+  text-transform: uppercase;
+}
+/* --- CONTROLE DE IMAGENS (RESPONSIVIDADE) --- */
+
+/* Regra Geral: Imagem nunca pode vazar do pai */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block; /* Remove espaços fantasmas abaixo da imagem */
+}
+
+/* 1. LOGO DO CABEÇALHO (Header) */
+/* Estratégia: Limitamos pela ALTURA, já que o header é uma faixa horizontal */
+.header-logo {
+  /* Trava a altura máxima. Mesmo que a img tenha 5000px, 
+       o navegador vai renderizá-la com 70px de altura */
+  max-height: 70px;
+
+  /* A largura se ajusta automaticamente para não distorcer */
+  width: auto;
+
+  /* Garante que a imagem fique centralizada e contida */
+  margin: 0 auto;
+  object-fit: contain;
+}
+header {
+  background-color: var(--cor-vinho); /* Garante o fundo vermelho */
+  width: 100%;
+  min-height: 100px; /* Força uma altura mínima para aparecer */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 5px solid var(--cor-dourado);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  padding: 15px 0;
+  margin-bottom: 30px;
+}
+
+.header-logo {
+  max-height: 70px; /* Tamanho da logo */
+  width: auto;
+  display: block;
+  /* Se a imagem quebrar, isso ajuda a debugar */
+  min-width: 50px;
+  min-height: 50px;
+}
+/* 2. CONTEUDO (card_dia) */
+.card-dia {
+  background-color: #ffffff; /* Fundo Branco */
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra */
+  display: flex;
+  overflow: hidden;
+}
+
+/* 4. LOGO DO RODAPÉ (Footer) */
+/* Estratégia: Limitamos pela LARGURA, para não ficar gigante no final da página */
+.footer-logo {
+  /* Trava a largura máxima. */
+  max-width: 180px;
+
+  height: auto;
+  margin-bottom: 15px;
+
+  /* Opacidade para ficar elegante no fundo escuro */
+  opacity: 0.9;
+}
+
+/* 3. CLASSE UTILITÁRIA (Para imagens dentro de textos ou cards) */
+.img-ajustada {
+  width: 100%;
+  height: 200px; /* Altura fixa para cards */
+  object-fit: cover; /* Aqui sim fazemos o CORTE (Crop) inteligente para preencher */
+  border-radius: 8px;
+}
+
+/* 
+ * --- CLASSES DE CORES LITÚRGICAS --- 
+ * Estas classes serão adicionadas via JavaScript nos cards
+ */
+
+/* 1. Para pintar o fundo da faixa lateral e badges */
+.bg-liturgia-verde {
+  background-color: var(--liturgia-verde);
+}
+
+.bg-liturgia-roxo {
+  background-color: var(--liturgia-roxo);
+}
+
+.bg-liturgia-vermelho {
+  background-color: var(--liturgia-vermelho);
+}
+
+.bg-liturgia-rosa {
+  background-color: var(--liturgia-rosa);
+}
+
+.bg-liturgia-branco {
+  background-color: var(--liturgia-branco);
+  /* O branco precisa de uma borda sutil para não sumir no fundo claro */
+  border-right: 1px solid #e0e0e0;
+}
+
+/* 2. Para pintar textos de destaque (ex: Nome do Tempo Litúrgico) */
+.txt-liturgia-verde {
+  color: var(--liturgia-verde);
+}
+.txt-liturgia-roxo {
+  color: var(--liturgia-roxo);
+}
+.txt-liturgia-vermelho {
+  color: var(--liturgia-vermelho);
+}
+.txt-liturgia-rosa {
+  color: var(--liturgia-rosa);
+}
+/* Branco não usamos em texto sobre fundo claro, usamos cinza ou o vinho padrão */
+.txt-liturgia-branco {
+  color: #757575;
+}
+
+/* 3. Classe especial para dias de Solenidade (Ouro/Dourado da marca) */
+.bg-liturgia-dourado {
+  background-color: var(--cor-dourado);
+}
+
+/* --- ESTILOS DO RODAPÉ (FOOTER) --- */
+
+.main-footer {
+  background-color: var(--cor-vinho);
+  color: var(--cor-bege);
+  padding-top: 50px;
+  padding-bottom: 20px;
+  border-top: 5px solid var(--cor-dourado);
+  margin-top: 40px;
+}
+
+.footer-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: grid;
+  /* Grid Responsivo: Cria colunas que se ajustam auto, min 250px */
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+  text-align: left;
+}
+
+/* Coluna Individual */
+.footer-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-heading {
+  color: var(--cor-dourado);
+  font-size: 1.1rem;
+  border-bottom: 1px solid rgba(251, 181, 88, 0.3);
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.footer-col p {
+  margin: 5px 0;
+  font-size: 0.95rem;
+  color: #fff8e7; /* Bege */
+}
+
+.footer-subtitle {
+  font-style: italic;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.footer-divider {
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.1);
+  margin: 10px 0;
+}
+
+.destaque-atendimento {
+  color: var(--cor-dourado) !important;
+  font-weight: bold;
+}
+.destaque-atendimento span {
+  font-weight: normal;
+  color: var(--cor-bege);
+}
+
+/* Link WhatsApp (Estilo Botão) */
+.btn-whatsapp {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--cor-bege);
+  text-decoration: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  margin-bottom: 15px;
+  width: fit-content;
+}
+
+.btn-whatsapp:hover {
+  background-color: #25d366; /* Verde Oficial Zap */
+  color: #fff;
+  border-color: #25d366;
+  transform: translateX(5px);
+}
+
+/* Ícones Sociais */
+.social-links {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.social-links a {
+  color: var(--cor-bege);
+  transition: transform 0.2s, color 0.2s;
+}
+
+.social-links a:hover {
+  color: var(--cor-dourado);
+  transform: scale(1.1);
+}
+
+.footer-copyright {
+  text-align: center;
+  font-size: 0.8rem;
+  opacity: 0.6;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Ajuste Mobile: Centralizar tudo se a tela for pequena */
+@media (max-width: 768px) {
+  .footer-container {
+    text-align: center;
+  }
+  .footer-col {
+    align-items: center;
+  }
+  .header-logo {
+    margin: 0 auto;
+  }
+}
+/* --- FIM DO ARQUIVO DE ESTILOS PERSONALIZADOS --- */
