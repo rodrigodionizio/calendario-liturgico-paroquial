@@ -154,51 +154,64 @@ img {
 }
 
 .card-conteudo {
-  padding: 20px;
+  padding: 15px; /* Reduzi de 20px para 15px para ganhar espaço */
   width: 100%;
 }
 
 .card-data {
-  border-bottom: 1px solid var(--cor-bege);
-  padding-bottom: 8px;
-  margin-bottom: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  /* Ajuste fino para não ficar grudado */
-  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05); /* Linha mais sutil */
+  padding-bottom: 5px;
+  margin-bottom: 8px;
+  /* Fonte um pouco menor para a data não brigar com o evento */
+  font-size: 0.95rem;
 }
 
 .card-evento-nome {
-  font-size: 1.1rem;
+  font-size: 1.05rem; /* Levemente menor */
   color: var(--text-primary);
-  margin-bottom: 15px;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
 }
 
-/* Tabela de Escalas */
-.table-escala {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.95rem;
-}
+/* Tabela Compacta */
 .table-escala td {
-  padding: 8px 4px;
+  padding: 4px 4px; /* Bem menos padding vertical */
   border-bottom: 1px dashed #eee;
-  vertical-align: top; /* Alinha texto no topo */
-}
-.table-escala tr:last-child td {
-  border-bottom: none;
+  vertical-align: top;
 }
 
-.badge-funcao {
-  background-color: var(--cor-bege);
-  color: var(--cor-vinho);
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-weight: bold;
-  font-size: 0.85rem;
+/* Nova classe para alinhar Rótulo + Valor na mesma linha visual */
+.escala-row {
+  font-size: 0.9rem;
+  margin-bottom: 2px;
+  line-height: 1.3;
+  display: flex;
+  align-items: baseline; /* Alinha o texto pela base das letras */
+  gap: 5px;
+}
+
+.escala-row span {
+  color: #666; /* Cor cinza para o rótulo "Leitores:" tirar o peso */
+  font-size: 0.8rem;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 95px; /* Garante alinhamento vertical dos dois pontos */
+}
+
+.escala-row strong {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+/* Badge de Horário mais discreto */
+.badge-funcao {
+  background-color: #f0f0f0; /* Cinza bem claro em vez de bege forte */
+  color: #555;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.75rem;
+  border: 1px solid #ddd;
 }
 
 /* --- 8. CLASSES LITÚRGICAS (Utilitárias) --- */
