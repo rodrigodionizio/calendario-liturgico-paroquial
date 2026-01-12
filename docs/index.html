@@ -258,37 +258,38 @@
          ÁREA DE IMPRESSÃO (RELATÓRIO OCULTO)
     ========================================================================== -->
     <div id="relatorio-impressao" class="print-only">
-      <header class="pdf-header">
+      <header class="print-header">
+        <!-- Logo Circular -->
         <img
           src="assets/img/logo-paroquia-colorida.png"
           alt="Logo"
-          class="pdf-logo-img"
+          class="print-logo-circ"
         />
-        <div class="pdf-info">
+        <div class="print-info">
           <h1>Paróquia Senhor Bom Jesus</h1>
           <h2>Agenda Pastoral & Litúrgica</h2>
         </div>
-        <div class="pdf-mes-ano">
-          <h3 id="print-month-name">Janeiro</h3>
-          <span id="print-year">2026</span>
+        <div class="print-mes">
+          <h3 id="print-month-name">JANEIRO</h3>
+          <span id="print-year-val">2026</span>
         </div>
       </header>
 
-      <table class="pdf-table">
+      <table class="print-table">
         <thead>
           <tr>
-            <th>Data</th>
-            <th>Hora</th>
-            <th>Evento / Liturgia</th>
-            <th>Detalhes / Equipes</th>
+            <th width="12%">Data</th>
+            <th width="10%">Hora</th>
+            <th width="40%">Evento / Liturgia</th>
+            <th width="38%">Detalhes / Equipes</th>
           </tr>
         </thead>
         <tbody id="print-table-body">
-          <!-- Injetado via JS -->
+          <!-- Injetado pelo JS -->
         </tbody>
       </table>
 
-      <footer class="pdf-footer">
+      <footer class="print-footer">
         <span
           >Gerado pelo Sistema Sacristia Digital • Paróquia Senhor Bom
           Jesus</span

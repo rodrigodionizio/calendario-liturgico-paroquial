@@ -737,100 +737,148 @@ window.salvarEdicoes = async function () {
 // ==========================================================================
 // 7. RELATÓRIO PDF
 // ==========================================================================
+/**
+ * FUNÇÃO: prepararImpressao
+ * DESCRIÇÃO: Converte os dados do calendário em uma lista cronológica elegante
+ * para impressão em papel A4, seguindo a identidade visual oficial.
+ */
 window.prepararImpressao = function () {
+  // 1. Captura de Elementos do DOM do Relatório Oculto
   const tbody = document.getElementById("print-table-body");
-  const printMonth = document.getElementById("print-month-name");
-  const printYear = document.getElementById("print-year");
+  const monthName = document.getElementById("print-month-name");
+  const yearVal = document.getElementById("print-year-val");
+  const footerDate = document.getElementById("print-footer-date");
 
-  // Configura Cabeçalho do PDF
+  if (!tbody) {
+    console.error("Erro: Container de impressão não encontrado.");
+    return;
+  }
+
+  // 2. Configurações de Cabeçalho e Rodapé do Relatório
+  // Pega o nome do mês e ano do ESTADO global do app
   const dataRef = new Date(ESTADO.anoAtual, ESTADO.mesAtual - 1);
-  printMonth.textContent = dataRef
+  monthName.textContent = dataRef
     .toLocaleString("pt-BR", { month: "long" })
     .toUpperCase();
-  printYear.textContent = ESTADO.anoAtual;
-  document.getElementById("print-footer-date").textContent =
-    new Date().toLocaleDateString();
+  yearVal.textContent = ESTADO.anoAtual;
 
+  // Data da geração do documento (no rodapé)
+  footerDate.textContent = new Date().toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  // 3. Limpeza de dados antigos e Ordenação Cronológica
   tbody.innerHTML = "";
   const listaEventos = Object.values(ESTADO.dadosEventos).sort((a, b) =>
     a.data.localeCompare(b.data)
   );
 
-  listaEventos.forEach((ev) => {
-    const dateObj = new Date(ev.data + "T12:00:00");
-    const dia = dateObj.getDate().toString().padStart(2, "0");
-    const sem = dateObj
+  // 4. Processamento dos Eventos
+  listaEventos.forEach((evento) => {
+    // Ignora dias vazios ou sem título
+    if (!evento.titulo) return;
+
+    const dataObj = new Date(evento.data + "T12:00:00");
+    const diaNum = dataObj.getDate().toString().padStart(2, "0");
+    const diaSem = dataObj
       .toLocaleString("pt-BR", { weekday: "short" })
-      .toUpperCase();
+      .toUpperCase()
+      .replace(".", "");
 
-    // Se for Liturgia com múltiplas escalas
-    if (
-      ev.tipo_compromisso === "liturgia" &&
-      ev.escalas &&
-      ev.escalas.length > 0
-    ) {
-      ev.escalas.forEach((esc, idx) => {
-        const tr = document.createElement("tr");
-        if (ev.is_solenidade) tr.className = "row-solenidade";
+    /**
+     * LÓGICA DE ESCALAS:
+     * Se for Liturgia, verificamos as 'escalas' (múltiplos horários).
+     * Se for Reunião/Evento, criamos uma escala fake para manter o padrão de loop.
+     */
+    const subEventos =
+      evento.tipo_compromisso === "liturgia" &&
+      evento.escalas &&
+      evento.escalas.length > 0
+        ? evento.escalas
+        : [null];
 
-        tr.innerHTML = `
-                    <td class="col-data">${
-                      idx === 0
-                        ? `<span class="dia-grande">${dia}</span><span class="dia-sem">${sem}</span>`
-                        : ""
-                    }</td>
-                    <td class="col-hora">${esc.hora_celebracao.substring(
-                      0,
-                      5
-                    )}</td>
-                    <td class="col-evento">
-                        <div class="evento-titulo">${ev.titulo}</div>
-                        <span class="evento-tipo ${
-                          ev.is_solenidade ? "tipo-solenidade" : ""
-                        }">Liturgia</span>
-                    </td>
-                    <td class="col-detalhes">
-                        <div class="detalhe-row">📖 <strong>${
-                          esc.equipe_leitura?.nome_equipe || "-"
-                        }</strong></div>
-                        <div class="detalhe-row">🎵 <strong>${
-                          esc.equipe_canto?.nome_equipe || "-"
-                        }</strong></div>
-                    </td>
-                `;
-        tbody.appendChild(tr);
-      });
-    } else {
-      // Evento Único (Reunião, Atendimento, etc)
+    subEventos.forEach((escala, index) => {
       const tr = document.createElement("tr");
-      const h = ev.hora_inicio
-        ? ev.hora_inicio.substring(0, 5)
-        : ev.escalas?.[0]?.hora_celebracao?.substring(0, 5) || "--:--";
 
-      tr.innerHTML = `
-                <td class="col-data"><span class="dia-grande">${dia}</span><span class="dia-sem">${sem}</span></td>
-                <td class="col-hora">${h}</td>
-                <td class="col-evento">
-                    <div class="evento-titulo">${ev.titulo}</div>
-                    <span class="evento-tipo">${ev.tipo_compromisso.toUpperCase()}</span>
-                </td>
-                <td class="col-detalhes">
-                    ${
-                      ev.local
-                        ? `<div class="detalhe-row">📍 ${ev.local}</div>`
-                        : ""
-                    }
-                    ${
-                      ev.responsavel
-                        ? `<div class="detalhe-row">👤 ${ev.responsavel}</div>`
-                        : ""
-                    }
-                </td>
+      // Aplica classe especial se for Solenidade (destaque amarelado do preview)
+      if (evento.is_solenidade) tr.className = "row-solenidade";
+
+      // --- COLUNA 1: DATA ---
+      // Só exibe a data no primeiro horário do dia para não poluir visualmente
+      const tdData = document.createElement("td");
+      tdData.className = "col-data";
+      if (index === 0) {
+        tdData.innerHTML = `
+                    <span class="dia-grande">${diaNum}</span>
+                    <span class="dia-sem">${diaSem}</span>
+                `;
+      }
+      tr.appendChild(tdData);
+
+      // --- COLUNA 2: HORA ---
+      const tdHora = document.createElement("td");
+      tdHora.className = "col-hora";
+      // Pega hora da escala ou do campo hora_inicio (agenda total)
+      const horaShow = escala
+        ? escala.hora_celebracao.substring(0, 5)
+        : evento.hora_inicio
+        ? evento.hora_inicio.substring(0, 5)
+        : "--:--";
+      tdHora.innerHTML = `<strong>${horaShow}</strong>`;
+      tr.appendChild(tdHora);
+
+      // --- COLUNA 3: EVENTO ---
+      const tdEvento = document.createElement("td");
+      tdEvento.className = "col-evento";
+      const labelTipo = evento.is_solenidade
+        ? "Solenidade"
+        : evento.tipo_compromisso || "Evento";
+      tdEvento.innerHTML = `
+                <div class="print-titulo">${evento.titulo}</div>
+                <span class="print-tipo ${
+                  evento.is_solenidade ? "tipo-solenidade" : ""
+                }">${labelTipo}</span>
             `;
+      tr.appendChild(tdEvento);
+
+      // --- COLUNA 4: DETALHES / EQUIPES ---
+      const tdDetalhes = document.createElement("td");
+      tdDetalhes.className = "col-detalhes";
+
+      if (escala) {
+        // Layout para Missas (Leitura e Canto com ícones simulados)
+        tdDetalhes.innerHTML = `
+                    <div class="print-escala-row">📖 <strong>${
+                      escala.equipe_leitura?.nome_equipe || "A definir"
+                    }</strong></div>
+                    <div class="print-escala-row">🎵 <strong>${
+                      escala.equipe_canto?.nome_equipe || "A definir"
+                    }</strong></div>
+                `;
+      } else {
+        // Layout para Reuniões e Outros (Local e Responsável)
+        tdDetalhes.innerHTML = `
+                    <div class="print-escala-row">📍 ${
+                      evento.local || "Não informado"
+                    }</div>
+                    <div class="print-escala-row">👤 ${
+                      evento.responsavel || "Paróquia"
+                    }</div>
+                `;
+      }
+      tr.appendChild(tdDetalhes);
+
+      // Adiciona a linha construída à tabela
       tbody.appendChild(tr);
-    }
+    });
   });
 
+  // 5. Acionamento da Impressão
+  // O timeout de 500ms é vital para que o navegador processe o HTML injetado antes de abrir o PDF
   setTimeout(() => {
     window.print();
   }, 500);
