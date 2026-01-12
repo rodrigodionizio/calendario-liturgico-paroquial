@@ -1,6 +1,6 @@
 /*
  * ARQUIVO: app.js
- * DESCRIÇÃO: Controlador Principal - Versão Final V11.0 (Estável)
+ * DESCRIÇÃO: Controlador Principal - Versão Final V11.0 (Estável com Correção de Horários)
  * AUTOR: Rodrigo & Dev AI
  */
 
@@ -12,7 +12,7 @@ console.log("🚀 Sistema Litúrgico V11.0 Iniciado");
 const ESTADO = {
   anoAtual: 2026,
   mesAtual: 1,
-  dadosEventos: {}, // Agora é: { 'YYYY-MM-DD': [evento1, evento2] }
+  dadosEventos: {}, // Estrutura: { 'YYYY-MM-DD': [evento1, evento2] }
   isAdmin: false,
   listaEquipes: [],
   filtrosAtivos: new Set(),
@@ -114,7 +114,6 @@ async function renderizarMural() {
         month: "2-digit",
       });
 
-      // Verifica se existe hora_inicio antes de tentar usar substring
       const horaShow = aviso.hora_inicio
         ? ` • ${aviso.hora_inicio.substring(0, 5)}`
         : "";
@@ -162,7 +161,6 @@ async function carregarMes(ano, mes) {
     const eventos = await window.api.buscarEventos(ano, mes);
     ESTADO.dadosEventos = {};
 
-    // Agrupa eventos por data em Arrays
     eventos.forEach((ev) => {
       if (!ESTADO.dadosEventos[ev.data]) ESTADO.dadosEventos[ev.data] = [];
       ESTADO.dadosEventos[ev.data].push(ev);
@@ -178,71 +176,62 @@ async function carregarMes(ano, mes) {
 }
 
 function renderizarGrid(ano, mes, gridElement, headersHTML) {
-    let html = headersHTML;
-    const primeiroDia = new Date(ano, mes - 1, 1).getDay();
-    const ultimoDia = new Date(ano, mes, 0).getDate();
-    const ultimoDiaMesAnt = new Date(ano, mes - 1, 0).getDate();
+  let html = headersHTML;
+  const primeiroDia = new Date(ano, mes - 1, 1).getDay();
+  const ultimoDia = new Date(ano, mes, 0).getDate();
+  const ultimoDiaMesAnt = new Date(ano, mes - 1, 0).getDate();
 
-    // Dias Mês Anterior
-    for (let i = primeiroDia - 1; i >= 0; i--) {
-        html += `<div class="day-cell other-month"><span class="day-number">${ultimoDiaMesAnt - i}</span></div>`;
-    }
+  // Dias Mês Anterior
+  for (let i = primeiroDia - 1; i >= 0; i--) {
+    html += `<div class="day-cell other-month"><span class="day-number">${
+      ultimoDiaMesAnt - i
+    }</span></div>`;
+  }
 
-    // Dias do Mês Atual
-    for (let dia = 1; dia <= ultimoDia; dia++) {
-        const dataISO = `${ano}-${String(mes).padStart(2, "0")}-${String(dia).padStart(2, "0")}`;
-        const listaEventos = ESTADO.dadosEventos[dataISO] || []; 
-        
-        let conteudoHTML = "";
-        let clickAttr = `onclick="abrirModal('${dataISO}')"`;
+  // Dias do Mês Atual
+  for (let dia = 1; dia <= ultimoDia; dia++) {
+    const dataISO = `${ano}-${String(mes).padStart(2, "0")}-${String(
+      dia
+    ).padStart(2, "0")}`;
+    const listaEventos = ESTADO.dadosEventos[dataISO] || [];
 
-        listaEventos.forEach(evento => {
-            // Lógica de Cor da Pílula Principal (Título)
-            let corHex = evento.liturgia_cores?.hex_code || "#2E7D32";
-            if (corHex.toLowerCase() === "#ffffff") corHex = "#cccccc";
-            if (evento.tipo_compromisso !== 'liturgia') corHex = '#64748b'; // Cinza azulado para reuniões
+    let conteudoHTML = "";
+    let clickAttr = `onclick="abrirModal('${dataISO}')"`;
 
-            const classeSolenidade = evento.is_solenidade ? "solenidade" : "";
-            const estiloPill = `border-left: 3px solid ${corHex}; background-color: var(--cor-vinho); margin-bottom: 2px;`;
+    listaEventos.forEach((evento) => {
+      // Lógica de Cor da Pílula Principal (Título)
+      let corHex = evento.liturgia_cores?.hex_code || "#2E7D32";
+      if (corHex.toLowerCase() === "#ffffff") corHex = "#cccccc";
+      if (evento.tipo_compromisso !== "liturgia") corHex = "#64748b";
 
-            // 1. Pílula do Título
-            conteudoHTML += `<div class="pill ${classeSolenidade}" style="${estiloPill}">${evento.titulo}</div>`;
+      const classeSolenidade = evento.is_solenidade ? "solenidade" : "";
+      const estiloPill = `border-left: 3px solid ${corHex}; background-color: var(--cor-vinho); margin-bottom: 2px;`;
 
-            // 2. Pílulas de Detalhe (Horário)
-            if (evento.escalas && evento.escalas.length > 0) {
-                // Se for Liturgia com escalas
-                evento.escalas.forEach((esc) => {
-                    const hora = esc.hora_celebracao.substring(0, 5);
-                    conteudoHTML += `<div class="pill" style="background-color:#f0f0f0; color:#333; border-left:3px solid #ccc">${hora} Missa</div>`;
-                });
-            } else if (evento.tipo_compromisso !== 'liturgia') {
-                // Se for Reunião/Evento (CORREÇÃO AQUI)
-                // Mostra a hora se tiver, senão mostra o local, senão 'Evento'
-                const hora = evento.hora_inicio ? evento.hora_inicio.substring(0,5) : '';
-                let textoExtra = hora ? `${hora}h` : 'Evento';
-                
-                // Se quiser mostrar o local também (cuidado com espaço):
-                // if(evento.local) textoExtra += ` ${evento.local}`; 
+      // 1. Pílula do Título
+      conteudoHTML += `<div class="pill ${classeSolenidade}" style="${estiloPill}">${evento.titulo}</div>`;
 
-                conteudoHTML += `<div class="pill" style="background-color:#f0f0f0; color:#555; border-left:3px solid #64748b">${textoExtra}</div>`;
-            }
+      // 2. Pílulas de Detalhe (Horário) - CORREÇÃO DE EXIBIÇÃO AQUI
+      if (evento.escalas && evento.escalas.length > 0) {
+        // Se for Liturgia com escalas (Missa)
+        evento.escalas.forEach((esc) => {
+          const hora = esc.hora_celebracao.substring(0, 5);
+          conteudoHTML += `<div class="pill" style="background-color:#f0f0f0; color:#333; border-left:3px solid #ccc">${hora} Missa</div>`;
         });
-        
-        html += `<div class="day-cell" data-iso="${dataISO}" ${clickAttr}><span class="day-number">${dia}</span>${conteudoHTML}</div>`;
-    }
+      } else if (evento.tipo_compromisso !== "liturgia") {
+        // Se for Reunião ou outro Evento
+        const hora = evento.hora_inicio
+          ? evento.hora_inicio.substring(0, 5)
+          : "";
+        let textoExtra = hora ? `${hora}h` : "Evento";
 
-    // Preenche fim
-    const totalCelulas = primeiroDia + ultimoDia;
-    const resto = totalCelulas % 7;
-    if (resto !== 0) {
-        for (let i = 1; i <= 7 - resto; i++) {
-            html += `<div class="day-cell other-month"><span class="day-number">${i}</span></div>`;
-        }
-    }
-    gridElement.innerHTML = html;
-}
+        conteudoHTML += `<div class="pill" style="background-color:#f0f0f0; color:#555; border-left:3px solid #64748b">${textoExtra}</div>`;
+      }
+    });
 
-  // Dias Próximo Mês
+    html += `<div class="day-cell" data-iso="${dataISO}" ${clickAttr}><span class="day-number">${dia}</span>${conteudoHTML}</div>`;
+  }
+
+  // Dias Próximo Mês (Preenchimento do Grid)
   const totalCelulas = primeiroDia + ultimoDia;
   const resto = totalCelulas % 7;
   if (resto !== 0) {
@@ -267,7 +256,6 @@ window.abrirModal = function (dataISO) {
     .toLocaleString("pt-BR", { month: "short" })
     .toUpperCase();
 
-  // Botão Adicionar (Apenas Admin)
   let btnNovo = ESTADO.isAdmin
     ? `<button onclick="iniciarCriacao('${dataISO}')" style="width:100%; padding:10px; border:2px dashed #ccc; background:#f9f9f9; color:#555; border-radius:8px; cursor:pointer; font-weight:bold; margin-top:15px;">➕ ADICIONAR NOVO EVENTO</button>`
     : "";
@@ -283,14 +271,11 @@ window.abrirModal = function (dataISO) {
       if (corHex.toLowerCase() === "#ffffff") corHex = "#ccc";
       if (ev.tipo_compromisso !== "liturgia") corHex = "#666";
 
-      // Botão Editar (Passa objeto ev escapado)
-      // EncodeURIComponent protege contra aspas no título
       const evString = encodeURIComponent(JSON.stringify(ev));
       const btnEdit = ESTADO.isAdmin
         ? `<button onclick='prepararEdicao(decodeURIComponent("${evString}"))' style="float:right; border:none; background:none; cursor:pointer; font-size:1.2rem;" title="Editar">✏️</button>`
         : "";
 
-      // Detalhes
       let detalhe = "";
       if (ev.tipo_compromisso === "liturgia") {
         detalhe = gerarHTMLLeitura(ev);
@@ -360,7 +345,6 @@ function gerarHTMLLeitura(evento) {
 // 5. EDITOR & AÇÕES
 // ==========================================================================
 
-// Prepara para criar novo
 window.iniciarCriacao = function (dataISO) {
   const novo = {
     id: null,
@@ -372,9 +356,7 @@ window.iniciarCriacao = function (dataISO) {
   renderizarEditor(novo);
 };
 
-// Prepara para editar existente (Recebe string JSON decodificada)
 window.prepararEdicao = function (eventoObj) {
-  // Se veio string, converte. Se veio objeto, usa direto.
   let evento =
     typeof eventoObj === "string" ? JSON.parse(eventoObj) : eventoObj;
   renderizarEditor(evento);
@@ -382,7 +364,7 @@ window.prepararEdicao = function (eventoObj) {
 
 function renderizarEditor(evento) {
   const container = document.getElementById("modalBody");
-  eventoEmEdicao = evento; // Salva globalmente para o salvarEdicoes usar
+  eventoEmEdicao = evento;
 
   const tituloVal = evento.titulo || "";
   const tipo = evento.tipo_compromisso || "liturgia";
@@ -390,7 +372,6 @@ function renderizarEditor(evento) {
   const local = evento.local || "";
   const resp = evento.responsavel || "";
 
-  // HTML Form
   container.innerHTML = `
         <h3 style="color:var(--cor-vinho); border-bottom:1px solid #eee; padding-bottom:10px;">${
           evento.id ? "Editar" : "Novo"
@@ -414,7 +395,6 @@ function renderizarEditor(evento) {
                 <label style="font-size:0.7rem; font-weight:bold;">TÍTULO</label>
                 <input type="text" id="editTitulo" value="${tituloVal}" style="width:100%; padding:8px; margin-bottom:10px;">
 
-                <!-- Extras -->
                 <div id="campos-extras" style="display:none; margin-top:10px; grid-template-columns: 1fr 1fr; gap:10px;">
                     <div><label style="font-size:0.7rem; font-weight:bold;">HORA</label>
                     <input type="time" id="editHoraInicio" value="${hora}" style="width:100%; margin-bottom:5px;"></div>
@@ -424,13 +404,11 @@ function renderizarEditor(evento) {
                     <input type="text" id="editResp" value="${resp}" style="width:100%;"></div>
                 </div>
 
-                <!-- Liturgia -->
                 <div id="campos-liturgia" style="margin-top:10px;">
                     ${gerarCamposLiturgia(evento)}
                 </div>
             </div>
             
-            <!-- Mural Check -->
             <div style="background:#fff9e6; padding:10px; border-radius:8px; margin-bottom:15px;">
                 <label><input type="checkbox" id="checkMural" onchange="toggleMuralPrio()" ${
                   evento.mural_destaque ? "checked" : ""
@@ -470,7 +448,6 @@ function renderizarEditor(evento) {
         </div>
     `;
 
-  // Popula Escalas
   if (evento.escalas)
     evento.escalas.forEach((esc, idx) => {
       document.getElementById("listaEditor").innerHTML += gerarLinhaEditor(
@@ -483,7 +460,6 @@ function renderizarEditor(evento) {
   window.toggleMuralPrio();
 }
 
-// Helpers de HTML
 function gerarCamposLiturgia(evento) {
   const corId = evento.cor_id || 1;
   const tempo = evento.tempo_liturgico || "Paroquial";
@@ -506,15 +482,10 @@ function gerarCamposLiturgia(evento) {
   return `<div style="display:flex; gap:10px; margin-bottom:10px;">
         <div style="flex:1;"><label style="font-size:0.7rem; font-weight:bold;">TEMPO</label><select id="editTempo" style="width:100%">${optsTempo}</select></div>
         <div style="flex:1;"><label style="font-size:0.7rem; font-weight:bold;">COR</label><select id="editCor" style="width:100%">
-            <option value="1" ${
-              corId == 1 ? "selected" : ""
-            }>Verde</option><option value="2" ${
-    corId == 2 ? "selected" : ""
-  }>Branco</option><option value="3" ${
-    corId == 3 ? "selected" : ""
-  }>Vermelho</option><option value="4" ${
-    corId == 4 ? "selected" : ""
-  }>Roxo</option>
+            <option value="1" ${corId == 1 ? "selected" : ""}>Verde</option>
+            <option value="2" ${corId == 2 ? "selected" : ""}>Branco</option>
+            <option value="3" ${corId == 3 ? "selected" : ""}>Vermelho</option>
+            <option value="4" ${corId == 4 ? "selected" : ""}>Roxo</option>
         </select></div>
     </div>`;
 }
@@ -555,7 +526,6 @@ function gerarLinhaEditor(escala, index) {
     </div>`;
 }
 
-// Funções Globais de Controle
 window.toggleCamposEditor = function () {
   const tipo = document.getElementById("editTipoComp").value;
   if (tipo === "liturgia") {
@@ -572,7 +542,7 @@ window.toggleCamposEditor = function () {
 window.toggleMuralPrio = function () {
   const check = document.getElementById("checkMural");
   const div = document.getElementById("area-prio");
-  div.style.display = check.checked ? "block" : "none";
+  if (div) div.style.display = check.checked ? "block" : "none";
 };
 
 window.adicionarNovaEscala = function () {
@@ -656,7 +626,7 @@ window.excluirEvento = async function (id) {
 };
 
 // ==========================================================================
-// 7. RELATÓRIO PDF (Com Suporte Multi-Eventos)
+// 7. RELATÓRIO PDF
 // ==========================================================================
 window.prepararImpressao = function () {
   const tbody = document.getElementById("print-table-body");
@@ -666,11 +636,9 @@ window.prepararImpressao = function () {
   document.querySelector("#print-year").textContent = ESTADO.anoAtual;
   tbody.innerHTML = "";
 
-  // Agrupa todos os eventos num array plano
   let listaFinal = [];
   Object.values(ESTADO.dadosEventos).forEach((arr) => listaFinal.push(...arr));
 
-  // Ordena por data e hora
   listaFinal.sort((a, b) => {
     const dataA =
       a.data + (a.hora_inicio || a.escalas?.[0]?.hora_celebracao || "00:00");
@@ -710,7 +678,6 @@ window.prepararImpressao = function () {
       ev.tipo_compromisso === "liturgia" ? ev.tempo_liturgico : "Reunião";
     if (ev.is_solenidade) tipoLabel = "Solenidade";
 
-    // Linha divisória de dia (opcional, para visual)
     const styleRow = mostrarData ? "border-top: 1px solid #000;" : "";
 
     html += `<tr style="${styleRow}">
@@ -811,6 +778,7 @@ function adicionarBotaoLogout() {
 
 function configurarBotoesNavegacao() {
   const btns = document.querySelectorAll(".btn-nav");
+  if (btns.length < 3) return;
   btns[0].onclick = () => {
     ESTADO.mesAtual--;
     if (ESTADO.mesAtual < 1) {
@@ -820,8 +788,9 @@ function configurarBotoesNavegacao() {
     carregarMes(ESTADO.anoAtual, ESTADO.mesAtual);
   };
   btns[1].onclick = () => {
-    ESTADO.anoAtual = 2026;
-    ESTADO.mesAtual = 1;
+    const hoje = new Date();
+    ESTADO.anoAtual = hoje.getFullYear();
+    ESTADO.mesAtual = hoje.getMonth() + 1;
     carregarMes(ESTADO.anoAtual, ESTADO.mesAtual);
   };
   btns[2].onclick = () => {
