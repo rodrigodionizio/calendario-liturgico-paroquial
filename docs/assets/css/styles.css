@@ -498,7 +498,15 @@ header {
 /* ==========================================================================
    11. ESTILOS DE IMPRESSÃO (PDF A4)
    ========================================================================== */
-print-only { display: none; }
+/* REGRA DE OURO: Esconde o relatório na tela normal */
+#relatorio-impressao, 
+.print-only { 
+    display: none !important; /* Força bruta para sumir da tela */
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
 
 @media print {
     /* Esconde a interface web */
