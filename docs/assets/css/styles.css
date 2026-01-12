@@ -1,7 +1,8 @@
 /* 
- * PROJECT: Liturgia Paroquial 2026
- * DESCRIPTION: Arquivo principal de estilos com Design System Jubileu
- * AUTHOR: Rodrigo & Dev AI
+ * ARQUIVO: styles.css
+ * PROJETO: Liturgia Paroquial 2026
+ * DESCRIÇÃO: Estilos globais, componentes, mural e responsividade.
+ * VERSÃO: 5.0 (Gold + Mural)
  */
 
 /* ==========================================================================
@@ -32,383 +33,58 @@
 
   /* UI Metrics */
   --radius-main: 16px;
-  /* Varáveis para definição de títulos */
-   /* Neulis para Títulos (Black/Bold) */
-    --font-titulo: 'Neulis', sans-serif; 
-    
-    /* Antenna para Texto Corrido */
-    --font-texto:  'AntennaCond', sans-serif;
+  
+  /* Tipografia */
+  --font-titulo: 'Neulis', sans-serif; 
+  --font-texto:  'AntennaCond', sans-serif;
+}
 
 /* ==========================================================================
-   2. FONT FACES & RESET
+   2. FONT FACES (IMPORTAÇÃO TIPOGRAFIA)
    ========================================================================== */
-/* Copie aqui o conteúdo gerado pelo script python (mapear_fontes.py) */
-/* Exemplo de placeholder se não tiver rodado o script ainda: */
-@font-face {
-  font-family: "Humming";
-  src: url("../fonts/Humming.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/Neulis-Black.otf") format("opentype");
-  font-weight: 900;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/Neulis-BlackItalic.otf") format("opentype");
-  font-weight: 900;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/Neulis-Bold.otf") format("opentype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/Neulis-BoldItalic.otf") format("opentype");
-  font-weight: 700;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/Neulis-ExtraBold.otf") format("opentype");
-  font-weight: 800;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/Neulis-ExtraBoldItalic.otf") format("opentype");
-  font-weight: 800;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/Neulis-ExtraLight.otf") format("opentype");
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/Neulis-ExtraLightItalic.otf") format("opentype");
-  font-weight: 300;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/Neulis-Italic.otf") format("opentype");
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/Neulis-Light.otf") format("opentype");
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/Neulis-LightItalic.otf") format("opentype");
-  font-weight: 300;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/Neulis-Medium.otf") format("opentype");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/Neulis-MediumItalic.otf") format("opentype");
-  font-weight: 500;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/Neulis-Regular.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/Neulis-SemiBold.otf") format("opentype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/Neulis-SemiBoldItalic.otf") format("opentype");
-  font-weight: 700;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/Neulis-Thin.otf") format("opentype");
-  font-weight: 100;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/Neulis-ThinItalic.otf") format("opentype");
-  font-weight: 100;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/NeulisAlt-Black.otf") format("opentype");
-  font-weight: 900;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/NeulisAlt-BlackItalic.otf") format("opentype");
-  font-weight: 900;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/NeulisAlt-Bold.otf") format("opentype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/NeulisAlt-BoldItalic.otf") format("opentype");
-  font-weight: 700;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/NeulisAlt-ExtraBold.otf") format("opentype");
-  font-weight: 800;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/NeulisAlt-ExtraBoldItalic.otf") format("opentype");
-  font-weight: 800;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/NeulisAlt-ExtraLight.otf") format("opentype");
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/NeulisAlt-ExtraLightItalic.otf") format("opentype");
-  font-weight: 300;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/NeulisAlt-Italic.otf") format("opentype");
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/NeulisAlt-Light.otf") format("opentype");
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/NeulisAlt-LightItalic.otf") format("opentype");
-  font-weight: 300;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/NeulisAlt-Medium.otf") format("opentype");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/NeulisAlt-MediumItalic.otf") format("opentype");
-  font-weight: 500;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/NeulisAlt-Regular.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/NeulisAlt-SemiBold.otf") format("opentype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/NeulisAlt-SemiBoldItalic.otf") format("opentype");
-  font-weight: 700;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/NeulisAlt-Thin.otf") format("opentype");
-  font-weight: 100;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Neulis";
-  src: url("../fonts/NeulisAlt-ThinItalic.otf") format("opentype");
-  font-weight: 100;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "AntennaCond";
-  src: url("../fonts/antennacond-black.otf") format("opentype");
-  font-weight: 900;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "AntennaCond";
-  src: url("../fonts/antennacond-blackitalic.otf") format("opentype");
-  font-weight: 900;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "AntennaCond";
-  src: url("../fonts/antennacond-bold-italic.otf") format("opentype");
-  font-weight: 700;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "AntennaCond";
-  src: url("../fonts/antennacond-bold.otf") format("opentype");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "AntennaCond";
-  src: url("../fonts/antennacond-extra-light-italic.otf") format("opentype");
-  font-weight: 300;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "AntennaCond";
-  src: url("../fonts/antennacond-extralight.otf") format("opentype");
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "AntennaCond";
-  src: url("../fonts/antennacond-italic.otf") format("opentype");
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "AntennaCond";
-  src: url("../fonts/antennacond-light-italic.otf") format("opentype");
-  font-weight: 300;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "AntennaCond";
-  src: url("../fonts/antennacond-light.otf") format("opentype");
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "AntennaCond";
-  src: url("../fonts/antennacond-medium-italic.otf") format("opentype");
-  font-weight: 500;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "AntennaCond";
-  src: url("../fonts/antennacond-medium.otf") format("opentype");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "AntennaCond";
-  src: url("../fonts/antennacond-thin-italiclic.otf") format("opentype");
-  font-weight: 100;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "AntennaCond";
-  src: url("../fonts/antennacond-thin.otf") format("opentype");
-  font-weight: 100;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "AntennaCond";
-  src: url("../fonts/antennacond.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "AntennaCond";
-  src: url("../fonts/antennacond_.otf") format("opentype");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
+/* Humming */
+@font-face { font-family: "Humming"; src: url("../fonts/Humming.otf") format("opentype"); font-weight: 400; font-style: normal; font-display: swap; }
 
+/* Neulis (Família Completa) */
+@font-face { font-family: "Neulis"; src: url("../fonts/Neulis-Black.otf") format("opentype"); font-weight: 900; font-style: normal; font-display: swap; }
+@font-face { font-family: "Neulis"; src: url("../fonts/Neulis-BlackItalic.otf") format("opentype"); font-weight: 900; font-style: italic; font-display: swap; }
+@font-face { font-family: "Neulis"; src: url("../fonts/Neulis-Bold.otf") format("opentype"); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "Neulis"; src: url("../fonts/Neulis-BoldItalic.otf") format("opentype"); font-weight: 700; font-style: italic; font-display: swap; }
+@font-face { font-family: "Neulis"; src: url("../fonts/Neulis-ExtraBold.otf") format("opentype"); font-weight: 800; font-style: normal; font-display: swap; }
+@font-face { font-family: "Neulis"; src: url("../fonts/Neulis-ExtraBoldItalic.otf") format("opentype"); font-weight: 800; font-style: italic; font-display: swap; }
+@font-face { font-family: "Neulis"; src: url("../fonts/Neulis-ExtraLight.otf") format("opentype"); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: "Neulis"; src: url("../fonts/Neulis-ExtraLightItalic.otf") format("opentype"); font-weight: 300; font-style: italic; font-display: swap; }
+@font-face { font-family: "Neulis"; src: url("../fonts/Neulis-Italic.otf") format("opentype"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: "Neulis"; src: url("../fonts/Neulis-Light.otf") format("opentype"); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: "Neulis"; src: url("../fonts/Neulis-LightItalic.otf") format("opentype"); font-weight: 300; font-style: italic; font-display: swap; }
+@font-face { font-family: "Neulis"; src: url("../fonts/Neulis-Medium.otf") format("opentype"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "Neulis"; src: url("../fonts/Neulis-MediumItalic.otf") format("opentype"); font-weight: 500; font-style: italic; font-display: swap; }
+@font-face { font-family: "Neulis"; src: url("../fonts/Neulis-Regular.otf") format("opentype"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Neulis"; src: url("../fonts/Neulis-SemiBold.otf") format("opentype"); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "Neulis"; src: url("../fonts/Neulis-SemiBoldItalic.otf") format("opentype"); font-weight: 700; font-style: italic; font-display: swap; }
+@font-face { font-family: "Neulis"; src: url("../fonts/Neulis-Thin.otf") format("opentype"); font-weight: 100; font-style: normal; font-display: swap; }
+@font-face { font-family: "Neulis"; src: url("../fonts/Neulis-ThinItalic.otf") format("opentype"); font-weight: 100; font-style: italic; font-display: swap; }
+
+/* AntennaCond (Família Completa) */
+@font-face { font-family: "AntennaCond"; src: url("../fonts/antennacond-black.otf") format("opentype"); font-weight: 900; font-style: normal; font-display: swap; }
+@font-face { font-family: "AntennaCond"; src: url("../fonts/antennacond-blackitalic.otf") format("opentype"); font-weight: 900; font-style: italic; font-display: swap; }
+@font-face { font-family: "AntennaCond"; src: url("../fonts/antennacond-bold-italic.otf") format("opentype"); font-weight: 700; font-style: italic; font-display: swap; }
+@font-face { font-family: "AntennaCond"; src: url("../fonts/antennacond-bold.otf") format("opentype"); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "AntennaCond"; src: url("../fonts/antennacond-extra-light-italic.otf") format("opentype"); font-weight: 300; font-style: italic; font-display: swap; }
+@font-face { font-family: "AntennaCond"; src: url("../fonts/antennacond-extralight.otf") format("opentype"); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: "AntennaCond"; src: url("../fonts/antennacond-italic.otf") format("opentype"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: "AntennaCond"; src: url("../fonts/antennacond-light-italic.otf") format("opentype"); font-weight: 300; font-style: italic; font-display: swap; }
+@font-face { font-family: "AntennaCond"; src: url("../fonts/antennacond-light.otf") format("opentype"); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: "AntennaCond"; src: url("../fonts/antennacond-medium-italic.otf") format("opentype"); font-weight: 500; font-style: italic; font-display: swap; }
+@font-face { font-family: "AntennaCond"; src: url("../fonts/antennacond-medium.otf") format("opentype"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "AntennaCond"; src: url("../fonts/antennacond-thin-italiclic.otf") format("opentype"); font-weight: 100; font-style: italic; font-display: swap; }
+@font-face { font-family: "AntennaCond"; src: url("../fonts/antennacond-thin.otf") format("opentype"); font-weight: 100; font-style: normal; font-display: swap; }
+@font-face { font-family: "AntennaCond"; src: url("../fonts/antennacond.otf") format("opentype"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "AntennaCond"; src: url("../fonts/antennacond_.otf") format("opentype"); font-weight: 400; font-style: normal; font-display: swap; }
+
+/* ==========================================================================
+   3. RESET & BASE
+   ========================================================================== */
 body {
   background-color: var(--cor-fundo);
   color: var(--text-main);
@@ -422,7 +98,7 @@ body {
 }
 
 /* ==========================================================================
-   3. HEADER (CABEÇALHO)
+   4. CABEÇALHO (HEADER)
    ========================================================================== */
 header {
   background-color: var(--cor-vinho);
@@ -435,21 +111,26 @@ header {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   z-index: 10;
   border-bottom: 4px solid var(--cor-dourado);
+  position: relative; /* Para posicionar o botão mobile */
 }
 
-.header-logo-container {
-  height: 50px;
-  display: flex;
-  align-items: center;
-}
-.header-logo-img {
-  height: 100%;
-  width: auto;
-  object-fit: contain;
+.header-logo-container { height: 50px; display: flex; align-items: center; }
+.header-logo-img { height: 100%; width: auto; object-fit: contain; }
+
+/* Botão Menu Mobile (Padrão: Escondido no Desktop) */
+#btn-mobile-menu {
+    display: none;
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 5px;
+    position: absolute;
+    left: 15px; /* Fica na esquerda no mobile */
 }
 
 /* ==========================================================================
-   4. LAYOUT GERAL & SIDEBAR
+   5. LAYOUT GERAL & SIDEBAR
    ========================================================================== */
 .app-layout {
   display: flex;
@@ -465,23 +146,21 @@ header {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    /* Adicione isto para garantir altura total e evitar overflow feio */
     height: 100vh; 
     box-sizing: border-box;
 }
 
+/* Container do Mural e Mini-Calendário */
 .mini-calendar {
+  /* Se for usado como placeholder, senão o Mural substitui */
   background: #fff;
   border-radius: 12px;
-  height: 200px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   border: 1px solid rgba(0, 0, 0, 0.05);
-  color: #aaa;
-  font-size: 0.8rem;
+  color: #aaa; font-size: 0.8rem;
 }
 
+/* Filtros */
 .filter-group h3 {
   font-size: 0.8rem;
   text-transform: uppercase;
@@ -492,557 +171,318 @@ header {
 }
 
 .filter-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  color: #444;
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 8px; font-size: 0.9rem;
+  cursor: pointer; color: #444;
 }
 
 .checkbox-custom {
-  width: 16px;
-  height: 16px;
+  width: 16px; height: 16px;
   border: 2px solid var(--cor-vinho);
-  border-radius: 4px;
-  display: inline-block;
+  border-radius: 4px; display: inline-block;
 }
-.checkbox-custom.checked {
-  background-color: var(--cor-vinho);
-}
+.checkbox-custom.checked { background-color: var(--cor-vinho); }
 
-/* O grupo de filtros específico (onde tem os checkboxes) */
+/* Scroll na lista de equipes se for muito grande */
 #filtro-equipes {
-    /* Permite scroll se a lista for grande */
     overflow-y: auto;
-    flex: 1; /* Ocupa o espaço disponível, empurrando o resto para baixo */
-    padding-right: 5px; /* Espaço para a barra de rolagem não colar */
-    
-    /* Scrollbar bonita (estilo moderno) */
+    flex: 1; /* Ocupa o espaço disponível */
+    padding-right: 5px;
     scrollbar-width: thin;
     scrollbar-color: var(--cor-vinho) #eee;
 }
 
-/* Estilo para Webkit (Chrome/Edge) */
-#filtro-equipes::-webkit-scrollbar {
-    width: 6px;
-}
-#filtro-equipes::-webkit-scrollbar-track {
-    background: #eee;
-    border-radius: 3px;
-}
-#filtro-equipes::-webkit-scrollbar-thumb {
-    background-color: var(--cor-vinho);
-    border-radius: 3px;
-}
+#filtro-equipes::-webkit-scrollbar { width: 6px; }
+#filtro-equipes::-webkit-scrollbar-track { background: #eee; border-radius: 3px; }
+#filtro-equipes::-webkit-scrollbar-thumb { background-color: var(--cor-vinho); border-radius: 3px; }
+
 /* ==========================================================================
-   5. CONTEÚDO PRINCIPAL (CALENDÁRIO)
+   6. MURAL DE AVISOS (NOVA FEATURE)
+   ========================================================================== */
+.mural-container {
+    display: flex; flex-direction: column; gap: 10px;
+    margin-bottom: 20px;
+}
+
+.mural-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 5px; border-bottom: 2px solid var(--cor-vinho); padding-bottom: 5px;
+}
+.mural-title { font-size: 0.9rem; font-weight: 900; color: var(--cor-vinho); text-transform: uppercase; }
+.mural-badge { background: var(--cor-cereja); color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; font-weight: bold; }
+
+.aviso-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    border-left: 4px solid #ccc;
+    transition: transform 0.2s;
+    cursor: default;
+}
+.aviso-card:hover { transform: translateX(3px); }
+
+/* Prioridades do Mural */
+.prio-1 { border-left-color: var(--cor-cereja); background-color: #fff5f5; } /* Urgente */
+.prio-2 { border-left-color: var(--cor-dourado); } /* Atenção */
+.prio-3 { border-left-color: #2196F3; } /* Info */
+
+/* Tipografia do Aviso */
+.aviso-tag {
+    font-size: 0.65rem; font-weight: bold; text-transform: uppercase;
+    display: inline-block; margin-bottom: 4px; padding: 2px 4px; border-radius: 3px;
+    background-color: #eee; color: #555;
+}
+.tag-urgente { background-color: var(--cor-cereja); color: white; animation: pulse 2s infinite; }
+
+.aviso-titulo { font-weight: 700; font-size: 0.9rem; color: #333; line-height: 1.2; margin-bottom: 4px; }
+.aviso-meta { font-size: 0.75rem; color: #666; display: flex; align-items: center; gap: 5px; }
+
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+
+/* ==========================================================================
+   7. CONTEÚDO PRINCIPAL (CALENDÁRIO)
    ========================================================================== */
 .main-content {
-  flex: 1;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto; /* Scroll apenas aqui */
+  flex: 1; padding: 0;
+  display: flex; flex-direction: column;
+  overflow-y: auto;
 }
 
 .scroll-wrapper {
-  padding: 20px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  padding: 20px; flex: 1;
+  display: flex; flex-direction: column;
 }
 
 .month-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;
 }
+.month-name { font-size: 1.8rem; font-weight: 900; color: var(--text-main); margin: 0; }
 
-.month-name {
-  font-size: 1.8rem;
-  font-weight: 900;
-  color: var(--text-main);
-  margin: 0;
-}
-
-.nav-buttons {
-  display: flex;
-  gap: 10px;
-}
+.nav-buttons { display: flex; gap: 10px; }
 .btn-nav {
-  border: 1px solid #ccc;
-  background: transparent;
-  padding: 5px 15px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background 0.2s;
+  border: 1px solid #ccc; background: transparent; padding: 5px 15px;
+  border-radius: 20px; cursor: pointer; font-weight: 600; transition: background 0.2s;
 }
-.btn-nav:hover {
-  background: rgba(0, 0, 0, 0.05);
-}
+.btn-nav:hover { background: rgba(0, 0, 0, 0.05); }
 
 /* Grid Container */
 .calendar-wrapper {
-  border: 1px solid #ddd;
-  border-radius: var(--radius-main);
-  overflow: hidden;
-  background-color: #ddd; /* Cor das linhas da grade */
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 1px;
+  border: 1px solid #ddd; border-radius: var(--radius-main);
+  overflow: hidden; background-color: #ddd;
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
   margin-bottom: 40px;
 }
 
 .day-header {
-  background-color: #fff;
-  padding: 10px 0;
-  text-align: center;
-  font-size: 0.75rem;
-  font-weight: 800;
-  color: #888;
-  text-transform: uppercase;
+  background-color: #fff; padding: 10px 0; text-align: center;
+  font-size: 0.75rem; font-weight: 800; color: #888; text-transform: uppercase;
 }
 
 .day-cell {
-  background-color: #fff;
-  min-height: 120px; /* Altura Desktop */
-  padding: 8px;
-  cursor: pointer;
-  transition: background 0.2s;
-  position: relative;
+  background-color: #fff; min-height: 120px; padding: 8px;
+  cursor: pointer; transition: background 0.2s; position: relative;
 }
-.day-cell:hover {
-  background-color: #fafafa;
-}
+.day-cell:hover { background-color: #fafafa; }
 
-.day-number {
-  font-weight: 700;
-  font-size: 1rem;
-  color: #333;
-  margin-bottom: 5px;
-  display: block;
-}
+.day-number { font-weight: 700; font-size: 1rem; color: #333; margin-bottom: 5px; display: block; }
+.other-month { background-color: #f4f4f4; opacity: 0.5; pointer-events: none; }
 
-.other-month {
-  background-color: #f4f4f4;
-  opacity: 0.5;
-  pointer-events: none;
-}
+/* Filtros Visuais (Grid) */
+.hidden-by-filter { opacity: 0.1; pointer-events: none; filter: grayscale(100%); }
+.highlight-filter { background-color: #fff9e6; border: 2px solid var(--cor-dourado); }
 
 /* Pílulas de Evento (Grid) */
 .pill {
-  font-size: 0.75rem;
-  margin-bottom: 2px;
-  padding: 3px 6px;
-  border-radius: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  background-color: var(--cor-vinho);
-  color: #fff;
+  font-size: 0.75rem; margin-bottom: 2px; padding: 3px 6px;
+  border-radius: 4px; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+  background-color: var(--cor-vinho); color: #fff;
   border-left: 3px solid var(--cor-dourado);
 }
-.pill.solenidade {
-  background-color: var(--cor-dourado);
-  color: var(--cor-vinho);
-  border-left: 3px solid #fff;
-}
+.pill.solenidade { background-color: var(--cor-dourado); color: var(--cor-vinho); border-left: 3px solid #fff; }
 
 /* ==========================================================================
-   6. RODAPÉ (FOOTER)
+   8. RODAPÉ (FOOTER)
    ========================================================================== */
 .main-footer {
-  background-color: var(--cor-vinho);
-  color: var(--cor-bege);
-  padding: 50px 20px 20px 20px;
-  border-top: 5px solid var(--cor-dourado);
+  background-color: var(--cor-vinho); color: var(--cor-bege);
+  padding: 50px 20px 20px 20px; border-top: 5px solid var(--cor-dourado);
   margin-top: auto;
 }
 
 .footer-container {
-  max-width: 1000px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 40px;
+  max-width: 1000px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px;
 }
 
-.footer-logo {
-  max-width: 180px;
-  margin-bottom: 15px;
-  opacity: 0.9;
-}
+.footer-logo { max-width: 180px; margin-bottom: 15px; opacity: 0.9; }
 .footer-heading {
-  color: var(--cor-dourado);
-  font-size: 1.1rem;
+  color: var(--cor-dourado); font-size: 1.1rem;
   border-bottom: 1px solid rgba(251, 181, 88, 0.3);
-  padding-bottom: 10px;
-  margin-bottom: 15px;
-  font-weight: 800;
-  text-transform: uppercase;
+  padding-bottom: 10px; margin-bottom: 15px;
+  font-weight: 800; text-transform: uppercase;
 }
-.footer-col p {
-  margin: 5px 0;
-  font-size: 0.95rem;
-}
-.footer-subtitle {
-  font-style: italic;
-  font-size: 0.9rem;
-  opacity: 0.8;
-}
+.footer-col p { margin: 5px 0; font-size: 0.95rem; }
+.footer-subtitle { font-style: italic; font-size: 0.9rem; opacity: 0.8; }
 
-.destaque-atendimento {
-  color: var(--cor-dourado) !important;
-  font-weight: bold;
-}
-.destaque-atendimento span {
-  font-weight: normal;
-  color: var(--cor-bege);
-}
+.destaque-atendimento { color: var(--cor-dourado) !important; font-weight: bold; }
+.destaque-atendimento span { font-weight: normal; color: var(--cor-bege); }
 
 .btn-whatsapp {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background-color: rgba(255, 255, 255, 0.05);
-  color: var(--cor-bege);
-  text-decoration: none;
-  padding: 10px 15px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  width: fit-content;
-  margin-bottom: 15px;
-  font-size: 0.9rem;
-  transition: 0.3s;
+  display: flex; align-items: center; gap: 10px;
+  background-color: rgba(255, 255, 255, 0.05); color: var(--cor-bege);
+  text-decoration: none; padding: 10px 15px; border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1); width: fit-content;
+  margin-bottom: 15px; font-size: 0.9rem; transition: 0.3s;
 }
-.btn-whatsapp:hover {
-  background-color: #25d366;
-  border-color: #25d366;
-  color: #fff;
-}
+.btn-whatsapp:hover { background-color: #25d366; border-color: #25d366; color: #fff; }
 
-.social-links {
-  display: flex;
-  gap: 15px;
-  margin-top: 10px;
-}
-.social-links a {
-  color: var(--cor-bege);
-  transition: transform 0.2s;
-}
-.social-links a:hover {
-  color: var(--cor-dourado);
-  transform: scale(1.1);
-}
+.social-links { display: flex; gap: 15px; margin-top: 10px; }
+.social-links a { color: var(--cor-bege); transition: transform 0.2s; }
+.social-links a:hover { color: var(--cor-dourado); transform: scale(1.1); }
 
 .footer-copyright {
-  text-align: center;
-  font-size: 0.8rem;
-  opacity: 0.6;
-  margin-top: 40px;
-  padding-top: 20px;
+  text-align: center; font-size: 0.8rem; opacity: 0.6;
+  margin-top: 40px; padding-top: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* ==========================================================================
-   7. COMPONENTE: MODAL (POPUP)
+   9. COMPONENTE: MODAL (POPUP)
    ========================================================================== */
 .modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(44, 14, 18, 0.5);
-  backdrop-filter: blur(4px);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(44, 14, 18, 0.5); backdrop-filter: blur(4px);
+  display: none; justify-content: center; align-items: center; z-index: 1000;
 }
-.modal-overlay.active {
-  display: flex;
-  animation: fadeIn 0.2s ease;
-}
+.modal-overlay.active { display: flex; animation: fadeIn 0.2s ease; }
 
 .modal-card {
-  background: #fff;
-  border-radius: 16px;
-  overflow: hidden;
+  background: #fff; border-radius: 16px; overflow: hidden;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-  position: relative;
-  display: flex;
-  /* Mobile First Dimensions */
-  width: 95%;
-  max-width: 400px;
-  max-height: 85vh;
-  overflow-y: auto;
+  position: relative; display: flex;
+  width: 95%; max-width: 400px; max-height: 85vh; overflow-y: auto;
 }
 
-.modal-sidebar-color {
-  width: 10px;
-  flex-shrink: 0;
-}
-.modal-body {
-  padding: 20px;
-  flex: 1;
-}
+.modal-sidebar-color { width: 10px; flex-shrink: 0; }
+.modal-body { padding: 20px; flex: 1; }
 
 .modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 15px;
-  border-bottom: 1px solid #f0f0f0;
-  padding-bottom: 10px;
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px;
 }
-.modal-day {
-  font-size: 2rem;
-  font-weight: 900;
-  line-height: 1;
-  color: var(--text-main);
-}
-.modal-month {
-  font-size: 0.9rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--cor-vinho);
-}
-.modal-weekday {
-  font-size: 0.75rem;
-  color: #888;
-  text-transform: uppercase;
-}
+.modal-day { font-size: 2rem; font-weight: 900; line-height: 1; color: var(--text-main); }
+.modal-month { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; color: var(--cor-vinho); }
+.modal-weekday { font-size: 0.75rem; color: #888; text-transform: uppercase; }
 
-.modal-liturgia {
-  font-size: 0.85rem;
-  font-weight: bold;
-  margin-bottom: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.modal-titulo {
-  font-size: 1.1rem;
-  font-weight: 800;
-  margin-bottom: 20px;
-  color: var(--text-main);
-  line-height: 1.2;
-}
+.modal-liturgia { font-size: 0.85rem; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+.modal-titulo { font-size: 1.1rem; font-weight: 800; margin-bottom: 20px; color: var(--text-main); line-height: 1.2; }
 
 /* Lista de Escalas */
 .escala-item {
-  display: flex;
-  align-items: flex-start;
-  border-bottom: 1px dashed #eee;
-  padding-bottom: 8px;
-  margin-bottom: 12px;
+  display: flex; align-items: flex-start;
+  border-bottom: 1px dashed #eee; padding-bottom: 8px; margin-bottom: 12px;
 }
 .escala-hora {
-  background: #f5f5f5;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-weight: 700;
-  font-size: 0.8rem;
-  margin-right: 10px;
-  color: #555;
+  background: #f5f5f5; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 0.8rem; margin-right: 10px; color: #555;
 }
-.equipe-row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 5px;
-  flex-wrap: nowrap;
-}
-.equipe-icon {
-  width: 16px;
-  height: 16px;
-  margin-right: 8px;
-  opacity: 0.8;
-  flex-shrink: 0;
-}
-.equipe-label {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  color: #999;
-  margin-right: 5px;
-  font-weight: 600;
-  width: 55px;
-  flex-shrink: 0;
-}
-.equipe-val {
-  font-weight: 700;
-  color: var(--text-main);
-  font-size: 0.9rem;
-  white-space: normal;
-  line-height: 1.2;
-}
+.equipe-row { display: flex; align-items: center; margin-bottom: 5px; flex-wrap: nowrap; }
+.equipe-icon { width: 16px; height: 16px; margin-right: 8px; opacity: 0.8; flex-shrink: 0; }
+.equipe-label { font-size: 0.7rem; text-transform: uppercase; color: #999; margin-right: 5px; font-weight: 600; width: 55px; flex-shrink: 0; }
+.equipe-val { font-weight: 700; color: var(--text-main); font-size: 0.9rem; white-space: normal; line-height: 1.2; }
 
 .btn-close {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  cursor: pointer;
-  background: #eee;
-  border-radius: 50%;
-  width: 25px;
-  height: 25px;
-  border: none;
-  font-weight: bold;
-  font-size: 1.2rem;
-  color: #555;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: absolute; top: 10px; right: 10px; cursor: pointer;
+  background: #eee; border-radius: 50%; width: 25px; height: 25px;
+  border: none; font-weight: bold; font-size: 1.2rem; color: #555;
+  display: flex; align-items: center; justify-content: center;
 }
 
-/* Utilitários de Cor para Modal */
-.bg-verde {
-  background-color: var(--bg-verde);
+/* Botão Admin */
+.btn-admin-action {
+    margin-top: 20px; width: 100%; padding: 12px;
+    background-color: #2C0E12; color: #fff;
+    border: none; border-radius: 8px; cursor: pointer;
+    font-weight: bold; font-size: 0.9rem;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: background 0.2s;
 }
-.bg-branco {
-  background-color: #e0e0e0;
-}
-.bg-dourado {
-  background-color: var(--bg-dourado);
-}
-.txt-verde {
-  color: var(--txt-verde);
-}
-.txt-branco {
-  color: var(--txt-branco);
-}
-.txt-dourado {
-  color: var(--txt-dourado);
-}
+.btn-admin-action:hover { background-color: var(--cor-cereja); }
 
 /* ==========================================================================
-   8. RESPONSIVIDADE (MEDIA QUERIES)
+   10. RESPONSIVIDADE (MEDIA QUERIES) & MENU MOBILE
    ========================================================================== */
 
-/* DESKTOP (Telas maiores) */
-@media (min-width: 768px) {
-  .header-logo-container {
-    height: 60px;
-    margin: 0;
-  }
-  header {
-    justify-content: space-between;
-  }
+/* MÁSCARA ESCURA (Overlay do Menu) */
+#sidebar-overlay {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5); z-index: 99; backdrop-filter: blur(2px);
+}
+#sidebar-overlay.active { display: block; }
 
-  .modal-card {
-    width: 600px;
-    max-width: 600px;
-  }
-  .modal-body {
-    padding: 35px;
-  }
-  .modal-day {
-    font-size: 2.8rem;
-  }
-  .modal-titulo {
-    font-size: 1.5rem;
-  }
-  .modal-sidebar-color {
-    width: 15px;
-  }
+/* DESKTOP (Telas maiores que 768px) */
+@media (min-width: 768px) {
+  .header-logo-container { height: 60px; margin: 0; }
+  header { justify-content: space-between; }
+
+  .modal-card { width: 600px; max-width: 600px; }
+  .modal-body { padding: 35px; }
+  .modal-day { font-size: 2.8rem; }
+  .modal-titulo { font-size: 1.5rem; }
+  .modal-sidebar-color { width: 15px; }
 }
 
-/* MOBILE (Celulares) */
+/* MOBILE (Celulares menores que 768px) */
 @media (max-width: 768px) {
+  /* Mostra botão de menu */
+  #btn-mobile-menu { display: block; }
+  
+  header { justify-content: center; }
+  .header-logo-img { max-height: 40px; }
+
+  /* SIDEBAR VIRA GAVETA */
   .sidebar {
-    display: none;
-  } /* Esconde filtros */
-  header {
-    justify-content: center;
+    display: flex !important; /* Força exibir para animação */
+    position: fixed; top: 0; left: 0;
+    height: 100vh; width: 80%; max-width: 300px;
+    background: #fff; z-index: 100;
+    transform: translateX(-100%); /* Esconde na esquerda */
+    transition: transform 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.5);
   }
+  .sidebar.active { transform: translateX(0); } /* Desliza para dentro */
 
-  .month-name {
-    font-size: 1.4rem;
-  }
-  .day-header {
-    font-size: 0.65rem;
-    padding: 5px 0;
-  }
+  .month-name { font-size: 1.4rem; }
+  .day-header { font-size: 0.65rem; padding: 5px 0; }
 
-  /* Grid Mobile */
+  /* Grid Compacto */
   .day-cell {
-    min-height: 55px;
-    height: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
+    min-height: 55px; height: auto;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
     padding: 4px;
   }
 
-  /* Pílulas Mobile (Bolinhas) */
   .pill {
-    font-size: 0px;
-    width: 6px;
-    height: 6px;
-    padding: 0;
-    border: none;
-    border-radius: 50%;
-    display: inline-block;
-    margin: 2px 1px;
+    font-size: 0px; width: 6px; height: 6px; padding: 0;
+    border: none; border-radius: 50%; display: inline-block; margin: 2px 1px;
   }
 
-  /* Footer Mobile */
-  .footer-container {
-    text-align: center;
-  }
-  .footer-col {
-    align-items: center;
-  }
-  .btn-whatsapp {
-    margin: 0 auto 15px auto;
-  }
-  .social-links {
-    justify-content: center;
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* --- ESTILOS DE FILTRO --- */
-
-/* Esconde dias que não atendem ao filtro */
-.day-cell.hidden-by-filter {
-    opacity: 0.1; /* Fica quase invisível */
-    pointer-events: none; /* Não clicável */
-    filter: grayscale(100%);
-}
-
-/* Destaca dias filtrados */
-.day-cell.highlight-filter {
-    background-color: #fff9e6; /* Fundo levemente amarelo */
-    border: 2px solid var(--cor-dourado);
+  .footer-container { text-align: center; }
+  .footer-col { align-items: center; }
+  .btn-whatsapp { margin: 0 auto 15px auto; }
+  .social-links { justify-content: center; }
 }
 
 /* ==========================================================================
-   9. ESTILOS DE IMPRESSÃO (PDF A4)
+   11. ESTILOS DE IMPRESSÃO (PDF A4)
    ========================================================================== */
-/* Esconde o relatório na tela normal */
 .print-only { display: none; }
 
 @media print {
-    /* 1. Esconde a Aplicação Web */
-    .app-layout, header, .modal-overlay { 
-        display: none !important; 
-    }
-
-    /* 2. Mostra e Configura o Relatório */
+    .app-layout, header, .modal-overlay, #btn-mobile-menu { display: none !important; }
+    
     .print-only {
         display: block !important;
         background: white;
@@ -1051,48 +491,21 @@ header {
         padding: 0;
     }
 
-    /* Layout da Página A4 */
-    @page {
-        size: A4;
-        margin: 1.5cm;
-    }
+    @page { size: A4; margin: 1.5cm; }
 
-    /* Cabeçalho do Relatório */
     .print-header {
-        display: flex;
-        align-items: center;
-        border-bottom: 2px solid #000;
-        padding-bottom: 20px;
-        margin-bottom: 20px;
+        display: flex; align-items: center; border-bottom: 2px solid #000;
+        padding-bottom: 20px; margin-bottom: 20px;
     }
     .print-logo { height: 60px; margin-right: 20px; }
     .print-info h1 { margin: 0; font-size: 18pt; text-transform: uppercase; }
     .print-info h2 { margin: 0; font-size: 14pt; color: #444; }
 
-    /* Tabela */
-    .print-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    
-    .print-table th {
-        border-bottom: 2px solid #000;
-        text-align: left;
-        padding: 10px;
-        font-size: 10pt;
-        text-transform: uppercase;
-    }
-
-    .print-table td {
-        border-bottom: 1px solid #ccc;
-        padding: 10px;
-        vertical-align: top;
-    }
-
-    /* Evita quebrar uma linha de evento no meio da página */
+    .print-table { width: 100%; border-collapse: collapse; }
+    .print-table th { border-bottom: 2px solid #000; text-align: left; padding: 10px; font-size: 10pt; text-transform: uppercase; }
+    .print-table td { border-bottom: 1px solid #ccc; padding: 10px; vertical-align: top; }
     tr { page-break-inside: avoid; }
 
-    /* Estilos das Colunas */
     .col-data { text-align: center; background: #f9f9f9; }
     .dia-grande { display: block; font-size: 16pt; font-weight: bold; }
     .dia-sem { display: block; font-size: 8pt; text-transform: uppercase; }
@@ -1100,82 +513,18 @@ header {
     .col-evento .print-titulo { font-weight: bold; font-size: 11pt; margin-bottom: 4px; }
     .col-evento .print-liturgia { font-size: 9pt; font-style: italic; color: #555; }
 
-    /* Escalas */
-    .print-escala-row {
-        margin-bottom: 6px;
-        display: flex;
-        align-items: center;
-    }
+    .print-escala-row { margin-bottom: 6px; display: flex; align-items: center; }
     .print-hora {
-        background: #000; color: #fff;
-        padding: 2px 6px; border-radius: 4px;
-        font-weight: bold; font-size: 9pt;
-        margin-right: 10px;
-        -webkit-print-color-adjust: exact; /* Força impressão do fundo preto */
+        background: #000; color: #fff; padding: 2px 6px; border-radius: 4px;
+        font-weight: bold; font-size: 9pt; margin-right: 10px;
+        -webkit-print-color-adjust: exact;
     }
     .print-equipes { font-size: 10pt; }
 
-    /* Destaque Solenidade */
-    .row-solenidade td {
-        background-color: #f0f0f0 !important;
-        -webkit-print-color-adjust: exact;
-    }
+    .row-solenidade td { background-color: #f0f0f0 !important; -webkit-print-color-adjust: exact; }
 
     .print-footer {
-        margin-top: 30px;
-        text-align: center;
-        font-size: 8pt;
-        border-top: 1px solid #ccc;
-        padding-top: 10px;
-    }
-}
-/* --- BOTÃO MENU MOBILE (Padrão: Escondido no Desktop) --- */
-#btn-mobile-menu {
-    display: none;
-    background: transparent;
-    border: none;
-    color: white;
-    cursor: pointer;
-    padding: 5px;
-}
-
-/* --- MÁSCARA ESCURA (Overlay) --- */
-#sidebar-overlay {
-    display: none;
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5);
-    z-index: 99; /* Atrás da sidebar, na frente de tudo */
-    backdrop-filter: blur(2px);
-}
-#sidebar-overlay.active { display: block; }
-
-/* --- AJUSTES MOBILE --- */
-@media (max-width: 768px) {
-    /* Mostra o botão de menu */
-    #btn-mobile-menu { display: block; }
-    
-    /* Header ajustado */
-    header { justify-content: space-between; padding: 0 15px; }
-    .header-logo-img { max-height: 40px; } /* Logo um pouco menor */
-
-    /* TRANSFORMAÇÃO DA SIDEBAR EM GAVETA */
-    .sidebar {
-        display: flex !important; /* Força aparecer */
-        position: fixed;
-        top: 0; left: 0;
-        height: 100vh;
-        width: 280px; /* Largura da gaveta */
-        background-color: #fff;
-        z-index: 100; /* Acima de tudo */
-        box-shadow: 2px 0 10px rgba(0,0,0,0.3);
-        
-        /* Estado Fechado (Fora da tela) */
-        transform: translateX(-100%);
-        transition: transform 0.3s ease;
-    }
-
-    /* Estado Aberto (Classe adicionada via JS) */
-    .sidebar.active {
-        transform: translateX(0);
+        margin-top: 30px; text-align: center; font-size: 8pt;
+        border-top: 1px solid #ccc; padding-top: 10px;
     }
 }
