@@ -20,7 +20,7 @@ window.api = {
   client: _supabaseClient,
 
   // ==========================================================================
-  // 2. BUSCA DE EVENTOS (LÓGICA DE MÚLTIPLOS EVENTOS)
+  // 2. FEATURE: BUSCA DE EVENTOS E ESCALAS
   // ==========================================================================
   /* INÍCIO: Método buscarEventos */
   buscarEventos: async function (ano, mes, apenasAprovados = true) {
@@ -46,28 +46,46 @@ window.api = {
         .gte("data", inicio)
         .lte("data", fim);
 
-      // Filtro de status para visualização pública
       if (apenasAprovados) {
         query = query.eq("status", "aprovado");
       }
 
       const { data, error } = await query.order("data", { ascending: true });
-
       if (error) throw error;
       return data || [];
     } catch (err) {
       console.error(
-        "❌ api.js: Falha na comunicação com o banco:",
+        "❌ api.js: Erro na busca de eventos/escalas:",
         err.message
       );
-      return []; // Retorna array vazio para não quebrar o Motor UI
+      return [];
     }
   },
   /* FIM: Método buscarEventos */
 
   // ==========================================================================
-  // 3. ESTATÍSTICAS E GESTÃO
+  // 3. FEATURE: MURAL E ESTATÍSTICAS
   // ==========================================================================
+  /* INÍCIO: Método buscarAvisos */
+  buscarAvisos: async function () {
+    const hoje = new Date().toISOString().split("T")[0];
+    try {
+      const { data, error } = await _supabaseClient
+        .from("eventos_base")
+        .select("id, titulo, data, local, mural_prioridade, hora_inicio")
+        .eq("mural_destaque", true)
+        .eq("status", "aprovado")
+        .gte("data", hoje)
+        .order("data", { ascending: true })
+        .limit(5);
+      if (error) throw error;
+      return data || [];
+    } catch (e) {
+      return [];
+    }
+  },
+  /* FIM: Método buscarAvisos */
+
   /* INÍCIO: Método buscarEstatisticasDashboard */
   buscarEstatisticasDashboard: async function () {
     const hoje = new Date().toISOString().split("T")[0];
@@ -103,9 +121,24 @@ window.api = {
   /* FIM: Método buscarEstatisticasDashboard */
 
   // ==========================================================================
-  // 4. MÉTODOS DE SESSÃO E SUPORTE
+  // 4. FEATURE: GESTÃO E AUTH
   // ==========================================================================
-  /* INÍCIO: checkSession */
+  /* INÍCIO: Método listarEquipes */
+  listarEquipes: async function () {
+    try {
+      const { data, error } = await _supabaseClient
+        .from("equipes")
+        .select("*")
+        .order("nome_equipe");
+      if (error) throw error;
+      return data || [];
+    } catch (e) {
+      return [];
+    }
+  },
+  /* FIM: Método listarEquipes */
+
+  /* INÍCIO: Métodos de Autenticação */
   checkSession: async function () {
     try {
       const { data } = await _supabaseClient.auth.getSession();
@@ -119,25 +152,5 @@ window.api = {
     await _supabaseClient.auth.signOut();
     window.location.href = "index.html";
   },
-
-  listarEquipes: async function () {
-    const { data } = await _supabaseClient
-      .from("equipes")
-      .select("*")
-      .order("nome_equipe");
-    return data || [];
-  },
-
-  buscarAvisos: async function () {
-    const hoje = new Date().toISOString().split("T")[0];
-    const { data } = await _supabaseClient
-      .from("eventos_base")
-      .select("id, titulo, data, local, mural_prioridade, hora_inicio")
-      .eq("status", "aprovado")
-      .eq("mural_destaque", true)
-      .gte("data", hoje)
-      .limit(5);
-    return data || [];
-  },
-  /* FIM: checkSession */
+  /* FIM: Métodos de Autenticação */
 };

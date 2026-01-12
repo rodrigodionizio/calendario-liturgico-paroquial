@@ -6,23 +6,38 @@
 }
 
 .admin-body {
-  background-color: var(--cor-fundo-admin);
-  color: var(--text-main);
-  margin: 0;
-  padding: 0;
-  display: flex;
+  display: flex !important;
+  flex-direction: row !important;
   height: 100vh;
+  margin: 0;
   overflow: hidden;
+  background-color: #f5f7fa;
 }
 
-/* SIDEBAR */
 .admin-sidebar {
-  width: var(--sidebar-width);
+  width: 260px;
+  flex-shrink: 0; /* Impede a sidebar de encolher */
   background-color: var(--cor-vinho);
   color: white;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.admin-main {
+  flex-grow: 1; /* Faz o conteúdo ocupar o restante da tela */
+  height: 100vh;
+  overflow-y: auto;
+  padding: 30px;
+  box-sizing: border-box;
+}
+
+/* Garante que o cabeçalho não empurre o conteúdo */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
 }
 
 .admin-logo {
