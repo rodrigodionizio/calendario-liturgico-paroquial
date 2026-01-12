@@ -3,11 +3,13 @@
  * DESCRIÇÃO: Camada de Conexão com Supabase e Regras de Negócio
  * PROJETO: Liturgia Paroquial 2026
  * AUTOR: Rodrigo & Dev AI
+ * VERSÃO: 2.0 (Agenda Total + Mural)
  */
 
 // ==========================================================================
 // 1. CONFIGURAÇÃO E CONEXÃO
 // ==========================================================================
+// Substitua pelas suas chaves reais
 const SUPABASE_URL = "https://gmfmebnodmtozpzhlgvk.supabase.co"; 
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtZm1lYm5vZG10b3pwemhsZ3ZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5NzU3MzIsImV4cCI6MjA4MzU1MTczMn0.29rhpFJ0I-ywPbHb4sgcdmNHaM_rJidCeaV3Cfos6Ro";
 
@@ -47,51 +49,53 @@ window.api = {
         return data;
     },
 
-    // Salva ou Cria um Evento (Com suas escalas)
+    // Salva ou Cria um Evento (Com suporte a Agenda Total e Mural)
     salvarEventoCompleto: async function (eventoDados, escalasLista) {
         let eventoId = eventoDados.id;
 
-        // A. Salvar/Criar Evento Base
+        // Payload Unificado (Liturgia + Agenda + Mural)
         const payloadEvento = {
             data: eventoDados.data,
             titulo: eventoDados.titulo,
+            tipo_compromisso: eventoDados.tipo_compromisso || 'liturgia',
+            
+            // Campos de Agenda
+            local: eventoDados.local,
+            responsavel: eventoDados.responsavel,
+            
+            // Campos do Mural
+            mural_destaque: eventoDados.mural_destaque || false,
+            mural_prioridade: eventoDados.mural_prioridade || 2,
+
+            // Campos Litúrgicos (Default se for outro tipo)
             tempo_liturgico: eventoDados.tempo_liturgico || "Tempo Comum",
             cor_id: eventoDados.cor_id || 1,
             is_solenidade: eventoDados.is_solenidade || false,
             is_festa: eventoDados.is_festa || false,
-            tipo_compromisso: eventoDados.tipo_compromisso || 'liturgia',
-            local: eventoDados.local,
-            responsavel: eventoDados.responsavel
         };
 
+        // 1. Upsert do Evento Pai
         if (eventoId) {
-            // Update
-            const { error } = await _supabaseClient
-                .from("eventos_base")
-                .update(payloadEvento)
-                .eq("id", eventoId);
+            const { error } = await _supabaseClient.from("eventos_base").update(payloadEvento).eq("id", eventoId);
             if (error) throw error;
         } else {
-            // Insert
-            const { data, error } = await _supabaseClient
-                .from("eventos_base")
-                .insert(payloadEvento)
-                .select();
+            const { data, error } = await _supabaseClient.from("eventos_base").insert(payloadEvento).select();
             if (error) throw error;
             eventoId = data[0].id;
         }
 
-        // B. Salvar Escalas (Transação Simplificada: Delete All -> Insert New)
-        const { error: errDel } = await _supabaseClient
-            .from("escalas")
-            .delete()
-            .eq("evento_id", eventoId);
-        if (errDel) throw errDel;
+        // 2. Gerenciamento de Escalas (Apenas se for tipo liturgia)
+        if (eventoDados.tipo_compromisso === 'liturgia') {
+            // Limpa escalas antigas para garantir integridade
+            const { error: errDel } = await _supabaseClient.from("escalas").delete().eq("evento_id", eventoId);
+            if (errDel) throw errDel;
 
-        if (escalasLista.length > 0) {
-            const escalasComId = escalasLista.map((e) => ({ ...e, evento_id: eventoId }));
-            const { error: errIns } = await _supabaseClient.from("escalas").insert(escalasComId);
-            if (errIns) throw errIns;
+            // Insere novas se houver
+            if (escalasLista.length > 0) {
+                const escalasComId = escalasLista.map((e) => ({ ...e, evento_id: eventoId }));
+                const { error: errIns } = await _supabaseClient.from("escalas").insert(escalasComId);
+                if (errIns) throw errIns;
+            }
         }
 
         return true;
@@ -102,14 +106,16 @@ window.api = {
     // 3. FEATURE: MURAL DE AVISOS
     // ==========================================================================
     
+    // Busca apenas eventos marcados como destaque para o futuro
     buscarAvisos: async function() {
-        const hoje = new Date().toISOString();
+        const hoje = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
         
         const { data, error } = await _supabaseClient
-            .from('avisos')
-            .select('*')
-            .gte('data_evento', hoje) // Apenas futuros
-            .order('data_evento', { ascending: true }) // Mais próximos primeiro
+            .from('eventos_base')
+            .select('id, titulo, data, local, mural_prioridade')
+            .eq('mural_destaque', true)
+            .gte('data', hoje)
+            .order('data', { ascending: true })
             .limit(5);
 
         if (error) { console.error("Erro avisos:", error); return []; }

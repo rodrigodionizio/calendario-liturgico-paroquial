@@ -1,7 +1,9 @@
 /* 
  * ARQUIVO: app.js
- * DESCRIÇÃO: Controlador Principal (Versão 7.0 - Mestre)
+ * DESCRIÇÃO: Controlador Principal - Renderização, Modais e Painel Admin
+ * PROJETO: Liturgia Paroquial 2026
  * AUTOR: Rodrigo & Dev AI
+ * VERSÃO: 2.0 (Agenda Total + Mural + Filtros)
  */
 
 console.log("🚀 Sistema Litúrgico V7 Iniciado");
@@ -45,8 +47,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     
     // Inicia UI
     inicializarSidebar();
-    renderizarMural(); // <-- Importante: Carrega o Mural
-    carregarMes(ESTADO.anoAtual, ESTADO.mesAtual);
+    renderizarMural(); // Carrega Mural
+    carregarMes(ESTADO.anoAtual, ESTADO.mesAtual); // Carrega Calendário
     configurarBotoesNavegacao();
 });
 
@@ -90,7 +92,7 @@ async function renderizarMural() {
             const diaMes = dataEvento.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'});
 
             html += `
-            <div class="aviso-card prio-${aviso.prioridade}">
+            <div class="aviso-card prio-${aviso.mural_prioridade}">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span class="aviso-tag ${tagClass}">${tagTexto}</span>
                     <span style="font-size:0.7rem; color:#666;">${diaMes}</span>
@@ -110,7 +112,7 @@ async function renderizarMural() {
 }
 
 // ==========================================================================
-// 3. CALENDÁRIO & FILTROS
+// 3. CALENDÁRIO & RENDERIZAÇÃO
 // ==========================================================================
 async function carregarMes(ano, mes) {
     const nomeMes = new Date(ano, mes - 1).toLocaleString("pt-BR", { month: "long" });
@@ -155,6 +157,11 @@ function renderizarGrid(ano, mes, gridElement, headersHTML) {
             let corHex = evento.liturgia_cores?.hex_code || "#2E7D32";
             if (corHex.toLowerCase() === "#ffffff") corHex = "#cccccc";
 
+            // Se for reunião, usa cor cinza neutra
+            if (evento.tipo_compromisso && evento.tipo_compromisso !== 'liturgia') {
+                corHex = '#64748b'; // Slate Gray
+            }
+
             const classeSolenidade = evento.is_solenidade ? "solenidade" : "";
             const estiloPill = `border-left: 3px solid ${corHex}; background-color: var(--cor-vinho);`;
 
@@ -165,6 +172,8 @@ function renderizarGrid(ano, mes, gridElement, headersHTML) {
                     const hora = esc.hora_celebracao.substring(0, 5);
                     conteudoHTML += `<div class="pill" style="background-color:#f0f0f0; color:#333; border-left:3px solid #ccc">${hora} Missa</div>`;
                 });
+            } else if (evento.tipo_compromisso !== 'liturgia') {
+                conteudoHTML += `<div class="pill" style="background-color:#f0f0f0; color:#555; border-left:3px solid #ccc">Evento</div>`;
             }
         }
         html += `<div class="day-cell" data-iso="${dataISO}" ${clickAttr}><span class="day-number">${dia}</span>${conteudoHTML}</div>`;
@@ -180,7 +189,9 @@ function renderizarGrid(ano, mes, gridElement, headersHTML) {
     gridElement.innerHTML = html;
 }
 
-// --- FILTROS ---
+// ==========================================================================
+// 4. SIDEBAR E FILTROS
+// ==========================================================================
 async function inicializarSidebar() {
     const containerEquipes = document.getElementById('filtro-equipes');
     if (!containerEquipes) return;
@@ -260,7 +271,7 @@ function aplicarFiltrosVisuais() {
 }
 
 // ==========================================================================
-// 4. MODAL
+// 5. MODAL DE DETALHES
 // ==========================================================================
 window.abrirModal = function (dataISO) {
     let evento = ESTADO.dadosEventos[dataISO];
@@ -282,7 +293,17 @@ window.abrirModal = function (dataISO) {
     let corTxt = corHex;
     if (corHex.toLowerCase() === "#ffffff") { corHex = "#ccc"; corTxt = "#666"; }
 
-    const conteudoHTML = gerarHTMLLeitura(evento);
+    // HTML diferente para Reunião vs Liturgia
+    let conteudoHTML = '';
+    if (evento.tipo_compromisso && evento.tipo_compromisso !== 'liturgia') {
+        conteudoHTML = `
+            <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:10px;">
+                <p><strong>📍 Local:</strong> ${evento.local || 'Não informado'}</p>
+                <p><strong>👤 Responsável:</strong> ${evento.responsavel || 'Não informado'}</p>
+            </div>`;
+    } else {
+        conteudoHTML = gerarHTMLLeitura(evento);
+    }
 
     let btnAdmin = "";
     if (ESTADO.isAdmin) {
@@ -313,7 +334,7 @@ window.abrirModal = function (dataISO) {
 
 function gerarHTMLLeitura(evento) {
     if (!evento.escalas || evento.escalas.length === 0) {
-        return '<div style="color:#999; font-style:italic; padding:10px;">Nenhuma celebração agendada.</div>';
+        return '<div style="color:#999; font-style:italic; padding:10px;">Nenhuma escala litúrgica.</div>';
     }
     return evento.escalas.map((esc) => {
         const leit = esc.equipe_leitura?.nome_equipe || "-";
@@ -331,78 +352,103 @@ function gerarHTMLLeitura(evento) {
 }
 
 // ==========================================================================
-// 5. EDITOR (ADMIN)
+// 6. EDITOR DE EVENTOS (FORMULÁRIO UNIFICADO)
 // ==========================================================================
 function ativarModoEdicao(evento) {
     const area = document.getElementById("areaConteudo");
     const btnEditar = document.getElementById("btnEditar");
     if (btnEditar) btnEditar.style.display = "none";
 
-    // Valores Iniciais
-    const tituloVal = evento.titulo || "";
-    const tipoCompromisso = evento.tipo_compromisso || "liturgia";
+    // Valores
+    const tituloVal = evento.titulo || "Novo Evento";
+    const tipoComp = evento.tipo_compromisso || "liturgia";
     const localVal = evento.local || "";
     const respVal = evento.responsavel || "";
-    
-    // HTML do Formulário
-    let html = `
+    const isMural = evento.mural_destaque || false;
+    const prioMural = evento.mural_prioridade || 2;
+
+    // HTML Form
+    let htmlEditor = `
         <h3 style="color:var(--cor-vinho); margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:5px;">Editar Agenda</h3>
-        
         <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #e0e0e0; margin-bottom:15px;">
-            <!-- SELETOR DE TIPO -->
             <label style="font-size:0.7rem; font-weight:bold; color:#888;">TIPO DE COMPROMISSO</label>
-            <select id="editTipoComp" onchange="toggleCamposEditor()" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; margin-bottom:15px; background:#f9f9f9; font-weight:bold;">
-                <option value="liturgia" ${tipoCompromisso==='liturgia'?'selected':''}>✝️ Celebração Litúrgica / Missa</option>
-                <option value="reuniao" ${tipoCompromisso==='reuniao'?'selected':''}>👥 Reunião / Encontro</option>
-                <option value="evento" ${tipoCompromisso==='evento'?'selected':''}>🎉 Evento / Festa</option>
-                <option value="atendimento" ${tipoCompromisso==='atendimento'?'selected':''}>🗣️ Atendimento do Padre</option>
+            <select id="editTipoComp" onchange="toggleCamposEditor()" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; margin-bottom:10px; font-weight:bold; background:#f9f9f9;">
+                <option value="liturgia" ${tipoComp==='liturgia'?'selected':''}>✝️ Liturgia / Missa</option>
+                <option value="reuniao" ${tipoComp==='reuniao'?'selected':''}>👥 Reunião / Pastoral</option>
+                <option value="evento" ${tipoComp==='evento'?'selected':''}>🎉 Evento / Festa</option>
+                <option value="atendimento" ${tipoComp==='atendimento'?'selected':''}>🗣️ Atendimento Padre</option>
             </select>
 
             <label style="font-size:0.7rem; font-weight:bold; color:#888;">TÍTULO</label>
-            <input type="text" id="editTitulo" value="${tituloVal}" placeholder="Ex: Missa ou Reunião do CPP" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; font-weight:bold; font-size:1rem; margin-bottom:10px;">
+            <input type="text" id="editTitulo" value="${tituloVal}" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; font-weight:bold; font-size:1rem; margin-bottom:10px;">
 
-            <!-- CAMPOS EXCLUSIVOS DE REUNIÃO/EVENTO (Inicialmente ocultos se for liturgia) -->
-            <div id="campos-extras" style="display:none; grid-template-columns: 1fr 1fr; gap:10px;">
+            <!-- Extras (Reunião) -->
+            <div id="campos-extras" style="display:none; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
                 <div>
                     <label style="font-size:0.7rem; font-weight:bold; color:#888;">LOCAL</label>
                     <input type="text" id="editLocal" value="${localVal}" placeholder="Ex: Salão" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
                 </div>
                 <div>
                     <label style="font-size:0.7rem; font-weight:bold; color:#888;">RESPONSÁVEL</label>
-                    <input type="text" id="editResp" value="${respVal}" placeholder="Ex: Coord. Maria" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
+                    <input type="text" id="editResp" value="${respVal}" placeholder="Ex: Coord. João" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
                 </div>
             </div>
 
-            <!-- CAMPOS EXCLUSIVOS DE LITURGIA -->
-            <div id="campos-liturgia">
-                <!-- (Aqui vem os selects de Cor, Tempo, Solenidade que já tínhamos) -->
-                ${gerarCamposLiturgia(evento)}
+            <!-- Liturgia -->
+            <div id="campos-liturgia">${gerarCamposLiturgia(evento)}</div>
+        </div>
+
+        <!-- Mural -->
+        <div style="background:#fff9e6; padding:10px; border-radius:8px; border:1px solid #eee; margin-bottom:15px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <input type="checkbox" id="checkMural" onchange="toggleMuralPrio()" ${isMural?'checked':''} style="width:18px; height:18px;">
+                <label for="checkMural" style="font-weight:bold; font-size:0.9rem; color:#d97706;">Destacar no Mural?</label>
+            </div>
+            <div id="area-prio" style="margin-top:10px; display:none; padding-left:28px;">
+                <label style="font-size:0.7rem; font-weight:bold; color:#888;">PRIORIDADE</label>
+                <select id="editPrio" style="padding:5px; border:1px solid #ccc; border-radius:4px;">
+                    <option value="1" ${prioMural==1?'selected':''}>🔴 Urgente</option>
+                    <option value="2" ${prioMural==2?'selected':''}>🟡 Atenção</option>
+                    <option value="3" ${prioMural==3?'selected':''}>🔵 Info</option>
+                </select>
             </div>
         </div>
 
-        <!-- ÁREA DE ESCALAS (Só aparece se for Liturgia) -->
+        <!-- Escalas -->
         <div id="area-escalas">
             <h4 style="color:#666; font-size:0.9rem; margin-bottom:10px;">Escalas e Horários</h4>
-            <div id="listaEditor" style="display:flex; flex-direction:column; gap:15px;">
-                ${gerarListaEscalasIniciais(evento)}
-            </div>
-            <button onclick="adicionarNovaEscala()" style="margin-top:15px; background:#f0f0f0; border:1px dashed #ccc; padding:10px; width:100%; border-radius:6px; cursor:pointer; font-weight:bold; color:#555;">➕ Adicionar Horário</button>
+            <div id="listaEditor" style="display:flex; flex-direction:column; gap:15px;">${gerarListaEscalasIniciais(evento)}</div>
+            <button onclick="adicionarNovaEscala()" style="margin-top:15px; width:100%; padding:8px; background:#f0f0f0; border:1px dashed #ccc; border-radius:4px; font-weight:bold; color:#555;">➕ Adicionar Horário</button>
         </div>
 
-        <!-- BOTÕES -->
         <div style="margin-top:25px; display:flex; gap:10px;">
             <button onclick="salvarEdicoes()" style="flex:1; background:var(--cor-verde); color:#fff; border:none; padding:12px; border-radius:6px; font-weight:bold; cursor:pointer;">💾 SALVAR</button>
             <button onclick="fecharModalForce()" style="background:#eee; border:none; padding:12px 20px; border-radius:6px; cursor:pointer; color:#555;">Cancelar</button>
-        </div>
-    `;
+        </div>`;
 
     area.innerHTML = htmlEditor;
-    
-    // Ativa a lógica visual inicial
     window.toggleCamposEditor();
+    window.toggleMuralPrio();
 }
 
-// Helpers para limpar o código principal
+// Helpers do Editor
+window.toggleCamposEditor = function() {
+    const tipo = document.getElementById('editTipoComp').value;
+    if(tipo === 'liturgia') {
+        document.getElementById('campos-liturgia').style.display = 'block';
+        document.getElementById('area-escalas').style.display = 'block';
+        document.getElementById('campos-extras').style.display = 'none';
+    } else {
+        document.getElementById('campos-liturgia').style.display = 'none';
+        document.getElementById('area-escalas').style.display = 'none';
+        document.getElementById('campos-extras').style.display = 'grid';
+    }
+};
+
+window.toggleMuralPrio = function() {
+    document.getElementById('area-prio').style.display = document.getElementById('checkMural').checked ? 'block' : 'none';
+};
+
 function gerarCamposLiturgia(evento) {
     const tempoVal = evento.tempo_liturgico || "Paroquial";
     const corAtualId = evento.cor_id || 1;
@@ -411,85 +457,85 @@ function gerarCamposLiturgia(evento) {
 
     return `
     <div style="display:flex; gap:10px; margin-bottom:10px;">
-        <div style="flex:1;">
-            <label style="font-size:0.7rem; font-weight:bold; color:#888;">TEMPO LITÚRGICO</label>
-            <select id="editTempo" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">${optionsTempo}</select>
-        </div>
-        <div style="flex:1;">
-            <label style="font-size:0.7rem; font-weight:bold; color:#888;">TIPO</label>
-            <select id="editTipo" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
-                <option value="comum" ${!evento.is_solenidade?'selected':''}>Comum</option>
-                <option value="solenidade" ${evento.is_solenidade?'selected':''}>Solenidade</option>
-            </select>
-        </div>
-    </div>
-    <div>
-        <label style="font-size:0.7rem; font-weight:bold; color:#888;">COR</label>
-        <select id="editCor" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
+        <div style="flex:1;"><label style="font-size:0.7rem; font-weight:bold; color:#888;">TEMPO</label><select id="editTempo" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">${optionsTempo}</select></div>
+        <div style="flex:1;"><label style="font-size:0.7rem; font-weight:bold; color:#888;">COR</label><select id="editCor" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
             <option value="1" ${corAtualId==1?'selected':''}>Verde</option>
             <option value="2" ${corAtualId==2?'selected':''}>Branco</option>
             <option value="3" ${corAtualId==3?'selected':''}>Vermelho</option>
             <option value="4" ${corAtualId==4?'selected':''}>Roxo</option>
             <option value="5" ${corAtualId==5?'selected':''}>Rosa</option>
-        </select>
+        </select></div>
     </div>`;
 }
 
 function gerarListaEscalasIniciais(evento) {
     if (!evento.escalas) return '';
     let html = '';
-    evento.escalas.forEach((esc, index) => {
-        html += gerarLinhaEditor(esc, index);
-    });
+    evento.escalas.forEach((esc, index) => { html += gerarLinhaEditor(esc, index); });
     return html;
 }
 
-// Lógica de Toggle (Show/Hide)
-window.toggleCamposEditor = function() {
-    const tipo = document.getElementById('editTipoComp').value;
-    const divLiturgia = document.getElementById('campos-liturgia');
-    const divExtras = document.getElementById('campos-extras');
-    const divEscalas = document.getElementById('area-escalas');
+function gerarLinhaEditor(escala, index) {
+    const idLeit = escala.equipe_leitura?.id || escala.equipe_leitura_id;
+    const idCant = escala.equipe_canto?.id || escala.equipe_canto_id;
+    const horaVal = escala.hora_celebracao ? escala.hora_celebracao.substring(0, 5) : "19:00";
 
-    if (tipo === 'liturgia') {
-        divLiturgia.style.display = 'block';
-        divEscalas.style.display = 'block';
-        divExtras.style.display = 'none';
-    } else {
-        // Modo Reunião/Evento
-        divLiturgia.style.display = 'none';
-        divEscalas.style.display = 'none'; // Esconde escalas pois reunião não tem canto/leitura
-        divExtras.style.display = 'grid'; // Mostra Local/Responsável
-    }
+    const buildOpts = (lista, selId) => {
+        let h = '<option value="">-- Selecione --</option>';
+        lista.forEach(eq => {
+            const s = eq.id === selId ? 'selected' : '';
+            h += `<option value="${eq.id}" ${s}>${eq.nome_equipe}</option>`;
+        });
+        return h;
+    };
+
+    return `
+    <div class="editor-row" style="background:#fff; padding:15px; border-radius:8px; border:1px solid #e0e0e0;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px; border-bottom:1px solid #f5f5f5;">
+            <label style="font-size:0.8rem; font-weight:bold; color:#888;">HORÁRIO</label>
+            <button onclick="removerLinha(this)" style="color:red; border:none; background:none; cursor:pointer;">🗑️</button>
+        </div>
+        <input type="time" class="edit-hora" value="${horaVal}" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; margin-bottom:10px; font-weight:bold;">
+        <div style="display:grid; gap:10px;">
+            <div><label style="font-size:0.7rem; font-weight:bold; color:#666;">LEITURA</label><select class="edit-leitura" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">${buildOpts(cacheEquipesLeitura, idLeit)}</select></div>
+            <div><label style="font-size:0.7rem; font-weight:bold; color:#666;">CANTO</label><select class="edit-canto" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">${buildOpts(cacheEquipesCanto, idCant)}</select></div>
+        </div>
+    </div>`;
+}
+
+window.adicionarNovaEscala = function () {
+    const lista = document.getElementById("listaEditor");
+    const div = document.createElement("div");
+    div.innerHTML = gerarLinhaEditor({ hora_celebracao: "19:00" }, 999);
+    lista.appendChild(div.firstElementChild);
+    div.firstElementChild.scrollIntoView({ behavior: "smooth" });
 };
+
+window.removerLinha = function (btn) { if (confirm("Remover?")) btn.closest(".editor-row").remove(); };
+
 window.salvarEdicoes = async function () {
-    const tipoComp = document.getElementById("editTipoComp").value;
     const novoTitulo = document.getElementById("editTitulo").value;
-    
+    const tipoComp = document.getElementById("editTipoComp").value;
     if (!novoTitulo) { alert("Informe o Título!"); return; }
 
-    // Objeto Base
     const dadosEvento = {
         id: eventoEmEdicao.id,
         data: eventoEmEdicao.data,
         titulo: novoTitulo,
         tipo_compromisso: tipoComp,
-        // Campos Extras (só salva se não for liturgia, ou salva vazio)
+        mural_destaque: document.getElementById('checkMural').checked,
+        mural_prioridade: parseInt(document.getElementById('editPrio').value),
         local: tipoComp !== 'liturgia' ? document.getElementById("editLocal").value : null,
         responsavel: tipoComp !== 'liturgia' ? document.getElementById("editResp").value : null,
-        
-        // Campos Litúrgicos (Default se for reunião)
         tempo_liturgico: tipoComp === 'liturgia' ? document.getElementById("editTempo").value : 'Paroquial',
-        cor_id: tipoComp === 'liturgia' ? parseInt(document.getElementById("editCor").value) : 1, // 1=Verde (neutro)
-        is_solenidade: tipoComp === 'liturgia' ? (document.getElementById("editTipo").value === "solenidade") : false,
-        is_festa: false,
+        cor_id: tipoComp === 'liturgia' ? parseInt(document.getElementById("editCor").value) : 1,
+        is_solenidade: false, 
+        is_festa: false
     };
 
-    // Escalas (Só coleta se for Liturgia)
     const novasEscalas = [];
-    if (tipoComp === 'liturgia') {
-        const linhas = document.querySelectorAll(".editor-row");
-        linhas.forEach((row) => {
+    if(tipoComp === 'liturgia') {
+        document.querySelectorAll(".editor-row").forEach((row) => {
             const hora = row.querySelector(".edit-hora").value;
             const leit = row.querySelector(".edit-leitura").value || null;
             const cant = row.querySelector(".edit-canto").value || null;
@@ -499,13 +545,11 @@ window.salvarEdicoes = async function () {
 
     try {
         document.getElementById("areaConteudo").innerHTML = '<div style="text-align:center; padding:40px;">💾 Salvando...</div>';
-        
-        // Reusa a mesma função da API (ela já está pronta para receber campos extras se o objeto tiver)
         await window.api.salvarEventoCompleto(dadosEvento, novasEscalas);
-        
         alert("✅ Salvo com sucesso!");
         fecharModalForce();
         carregarMes(ESTADO.anoAtual, ESTADO.mesAtual);
+        renderizarMural();
     } catch (err) {
         alert("Erro: " + err.message);
         console.error(err);
@@ -514,52 +558,45 @@ window.salvarEdicoes = async function () {
 };
 
 // ==========================================================================
-// 6. RELATÓRIO DE IMPRESSÃO
+// 7. RELATÓRIO PDF
 // ==========================================================================
-window.prepararImpressao = function() {
-    const tbody = document.getElementById('print-table-body');
-    const title = document.getElementById('print-month-title');
-    title.textContent = document.querySelector('.month-name').textContent;
-    tbody.innerHTML = ''; 
+window.prepararImpressao = function () {
+    const tbody = document.getElementById("print-table-body");
+    const title = document.getElementById("print-month-title");
+    title.textContent = document.querySelector(".month-name").textContent;
+    tbody.innerHTML = "";
 
     const listaEventos = Object.values(ESTADO.dadosEventos).sort((a, b) => a.data.localeCompare(b.data));
-    let html = '';
-    listaEventos.forEach(ev => {
-        if ((!ev.escalas || ev.escalas.length === 0) && !ev.is_solenidade) return;
-        const dateObj = new Date(ev.data + 'T12:00:00');
-        const dia = dateObj.getDate().toString().padStart(2, '0');
-        const sem = dateObj.toLocaleString('pt-BR', { weekday: 'short' }).toUpperCase();
+    let html = "";
+    listaEventos.forEach((ev) => {
+        if (!ev.titulo && (!ev.escalas || ev.escalas.length === 0)) return;
 
-        let escalasHTML = '';
+        const dateObj = new Date(ev.data + "T12:00:00");
+        const dia = dateObj.getDate().toString().padStart(2, "0");
+        const sem = dateObj.toLocaleString("pt-BR", { weekday: "short" }).toUpperCase();
+
+        let escalasHTML = "";
         if (ev.escalas && ev.escalas.length > 0) {
-            ev.escalas.forEach(esc => {
+            ev.escalas.forEach((esc) => {
                 const hora = esc.hora_celebracao.substring(0, 5);
-                const leit = esc.equipe_leitura?.nome_equipe || '-';
-                const cant = esc.equipe_canto?.nome_equipe || '-';
-                escalasHTML += `
-                <div class="print-escala-row">
-                    <span class="print-hora">${hora}</span>
-                    <span class="print-equipes"><strong>📖 ${leit}</strong> • 🎵 ${cant}</span>
-                </div>`;
+                const leit = esc.equipe_leitura?.nome_equipe || "-";
+                const cant = esc.equipe_canto?.nome_equipe || "-";
+                escalasHTML += `<div class="print-escala-row"><span class="print-hora">${hora}</span><span class="print-equipes"><strong>📖 ${leit}</strong> • 🎵 ${cant}</span></div>`;
             });
+        } else if (ev.tipo_compromisso !== 'liturgia') {
+            escalasHTML = `<span style="font-style:italic">Local: ${ev.local || '-'} | Resp: ${ev.responsavel || '-'}</span>`;
         } else {
             escalasHTML = '<span style="color:#999; font-style:italic">Sem escalas</span>';
         }
-        const rowClass = ev.is_solenidade ? 'row-solenidade' : '';
-        html += `
-        <tr class="${rowClass}">
-            <td class="col-data"><span class="dia-grande">${dia}</span><span class="dia-sem">${sem}</span></td>
-            <td class="col-evento"><div class="print-titulo">${ev.titulo}</div><div class="print-liturgia">${ev.tempo_liturgico}</div></td>
-            <td class="col-escalas">${escalasHTML}</td>
-        </tr>`;
+
+        const rowClass = ev.is_solenidade ? "row-solenidade" : "";
+        html += `<tr class="${rowClass}"><td class="col-data"><span class="dia-grande">${dia}</span><span class="dia-sem">${sem}</span></td><td class="col-evento"><div class="print-titulo">${ev.titulo}</div><div class="print-liturgia">${ev.tempo_liturgico}</div></td><td class="col-escalas">${escalasHTML}</td></tr>`;
     });
     tbody.innerHTML = html;
-    setTimeout(() => window.print(), 300); 
+    setTimeout(() => window.print(), 300);
 };
 
-// ==========================================================================
-// 7. UTILS
-// ==========================================================================
+// Utils finais
 function adicionarBotaoLogout() {
     const header = document.querySelector("header");
     const div = document.createElement("div");
@@ -567,20 +604,13 @@ function adicionarBotaoLogout() {
     div.innerHTML = `<button onclick="window.api.logout()" style="background:rgba(255,255,255,0.2); border:1px solid #fff; color:#fff; padding:5px 12px; border-radius:20px; cursor:pointer; font-size:0.8rem;">Sair</button>`;
     header.appendChild(div);
 }
-
 function configurarBotoesNavegacao() {
     const btns = document.querySelectorAll(".btn-nav");
     btns[0].onclick = () => { ESTADO.mesAtual--; if (ESTADO.mesAtual < 1) { ESTADO.mesAtual = 12; ESTADO.anoAtual--; } carregarMes(ESTADO.anoAtual, ESTADO.mesAtual); };
     btns[1].onclick = () => { ESTADO.anoAtual = 2026; ESTADO.mesAtual = 1; carregarMes(ESTADO.anoAtual, ESTADO.mesAtual); };
     btns[2].onclick = () => { ESTADO.mesAtual++; if (ESTADO.mesAtual > 12) { ESTADO.mesAtual = 1; ESTADO.anoAtual++; } carregarMes(ESTADO.anoAtual, ESTADO.mesAtual); };
 }
-
 window.fecharModal = (e) => { if (e.target.id === "modalOverlay") fecharModalForce(); };
 window.fecharModalForce = () => { document.getElementById("modalOverlay").classList.remove("active"); };
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") fecharModalForce(); });
-
-// Menu Mobile
-window.toggleSidebarMobile = function() {
-    document.querySelector('.sidebar').classList.toggle('active');
-    document.getElementById('sidebar-overlay').classList.toggle('active');
-};
+window.toggleSidebarMobile = function () { document.querySelector(".sidebar").classList.toggle("active"); document.getElementById("sidebar-overlay").classList.toggle("active"); };
