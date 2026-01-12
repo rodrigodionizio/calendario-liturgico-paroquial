@@ -1,14 +1,14 @@
 /*
  * ARQUIVO: app.js
- * DESCRIÇÃO: Motor de Interface (UI Engine) - Controle de Fluxo e Renderização
+ * DESCRIÇÃO: Motor de Interface (UI Engine) - Estabilidade e Fallback
  * PROJETO: Liturgia Paroquial 2026
  * AUTOR: Rodrigo & Dev AI (Senior Specialist)
- * VERSÃO: 3.2 (Correção de Botões e Padronização Global)
+ * VERSÃO: 3.5 (Resiliência de Interface)
  */
 
 window.CalendarUI = {
   // ==========================================================================
-  // 0. ESTADO E CACHE
+  // 0. ESTADO CENTRALIZADO
   // ==========================================================================
   estado: {
     anoAtual: new Date().getFullYear(),
@@ -16,12 +16,11 @@ window.CalendarUI = {
     dadosEventos: {},
     isAdmin: false,
     listaEquipes: [],
-    filtrosAtivos: new Set(),
     config: { containerGrid: ".calendar-wrapper", mostrarPendentes: false },
   },
 
   // ==========================================================================
-  // 1. INICIALIZAÇÃO
+  // 1. INICIALIZAÇÃO RESILIENTE (FIX CADEADO)
   // ==========================================================================
   /* INÍCIO: Método init */
   init: async function (config = {}) {
@@ -29,82 +28,78 @@ window.CalendarUI = {
     this.estado.config = { ...this.estado.config, ...config };
     this.estado.isAdmin = config.isAdmin || false;
 
+    // PRIORIDADE 1: Renderizar UI de Acesso (Cadeado) independente da API
+    // Isso garante que o coordenador possa logar mesmo se os dados falharem
+    await this.renderizarBotoesAcesso();
+
+    // PRIORIDADE 2: Tentar carregar dados
     try {
-      // 1.1. Verifica Sessão e Gerencia Botões (Cadeado/Sair)
-      await this.gerenciarBotoesAcesso();
-
-      // 1.2. Carrega Dados Necessários
-      if (this.estado.listaEquipes.length === 0) {
-        this.estado.listaEquipes = await window.api.listarEquipes();
-      }
-
-      // 1.3. Renderização Inicial
+      this.estado.listaEquipes = await window.api.listarEquipes();
       await this.carregarMes();
       this.renderizarMural();
-      this.inicializarSidebarFiltros();
     } catch (e) {
-      console.error("❌ CalendarUI: Falha na inicialização:", e);
+      console.warn(
+        "⚠️ CalendarUI: Motor rodando em modo offline/erro de conexão."
+      );
     }
   },
   /* FIM: Método init */
 
   // ==========================================================================
-  // 2. CONTROLE DE ACESSO E INTERFACE (FIX CADEADO/LOGOUT)
+  // 2. INTERFACE E AUTH (RECUPERAÇÃO DO CADEADO)
   // ==========================================================================
-  /* INÍCIO: Método gerenciarBotoesAcesso */
-  gerenciarBotoesAcesso: async function () {
+  /* INÍCIO: Método renderizarBotoesAcesso */
+  renderizarBotoesAcesso: async function () {
     const header = document.querySelector("header");
     if (!header) return;
 
-    // Remove botões existentes para evitar duplicação
-    const btnAntigo = header.querySelector(".auth-btn-container");
-    if (btnAntigo) btnAntigo.remove();
+    // Limpa containers pré-existentes
+    const old = document.querySelector(".auth-wrapper");
+    if (old) old.remove();
 
     const session = await window.api.checkSession();
-    const container = document.createElement("div");
-    container.className = "auth-btn-container";
-    container.style.position = "absolute";
-    container.style.right = "20px";
+    const wrapper = document.createElement("div");
+    wrapper.className = "auth-wrapper";
+    wrapper.style.cssText =
+      "position:absolute; right:20px; display:flex; gap:10px; align-items:center;";
 
     if (session) {
-      // Se logado: Botão Sair + Link Dashboard
-      container.innerHTML = `
-                <div style="display:flex; gap:10px; align-items:center;">
-                    <a href="dashboard.html" style="color:#fff; text-decoration:none; font-size:0.8rem; background:rgba(255,255,255,0.2); padding:5px 10px; border-radius:4px;">Dashboard</a>
-                    <button onclick="window.api.logout()" style="background:rgba(255,255,255,0.2); border:1px solid #fff; color:#fff; padding:5px 12px; border-radius:20px; cursor:pointer; font-size:0.8rem;">Sair</button>
-                </div>`;
+      // Caso Logado
+      wrapper.innerHTML = `
+                <a href="dashboard.html" style="color:#fff; text-decoration:none; font-size:0.75rem; background:rgba(255,255,255,0.2); padding:5px 10px; border-radius:4px; font-family:sans-serif;">PAINEL</a>
+                <button onclick="window.api.logout()" style="background:none; border:1px solid #fff; color:#fff; padding:4px 10px; border-radius:20px; cursor:pointer; font-size:0.75rem;">Sair</button>`;
     } else {
-      // Se deslogado: Ícone do Cadeado (Login)
-      container.innerHTML = `
-                <a href="admin.html" title="Acesso Restrito" style="color:rgba(255,255,255,0.5); text-decoration:none;">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      // Caso Público (Cadeado)
+      wrapper.innerHTML = `
+                <a href="admin.html" title="Acesso Administrativo" style="color:rgba(255,255,255,0.7); display:flex;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                         <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                     </svg>
                 </a>`;
     }
-    header.appendChild(container);
+    header.appendChild(wrapper);
   },
-  /* FIM: Método gerenciarBotoesAcesso */
+  /* FIM: Método renderizarBotoesAcesso */
 
   // ==========================================================================
-  // 3. RENDERIZAÇÃO DO CALENDÁRIO
+  // 3. RENDERIZAÇÃO DO GRID (MÚLTIPLOS EVENTOS)
   // ==========================================================================
-  /* INÍCIO: Método carregarMes */
+  /* INÍCIO: carregarMes */
   carregarMes: async function () {
     const grid = document.querySelector(this.estado.config.containerGrid);
     if (!grid) return;
 
     const { anoAtual, mesAtual, config } = this.estado;
 
-    // Atualiza Título
+    // Atualização do cabeçalho
     const nomeMes = new Date(anoAtual, mesAtual - 1).toLocaleString("pt-BR", {
       month: "long",
     });
     const elNome = document.querySelector(".month-name");
     if (elNome) elNome.textContent = `${nomeMes.toUpperCase()} ${anoAtual}`;
 
-    // Busca Eventos
+    // Busca via API
     const eventos = await window.api.buscarEventos(
       anoAtual,
       mesAtual,
@@ -120,9 +115,8 @@ window.CalendarUI = {
 
     this.renderizarGrid(grid);
   },
-  /* FIM: Método carregarMes */
+  /* FIM: carregarMes */
 
-  /* INÍCIO: Método renderizarGrid */
   renderizarGrid: function (gridElement) {
     const { anoAtual, mesAtual } = this.estado;
     const primeiroDia = new Date(anoAtual, mesAtual - 1, 1).getDay();
@@ -133,41 +127,56 @@ window.CalendarUI = {
       .join("");
     let html = headers;
 
-    // Preenchimento Mês Anterior
-    for (let i = 0; i < primeiroDia; i++) {
+    // Padding inicial
+    for (let i = 0; i < primeiroDia; i++)
       html += `<div class="day-cell other-month"></div>`;
-    }
 
-    // Dias Atuais
+    // Loop de Dias
     for (let dia = 1; dia <= ultimoDia; dia++) {
       const dataISO = `${anoAtual}-${String(mesAtual).padStart(
         2,
         "0"
       )}-${String(dia).padStart(2, "0")}`;
-      const eventos = this.estado.dadosEventos[dataISO] || [];
+      const lista = this.estado.dadosEventos[dataISO] || [];
 
-      let pílulas = eventos
+      // Renderização das pílulas (Múltiplos Eventos)
+      const pílulas = lista
         .map((ev) => {
-          let cor = ev.liturgia_cores?.hex_code || "#64748b";
+          const cor = ev.liturgia_cores?.hex_code || "#666";
           return `<div class="pill" style="border-left:3px solid ${cor}; background:var(--cor-vinho)">${ev.titulo}</div>`;
         })
         .join("");
 
       html += `
-                <div class="day-cell" data-iso="${dataISO}" onclick="window.CalendarUI.abrirModal('${dataISO}')">
+                <div class="day-cell" onclick="window.CalendarUI.abrirModal('${dataISO}')">
                     <span class="day-number">${dia}</span>
                     <div class="pill-container">${pílulas}</div>
                 </div>`;
     }
-
     gridElement.innerHTML = html;
   },
-  /* FIM: Método renderizarGrid */
 
   // ==========================================================================
-  // 4. INTERAÇÕES E MODAIS
+  // 4. MÉTODOS DE APOIO (NAV E MODAL)
   // ==========================================================================
-  /* INÍCIO: Método abrirModal */
+  mudarMes: function (delta) {
+    this.estado.mesAtual += delta;
+    this.carregarMes();
+  },
+  irParaHoje: function () {
+    const h = new Date();
+    this.estado.anoAtual = h.getFullYear();
+    this.estado.mesAtual = h.getMonth() + 1;
+    this.carregarMes();
+  },
+  fecharModalForce: function () {
+    document.getElementById("modalOverlay").classList.remove("active");
+  },
+  toggleSidebarMobile: function () {
+    document.querySelector(".sidebar").classList.toggle("active");
+    document.getElementById("sidebar-overlay").classList.toggle("active");
+  },
+
   abrirModal: function (dataISO) {
     const overlay = document.getElementById("modalOverlay");
     const content = document.getElementById("modalContent");
@@ -177,66 +186,20 @@ window.CalendarUI = {
             <div class="modal-card">
                 <button class="btn-close" onclick="window.CalendarUI.fecharModalForce()">×</button>
                 <div class="modal-body">
-                    <h3 style="margin-bottom:15px; color:var(--cor-vinho); font-family:'Neulis', sans-serif;">Eventos em ${dataISO
+                    <h3 style="margin-bottom:15px; color:var(--cor-vinho)">${dataISO
                       .split("-")
                       .reverse()
                       .join("/")}</h3>
                     ${eventos
                       .map(
-                        (ev) => `
-                        <div style="background:#f9f9f9; padding:10px; border-radius:8px; margin-bottom:10px; border-left:4px solid ${
-                          ev.liturgia_cores?.hex_code || "#ccc"
-                        }">
-                            <strong style="color:var(--text-main)">${
-                              ev.titulo
-                            }</strong><br>
-                            <small style="color:#666">📍 ${
-                              ev.local || "Paróquia"
-                            }</small>
-                        </div>`
+                        (ev) =>
+                          `<div class="modal-item"><strong>${ev.titulo}</strong></div>`
                       )
                       .join("")}
-                    ${
-                      eventos.length === 0
-                        ? '<p style="color:#999; text-align:center;">Nenhum compromisso agendado para este dia.</p>'
-                        : ""
-                    }
+                    ${eventos.length === 0 ? "<p>Sem eventos.</p>" : ""}
                 </div>
             </div>`;
     overlay.classList.add("active");
-  },
-  /* FIM: Método abrirModal */
-
-  // ==========================================================================
-  // 5. NAVEGAÇÃO E UTILS
-  // ==========================================================================
-  irParaHoje: function () {
-    const hoje = new Date();
-    this.estado.anoAtual = hoje.getFullYear();
-    this.estado.mesAtual = hoje.getMonth() + 1;
-    this.carregarMes();
-  },
-
-  mudarMes: function (delta) {
-    this.estado.mesAtual += delta;
-    if (this.estado.mesAtual < 1) {
-      this.estado.mesAtual = 12;
-      this.estado.anoAtual--;
-    }
-    if (this.estado.mesAtual > 12) {
-      this.estado.mesAtual = 1;
-      this.estado.anoAtual++;
-    }
-    this.carregarMes();
-  },
-
-  fecharModalForce: function () {
-    document.getElementById("modalOverlay").classList.remove("active");
-  },
-
-  toggleSidebarMobile: function () {
-    document.querySelector(".sidebar").classList.toggle("active");
-    document.getElementById("sidebar-overlay").classList.toggle("active");
   },
 
   renderizarMural: async function () {
@@ -244,38 +207,12 @@ window.CalendarUI = {
     if (!container) return;
     const avisos = await window.api.buscarAvisos();
     container.innerHTML =
-      `<div class="mural-header">MURAL PAROQUIAL</div>` +
-      avisos
-        .map(
-          (a) => `
-            <div class="aviso-card" style="padding:10px; border-bottom:1px solid #eee;">
-                <div style="font-weight:bold; font-size:0.8rem; color:var(--cor-vinho)">${
-                  a.titulo
-                }</div>
-                <div style="font-size:0.7rem; color:#666;">📍 ${
-                  a.local || "Paróquia"
-                }</div>
-            </div>`
-        )
-        .join("");
-  },
-
-  inicializarSidebarFiltros: function () {
-    const container = document.getElementById("filtro-equipes");
-    if (!container) return;
-    container.innerHTML =
-      `<h3>FILTRAR EQUIPES</h3>` +
-      this.estado.listaEquipes
-        .map(
-          (eq) => `
-            <div class="filter-item" style="padding:5px 0; font-size:0.9rem;"><input type="checkbox"> ${eq.nome_equipe}</div>
-        `
-        )
-        .join("");
+      `<div class="mural-header">MURAL</div>` +
+      avisos.map((a) => `<div class="aviso-item">${a.titulo}</div>`).join("");
   },
 };
 
-// AUTO-INICIALIZAÇÃO PARA O SITE PÚBLICO
+// Auto-inicialização segura
 document.addEventListener("DOMContentLoaded", () => {
   if (
     document.querySelector(".calendar-wrapper") &&
