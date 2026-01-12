@@ -1,0 +1,139 @@
+<!-- 
+  ARQUIVO: dashboard.html
+  DESCRIÇÃO: Interface Administrativa com Sistema de Abas (Gestão + Estatísticas)
+  PROJETO: Liturgia Paroquial 2026
+  AUTOR: Rodrigo & Dev AI (Senior Specialist Approach)
+-->
+
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Painel de Gestão | Paróquia Senhor Bom Jesus</title>
+
+    <!-- Supabase Lib -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Estilos: Reuso do global + Estilo específico do painel -->
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link rel="stylesheet" href="assets/css/dashboard.css" />
+  </head>
+  <body class="admin-body">
+    <!-- [INÍCIO: Sidebar Administrativa] -->
+    <nav class="admin-sidebar">
+      <div class="admin-logo">⛪ SACRISTIA DIGITAL</div>
+
+      <div class="menu-item active" data-tab="visao-geral">📊 Visão Geral</div>
+      <div class="menu-item" data-tab="agenda-total">📅 Agenda Total</div>
+      <div class="menu-item" onclick="alert('Módulo de Equipes em breve')">
+        👥 Equipes
+      </div>
+
+      <!-- Link para retorno ao site público -->
+      <a
+        href="index.html"
+        class="menu-item"
+        style="margin-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1)"
+      >
+        🌐 Ver Site Público
+      </a>
+
+      <div
+        class="menu-item"
+        style="margin-top: auto; color: #ff9999"
+        onclick="window.api.logout()"
+      >
+        🚪 Sair do Sistema
+      </div>
+    </nav>
+    <!-- [FIM: Sidebar] -->
+
+    <main class="admin-main">
+      <!-- [INÍCIO: ABA 1 - VISÃO GERAL] -->
+      <section id="tab-visao-geral" class="tab-content active">
+        <header class="page-header">
+          <h1 class="page-title">Painel de Controle</h1>
+          <div class="user-profile">
+            Olá, <span id="admin-nome">Coordenador</span>
+            <div class="avatar"></div>
+          </div>
+        </header>
+
+        <!-- Grid de KPIs (Métricas de Desempenho) -->
+        <div class="kpi-grid" id="kpi-container">
+          <!-- Preenchido via dashboard.js -->
+        </div>
+
+        <div class="dashboard-split">
+          <!-- Gráfico de Atividades -->
+          <div class="panel">
+            <h3 class="panel-title">Carga de Trabalho (Próximos 7 Dias)</h3>
+            <div class="chart-container" id="admin-chart"></div>
+          </div>
+          <!-- Lista de Registros Recentes -->
+          <div class="panel">
+            <h3 class="panel-title">Atividades Recentes</h3>
+            <div id="admin-recent-list"></div>
+          </div>
+        </div>
+      </section>
+      <!-- [FIM: ABA 1] -->
+
+      <!-- [INÍCIO: ABA 2 - AGENDA TOTAL (GESTÃO)] -->
+      <section id="tab-agenda-total" class="tab-content">
+        <header class="page-header">
+          <h1 class="page-title">Gerenciar Agenda Completa</h1>
+          <div class="nav-buttons">
+            <button
+              class="btn-nav"
+              id="prev-btn"
+              onclick="window.CalendarUI.mudarMes(-1)"
+            >
+              &lt;
+            </button>
+            <button
+              class="btn-nav"
+              id="today-btn"
+              onclick="window.CalendarUI.irParaHoje()"
+            >
+              Hoje
+            </button>
+            <button
+              class="btn-nav"
+              id="next-btn"
+              onclick="window.CalendarUI.mudarMes(1)"
+            >
+              &gt;
+            </button>
+          </div>
+        </header>
+
+        <h2
+          class="month-name"
+          style="margin-bottom: 20px; color: var(--cor-vinho)"
+        ></h2>
+
+        <!-- Container onde o Motor CalendarUI injetará o Grid Editável -->
+        <div class="calendar-wrapper"></div>
+      </section>
+      <!-- [FIM: ABA 2] -->
+    </main>
+
+    <!-- Overlay de Modal para Edição (Reutilizado do motor principal) -->
+    <div
+      class="modal-overlay"
+      id="modalOverlay"
+      onclick="window.CalendarUI.fecharModal(event)"
+    >
+      <div id="modalContent"></div>
+    </div>
+
+    <!-- Scripts em Ordem de Dependência -->
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/app.js"></script>
+    <!-- Motor de Interface -->
+    <script src="assets/js/dashboard.js"></script>
+    <!-- Controlador do Dashboard -->
+  </body>
+</html>

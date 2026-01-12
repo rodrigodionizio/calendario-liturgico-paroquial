@@ -1,138 +1,168 @@
-/* 
+/*
  * ARQUIVO: api.js
- * DESCRIÇÃO: Camada de Conexão com Supabase e Regras de Negócio
+ * DESCRIÇÃO: Camada de Conexão com Supabase (Versão 3.0 - Dashboard Ready)
  * PROJETO: Liturgia Paroquial 2026
- * AUTOR: Rodrigo & Dev AI
- * VERSÃO: 2.0 (Agenda Total + Mural)
+ * AUTOR: Rodrigo & Dev AI (Senior Specialist approach)
+ * VERSÃO: 3.0
  */
 
-// ==========================================================================
-// 1. CONFIGURAÇÃO E CONEXÃO
-// ==========================================================================
-// Substitua pelas suas chaves reais
-const SUPABASE_URL = "https://gmfmebnodmtozpzhlgvk.supabase.co"; 
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtZm1lYm5vZG10b3pwemhsZ3ZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5NzU3MzIsImV4cCI6MjA4MzU1MTczMn0.29rhpFJ0I-ywPbHb4sgcdmNHaM_rJidCeaV3Cfos6Ro";
+const SUPABASE_URL = "https://gmfmebnodmtozpzhlgvk.supabase.co";
+const SUPABASE_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtZm1lYm5vZG10b3pwemhlZ3ZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5NzU3MzIsImV4cCI6MjA4MzU1MTczMn0.29rhpFJ0I-ywPbHb4sgcdmNHaM_rJidCeaV3Cfos6Ro";
 
 const _supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Exporta objeto global para uso no app.js
 window.api = {
-    client: _supabaseClient,
+  client: _supabaseClient,
 
-    // ==========================================================================
-    // 2. FEATURE: CALENDÁRIO & EVENTOS
-    // ==========================================================================
-    
-    // Busca eventos de um mês específico
-    buscarEventos: async function (ano, mes) {
-        const mesStr = String(mes).padStart(2, "0");
-        const inicio = `${ano}-${mesStr}-01`;
-        const ultimoDia = new Date(ano, mes, 0).getDate();
-        const fim = `${ano}-${mesStr}-${ultimoDia}`;
+  // ==========================================================================
+  // 1. BUSCA DE DADOS (CALENDÁRIO)
+  // ==========================================================================
+  /* INÍCIO: Método buscarEventos */
+  buscarEventos: async function (ano, mes, apenasAprovados = true) {
+    const mesStr = String(mes).padStart(2, "0");
+    const inicio = `${ano}-${mesStr}-01`;
+    const ultimoDia = new Date(ano, mes, 0).getDate();
+    const fim = `${ano}-${mesStr}-${ultimoDia}`;
 
-        const { data, error } = await _supabaseClient
-            .from("eventos_base")
-            .select(`*, liturgia_cores(hex_code), escalas(id, hora_celebracao, equipe_leitura:equipes!equipe_leitura_id(id, nome_equipe), equipe_canto:equipes!equipe_canto_id(id, nome_equipe))`)
-            .gte("data", inicio).lte("data", fim).order("data", { ascending: true });
+    let query = _supabaseClient
+      .from("eventos_base")
+      .select(
+        `*, liturgia_cores(hex_code), escalas(id, hora_celebracao, equipe_leitura:equipes!equipe_leitura_id(id, nome_equipe), equipe_canto:equipes!equipe_canto_id(id, nome_equipe))`
+      )
+      .gte("data", inicio)
+      .lte("data", fim);
 
-        if (error) { console.error("Erro busca:", error); return []; }
-        return data;
-    },
+    // Se estiver no site público, filtra apenas o que o coordenador aprovou
+    if (apenasAprovados) {
+      query = query.eq("status", "aprovado");
+    }
 
-    // Salva ou Cria um Evento (Com suporte a Agenda Total e Mural)
-     salvarEventoCompleto: async function (eventoDados, escalasLista) {
-        let eventoId = eventoDados.id;
-        
-        // Payload CORRIGIDO com hora_inicio
-        const payload = {
-            data: eventoDados.data, 
-            titulo: eventoDados.titulo,
-            tipo_compromisso: eventoDados.tipo_compromisso || 'liturgia',
-            local: eventoDados.local, 
-            responsavel: eventoDados.responsavel,
-            hora_inicio: eventoDados.hora_inicio, // <--- CAMPO CRÍTICO ADICIONADO
-            mural_destaque: eventoDados.mural_destaque || false,
-            mural_prioridade: eventoDados.mural_prioridade || 2,
-            tempo_liturgico: eventoDados.tempo_liturgico || "Tempo Comum",
-            cor_id: eventoDados.cor_id || 1,
-            is_solenidade: eventoDados.is_solenidade || false,
-            is_festa: eventoDados.is_festa || false
-        };
-        // Upsert do Evento
-        if (eventoId) {
-            const { error } = await _supabaseClient.from("eventos_base").update(payload).eq("id", eventoId);
-            if (error) throw error;
-        } else {
-            const { data, error } = await _supabaseClient.from("eventos_base").insert(payload).select();
-            if (error) throw error;
-            eventoId = data[0].id;
-        }
+    const { data, error } = await query.order("data", { ascending: true });
 
-        // Upsert das Escalas (Se for Liturgia)
-        if (eventoDados.tipo_compromisso === 'liturgia') {
-            await _supabaseClient.from("escalas").delete().eq("evento_id", eventoId);
-            if (escalasLista.length > 0) {
-                const escalasComId = escalasLista.map((e) => ({ ...e, evento_id: eventoId }));
-                await _supabaseClient.from("escalas").insert(escalasComId);
-            }
-        }
-        return true;
-    },
+    if (error) {
+      console.error("❌ Erro na busca de eventos:", error);
+      return [];
+    }
+    return data;
+  },
+  /* FIM: Método buscarEventos */
 
-   // 4. Utils
-    listarEquipes: async function () {
-        const { data } = await _supabaseClient.from("equipes").select("*").order("nome_equipe");
-        return data || [];
-    },
-    
-    checkSession: async function () {
-        const { data } = await _supabaseClient.auth.getSession();
-        return data.session;
-    },
-    // FIM FEATURE CALENDÁRIO
+  // ==========================================================================
+  // 2. MÉTODOS EXCLUSIVOS DO DASHBOARD (ESTATÍSTICAS)
+  // ==========================================================================
+  /* INÍCIO: Método buscarEstatisticasDashboard */
+  buscarEstatisticasDashboard: async function () {
+    const hoje = new Date().toISOString().split("T")[0];
 
-    // ==========================================================================
-    // 3. FEATURE: MURAL DE AVISOS
-    // ==========================================================================
-    
-    // Busca apenas eventos marcados como destaque para o futuro
-    buscarAvisos: async function() {
-        const hoje = new Date().toISOString().split('T')[0];
-        
-        const { data, error } = await _supabaseClient
-            .from('eventos_base')
-            .select('id, titulo, data, local, mural_prioridade, hora_inicio') // Adicionei hora_inicio
-            .eq('mural_destaque', true)
-            .gte('data', hoje)
-            .order('data', { ascending: true })
-            .limit(5);
+    // Execução paralela para máxima performance
+    const [eventos, pendentes, mural, equipes] = await Promise.all([
+      _supabaseClient
+        .from("eventos_base")
+        .select("id", { count: "exact", head: true })
+        .gte("data", hoje),
+      _supabaseClient
+        .from("eventos_base")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "pendente"),
+      _supabaseClient
+        .from("eventos_base")
+        .select("id", { count: "exact", head: true })
+        .eq("mural_destaque", true)
+        .gte("data", hoje),
+      _supabaseClient
+        .from("equipes")
+        .select("id", { count: "exact", head: true }),
+    ]);
 
-        if (error) { console.error("Erro avisos:", error); return []; }
-        return data;
-    },
-    // FIM FEATURE MURAL
+    return {
+      semana: eventos.count || 0,
+      pendentes: pendentes.count || 0,
+      mural: mural.count || 0,
+      equipes: equipes.count || 0,
+    };
+  },
+  /* FIM: Método buscarEstatisticasDashboard */
 
-    // ==========================================================================
-    // 4. FEATURE: GESTÃO (EQUIPES & AUTH)
-    // ==========================================================================
+  /* INÍCIO: Métodos de Listagem para Gráficos */
+  buscarEventosProximos: async function (dias) {
+    const hoje = new Date().toISOString().split("T")[0];
+    const { data } = await _supabaseClient
+      .from("eventos_base")
+      .select("data")
+      .gte("data", hoje)
+      .order("data", { ascending: true });
+    return data || [];
+  },
 
-    listarEquipes: async function () {
-        const { data, error } = await _supabaseClient
-            .from("equipes")
-            .select("*")
-            .order("nome_equipe");
-        if (error) return [];
-        return data;
-    },
+  buscarEventosRecentes: async function (limite) {
+    const { data } = await _supabaseClient
+      .from("eventos_base")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(limite);
+    return data || [];
+  },
+  /* FIM: Métodos de Listagem para Gráficos */
 
-    checkSession: async function () {
-        const { data } = await _supabaseClient.auth.getSession();
-        return data.session;
-    },
+  // ==========================================================================
+  // 3. PERSISTÊNCIA E GESTÃO
+  // ==========================================================================
+  /* INÍCIO: Método salvarEventoCompleto */
+  salvarEventoCompleto: async function (eventoDados, escalasLista) {
+    let eventoId = eventoDados.id;
 
-    logout: async function () {
-        await _supabaseClient.auth.signOut();
-        window.location.reload();
-    },
-    // FIM FEATURE GESTÃO
+    const payload = {
+      ...eventoDados,
+      // Garante que o status seja definido se for um novo evento
+      status: eventoDados.status || "aprovado",
+    };
+
+    if (eventoId) {
+      const { error } = await _supabaseClient
+        .from("eventos_base")
+        .update(payload)
+        .eq("id", eventoId);
+      if (error) throw error;
+    } else {
+      const { data, error } = await _supabaseClient
+        .from("eventos_base")
+        .insert(payload)
+        .select();
+      if (error) throw error;
+      eventoId = data[0].id;
+    }
+
+    if (eventoDados.tipo_compromisso === "liturgia") {
+      await _supabaseClient.from("escalas").delete().eq("evento_id", eventoId);
+      if (escalasLista.length > 0) {
+        const escalasComId = escalasLista.map((e) => ({
+          ...e,
+          evento_id: eventoId,
+        }));
+        await _supabaseClient.from("escalas").insert(escalasComId);
+      }
+    }
+    return true;
+  },
+  /* FIM: Método salvarEventoCompleto */
+
+  // Reuso dos demais métodos (listarEquipes, checkSession, logout)
+  listarEquipes: async function () {
+    const { data } = await _supabaseClient
+      .from("equipes")
+      .select("*")
+      .order("nome_equipe");
+    return data || [];
+  },
+
+  checkSession: async function () {
+    const { data } = await _supabaseClient.auth.getSession();
+    return data.session;
+  },
+
+  logout: async function () {
+    await _supabaseClient.auth.signOut();
+    window.location.href = "index.html";
+  },
 };
