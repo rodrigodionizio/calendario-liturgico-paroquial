@@ -178,40 +178,69 @@ async function carregarMes(ano, mes) {
 }
 
 function renderizarGrid(ano, mes, gridElement, headersHTML) {
-  let html = headersHTML;
-  const primeiroDia = new Date(ano, mes - 1, 1).getDay();
-  const ultimoDia = new Date(ano, mes, 0).getDate();
-  const ultimoDiaMesAnt = new Date(ano, mes - 1, 0).getDate();
+    let html = headersHTML;
+    const primeiroDia = new Date(ano, mes - 1, 1).getDay();
+    const ultimoDia = new Date(ano, mes, 0).getDate();
+    const ultimoDiaMesAnt = new Date(ano, mes - 1, 0).getDate();
 
-  // Dias Mês Anterior
-  for (let i = primeiroDia - 1; i >= 0; i--) {
-    const dia = ultimoDiaMesAnt - i;
-    html += `<div class="day-cell other-month"><span class="day-number">${dia}</span></div>`;
-  }
+    // Dias Mês Anterior
+    for (let i = primeiroDia - 1; i >= 0; i--) {
+        html += `<div class="day-cell other-month"><span class="day-number">${ultimoDiaMesAnt - i}</span></div>`;
+    }
 
-  // Dias do Mês Atual
-  for (let dia = 1; dia <= ultimoDia; dia++) {
-    const dataISO = `${ano}-${String(mes).padStart(2, "0")}-${String(
-      dia
-    ).padStart(2, "0")}`;
-    const listaEventos = ESTADO.dadosEventos[dataISO] || []; // Sempre retorna array
+    // Dias do Mês Atual
+    for (let dia = 1; dia <= ultimoDia; dia++) {
+        const dataISO = `${ano}-${String(mes).padStart(2, "0")}-${String(dia).padStart(2, "0")}`;
+        const listaEventos = ESTADO.dadosEventos[dataISO] || []; 
+        
+        let conteudoHTML = "";
+        let clickAttr = `onclick="abrirModal('${dataISO}')"`;
 
-    let conteudoHTML = "";
-    let clickAttr = `onclick="abrirModal('${dataISO}')"`;
+        listaEventos.forEach(evento => {
+            // Lógica de Cor da Pílula Principal (Título)
+            let corHex = evento.liturgia_cores?.hex_code || "#2E7D32";
+            if (corHex.toLowerCase() === "#ffffff") corHex = "#cccccc";
+            if (evento.tipo_compromisso !== 'liturgia') corHex = '#64748b'; // Cinza azulado para reuniões
 
-    listaEventos.forEach((evento) => {
-      let corHex = evento.liturgia_cores?.hex_code || "#2E7D32";
-      if (corHex.toLowerCase() === "#ffffff") corHex = "#cccccc";
-      if (evento.tipo_compromisso !== "liturgia") corHex = "#64748b";
+            const classeSolenidade = evento.is_solenidade ? "solenidade" : "";
+            const estiloPill = `border-left: 3px solid ${corHex}; background-color: var(--cor-vinho); margin-bottom: 2px;`;
 
-      const classeSolenidade = evento.is_solenidade ? "solenidade" : "";
-      const estiloPill = `border-left: 3px solid ${corHex}; background-color: var(--cor-vinho); margin-bottom: 2px;`;
+            // 1. Pílula do Título
+            conteudoHTML += `<div class="pill ${classeSolenidade}" style="${estiloPill}">${evento.titulo}</div>`;
 
-      conteudoHTML += `<div class="pill ${classeSolenidade}" style="${estiloPill}">${evento.titulo}</div>`;
-    });
+            // 2. Pílulas de Detalhe (Horário)
+            if (evento.escalas && evento.escalas.length > 0) {
+                // Se for Liturgia com escalas
+                evento.escalas.forEach((esc) => {
+                    const hora = esc.hora_celebracao.substring(0, 5);
+                    conteudoHTML += `<div class="pill" style="background-color:#f0f0f0; color:#333; border-left:3px solid #ccc">${hora} Missa</div>`;
+                });
+            } else if (evento.tipo_compromisso !== 'liturgia') {
+                // Se for Reunião/Evento (CORREÇÃO AQUI)
+                // Mostra a hora se tiver, senão mostra o local, senão 'Evento'
+                const hora = evento.hora_inicio ? evento.hora_inicio.substring(0,5) : '';
+                let textoExtra = hora ? `${hora}h` : 'Evento';
+                
+                // Se quiser mostrar o local também (cuidado com espaço):
+                // if(evento.local) textoExtra += ` ${evento.local}`; 
 
-    html += `<div class="day-cell" data-iso="${dataISO}" ${clickAttr}><span class="day-number">${dia}</span>${conteudoHTML}</div>`;
-  }
+                conteudoHTML += `<div class="pill" style="background-color:#f0f0f0; color:#555; border-left:3px solid #64748b">${textoExtra}</div>`;
+            }
+        });
+        
+        html += `<div class="day-cell" data-iso="${dataISO}" ${clickAttr}><span class="day-number">${dia}</span>${conteudoHTML}</div>`;
+    }
+
+    // Preenche fim
+    const totalCelulas = primeiroDia + ultimoDia;
+    const resto = totalCelulas % 7;
+    if (resto !== 0) {
+        for (let i = 1; i <= 7 - resto; i++) {
+            html += `<div class="day-cell other-month"><span class="day-number">${i}</span></div>`;
+        }
+    }
+    gridElement.innerHTML = html;
+}
 
   // Dias Próximo Mês
   const totalCelulas = primeiroDia + ultimoDia;
