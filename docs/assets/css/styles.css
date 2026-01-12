@@ -1117,11 +1117,12 @@ header {
     color: #a41d31 !important; /* Vinho */
     text-transform: uppercase !important;
     font-weight: 900 !important;
+    line-height: 1.1;
   }
 
   .print-info h2 {
     margin: 5px 0 0 0 !important;
-    font-size: 11pt !important;
+    font-size: 12pt !important;
     color: #666 !important;
     font-weight: normal !important;
   }
