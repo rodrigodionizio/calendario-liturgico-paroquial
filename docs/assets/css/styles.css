@@ -1100,8 +1100,8 @@ header {
     align-items: center !important;
     width: 100% !important;
     border-bottom: 3px solid #fbb558 !important;
-    padding-bottom: 20px !important;
-    margin-bottom: 30px !important;
+    padding-bottom: 10px !important;
+    margin-bottom: 25px !important;
     box-sizing: border-box !important;
   }
 
@@ -1114,6 +1114,12 @@ header {
     flex-shrink: 0 !important; /* Impede que a logo diminua */
     margin-right: 15px !important;
     display: block !important;
+    border: none !important; /* Remove qualquer borda visual */
+    border-style: none !important;
+    outline: none !important;
+    background: transparent !important;/* Garante que o fundo seja transparente e não branco/cinza */
+    background-color: transparent !important;
+    box-shadow: none !important;/* Remove sombras que podem parecer bordas borradas */
     /* border-radius: 50%; */ /* Opcional: use se a imagem não for circular e você quiser arredondar */
   }
   .print-logo {
