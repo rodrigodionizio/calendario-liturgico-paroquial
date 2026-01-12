@@ -1,139 +1,143 @@
-<!-- 
-  ARQUIVO: dashboard.html
-  DESCRIÇÃO: Interface Administrativa com Sistema de Abas (Gestão + Estatísticas)
-  PROJETO: Liturgia Paroquial 2026
-  AUTOR: Rodrigo & Dev AI (Senior Specialist Approach)
--->
-
 <!DOCTYPE html>
 <html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Painel de Gestão | Paróquia Senhor Bom Jesus</title>
+    <title>Painel Administrativo | Sacristia Digital</title>
 
-    <!-- Supabase Lib -->
+    <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- Estilos: Reuso do global + Estilo específico do painel -->
+    <!-- Estilos: Principal + Dashboard Específico -->
     <link rel="stylesheet" href="assets/css/styles.css" />
     <link rel="stylesheet" href="assets/css/dashboard.css" />
+
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      type="image/png"
+      href="assets/img/logo-paroquia-colorida.png"
+    />
+
+    <style>
+      /* Proteção visual inicial enquanto o JS valida a sessão */
+      body {
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      body.auth-ok {
+        opacity: 1;
+      }
+
+      /* Estilo para as abas de conteúdo */
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+      }
+    </style>
   </head>
   <body class="admin-body">
-    <!-- [INÍCIO: Sidebar Administrativa] -->
+    <!-- SIDEBAR DE NAVEGAÇÃO -->
     <nav class="admin-sidebar">
-      <div class="admin-logo">⛪ SACRISTIA DIGITAL</div>
-
-      <div class="menu-item active" data-tab="visao-geral">📊 Visão Geral</div>
-      <div class="menu-item" data-tab="agenda-total">📅 Agenda Total</div>
-      <div class="menu-item" onclick="alert('Módulo de Equipes em breve')">
-        👥 Equipes
+      <div class="admin-logo">
+        <img
+          src="assets/img/logo-horizontal-negativa.png"
+          alt="Logo"
+          style="width: 180px"
+        />
       </div>
 
-      <!-- Link para retorno ao site público -->
-      <a
-        href="index.html"
-        class="menu-item"
-        style="margin-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1)"
-      >
-        🌐 Ver Site Público
-      </a>
+      <div class="menu-item active" data-tab="visao-geral">📊 Visão Geral</div>
+      <div class="menu-item" data-tab="aprovacoes">
+        ✅ Aprovações <span class="menu-badge" id="badge-pendentes">0</span>
+      </div>
+      <a href="index.html" class="menu-item"> 📅 Ver Calendário Público </a>
+      <div class="menu-item" data-tab="equipes">👥 Equipes</div>
 
       <div
         class="menu-item"
-        style="margin-top: auto; color: #ff9999"
         onclick="window.api.logout()"
+        style="margin-top: auto; border-top: 1px solid rgba(255, 255, 255, 0.1)"
       >
         🚪 Sair do Sistema
       </div>
     </nav>
-    <!-- [FIM: Sidebar] -->
 
+    <!-- ÁREA DE CONTEÚDO PRINCIPAL -->
     <main class="admin-main">
-      <!-- [INÍCIO: ABA 1 - VISÃO GERAL] -->
-      <section id="tab-visao-geral" class="tab-content active">
-        <header class="page-header">
-          <h1 class="page-title">Painel de Controle</h1>
-          <div class="user-profile">
-            Olá, <span id="admin-nome">Coordenador</span>
-            <div class="avatar"></div>
-          </div>
-        </header>
+      <!-- HEADER DO PAINEL -->
+      <header class="page-header">
+        <div class="page-title" id="tab-title">Painel de Controle</div>
+        <div class="user-profile">
+          Olá, <span id="admin-nome">Coordenador</span>
+          <div class="avatar"></div>
+        </div>
+      </header>
 
-        <!-- Grid de KPIs (Métricas de Desempenho) -->
+      <!-- CONTEÚDO DINÂMICO POR ABAS -->
+
+      <!-- ABA 1: VISÃO GERAL -->
+      <section id="tab-visao-geral" class="tab-content active">
+        <!-- KPIs (Injetados via Dashboard.js) -->
         <div class="kpi-grid" id="kpi-container">
-          <!-- Preenchido via dashboard.js -->
+          <div style="padding: 20px; color: #888">Carregando métricas...</div>
         </div>
 
         <div class="dashboard-split">
           <!-- Gráfico de Atividades -->
           <div class="panel">
-            <h3 class="panel-title">Carga de Trabalho (Próximos 7 Dias)</h3>
-            <div class="chart-container" id="admin-chart"></div>
+            <div class="panel-title">Volume de Atividades (Próx. 7 Dias)</div>
+            <div class="chart-container" id="admin-chart">
+              <!-- Barras dinâmicas injetadas pelo JS -->
+            </div>
           </div>
-          <!-- Lista de Registros Recentes -->
+
+          <!-- Lista de Próximas Pendências -->
           <div class="panel">
-            <h3 class="panel-title">Atividades Recentes</h3>
-            <div id="admin-recent-list"></div>
+            <div class="panel-title">Aguardando Aprovação</div>
+            <div id="lista-pendentes-resumo">
+              <div style="color: #999; font-style: italic; padding: 10px">
+                Buscando pendências...
+              </div>
+            </div>
+            <div style="margin-top: 20px; text-align: center">
+              <button
+                class="btn-ver-todas"
+                onclick="document.querySelector('[data-tab=aprovacoes]').click()"
+              >
+                Gerenciar Todas
+              </button>
+            </div>
           </div>
         </div>
       </section>
-      <!-- [FIM: ABA 1] -->
 
-      <!-- [INÍCIO: ABA 2 - AGENDA TOTAL (GESTÃO)] -->
-      <section id="tab-agenda-total" class="tab-content">
-        <header class="page-header">
-          <h1 class="page-title">Gerenciar Agenda Completa</h1>
-          <div class="nav-buttons">
-            <button
-              class="btn-nav"
-              id="prev-btn"
-              onclick="window.CalendarUI.mudarMes(-1)"
-            >
-              &lt;
-            </button>
-            <button
-              class="btn-nav"
-              id="today-btn"
-              onclick="window.CalendarUI.irParaHoje()"
-            >
-              Hoje
-            </button>
-            <button
-              class="btn-nav"
-              id="next-btn"
-              onclick="window.CalendarUI.mudarMes(1)"
-            >
-              &gt;
-            </button>
+      <!-- ABA 2: APROVAÇÕES -->
+      <section id="tab-aprovacoes" class="tab-content">
+        <div class="panel">
+          <div class="panel-title">Gerenciar Solicitações de Agenda</div>
+          <p style="color: #666; margin-bottom: 20px">
+            Aprove ou rejeite eventos criados pelas pastorais.
+          </p>
+          <div id="lista-aprovacao-completa">
+            <!-- Tabela de aprovação será injetada aqui -->
           </div>
-        </header>
-
-        <h2
-          class="month-name"
-          style="margin-bottom: 20px; color: var(--cor-vinho)"
-        ></h2>
-
-        <!-- Container onde o Motor CalendarUI injetará o Grid Editável -->
-        <div class="calendar-wrapper"></div>
+        </div>
       </section>
-      <!-- [FIM: ABA 2] -->
+
+      <!-- ABA 3: EQUIPES -->
+      <section id="tab-equipes" class="tab-content">
+        <div class="panel">
+          <div class="panel-title">Pastorais e Movimentos</div>
+          <p>Módulo em desenvolvimento para gestão de membros.</p>
+        </div>
+      </section>
     </main>
 
-    <!-- Overlay de Modal para Edição (Reutilizado do motor principal) -->
-    <div
-      class="modal-overlay"
-      id="modalOverlay"
-      onclick="window.CalendarUI.fecharModal(event)"
-    >
-      <div id="modalContent"></div>
-    </div>
-
-    <!-- Scripts em Ordem de Dependência -->
+    <!-- SCRIPTS DE INICIALIZAÇÃO -->
     <script src="assets/js/api.js"></script>
-    <script src="assets/js/app.js"></script>
-    <!-- Motor de Interface -->
     <script src="assets/js/dashboard.js"></script>
-    <!-- Controlador do Dashboard -->
   </body>
 </html>

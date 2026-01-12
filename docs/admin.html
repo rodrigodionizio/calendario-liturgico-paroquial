@@ -3,14 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin - Liturgia Paroquial</title>
+    <title>Acesso Coordenador | Sacristia Digital</title>
+
+    <!-- Design System Principal -->
     <link rel="stylesheet" href="assets/css/styles.css" />
+
     <style>
-      /* Estilo Específico de Login */
+      /* Estilo Específico de Login - Mantendo o layout aprovado */
       body {
+        display: flex; /* Garante o alinhamento central */
         align-items: center;
         justify-content: center;
         background-color: var(--cor-vinho);
+        height: 100vh;
+        margin: 0;
       }
       .login-card {
         background: #fff;
@@ -32,6 +38,7 @@
         border: 1px solid #ddd;
         border-radius: 6px;
         box-sizing: border-box;
+        font-family: "AntennaCond", sans-serif;
       }
       button {
         width: 100%;
@@ -43,54 +50,94 @@
         font-weight: bold;
         cursor: pointer;
         transition: 0.3s;
+        font-family: "Neulis", sans-serif;
+        text-transform: uppercase;
       }
       button:hover {
-        background: var(--cor-vinho);
+        background: #a41d31;
+        transform: translateY(-2px);
       }
       .msg {
         margin-top: 15px;
         font-size: 0.9rem;
-        color: red;
+        min-height: 20px;
+      }
+      .loading-overlay {
+        display: none;
+        color: white;
+        font-family: "Neulis", sans-serif;
       }
     </style>
   </head>
   <body>
-    <div class="login-card">
+    <!-- Card de Login -->
+    <div class="login-card" id="cardLogin">
       <img
         src="assets/img/logo-paroquia-colorida.png"
         alt="Logo"
         class="login-logo"
       />
-      <h2 style="color: var(--cor-vinho); margin-bottom: 20px">
+      <h2
+        style="
+          color: var(--cor-vinho);
+          margin-bottom: 20px;
+          font-family: 'Neulis', sans-serif;
+        "
+      >
         Acesso Coordenador
       </h2>
 
       <form id="loginForm">
         <input type="email" id="email" placeholder="Seu E-mail" required />
-        <input type="password" id="senha" placeholder="Senha" required />
-        <button type="submit">ENTRAR</button>
+        <input type="password" id="senha" placeholder="Sua Senha" required />
+        <button type="submit" id="btnEntrar">ENTRAR</button>
       </form>
 
       <div id="msg" class="msg"></div>
     </div>
 
-    <!-- Supabase e Lógica -->
+    <!-- Mensagem de carregamento (caso já esteja logado) -->
+    <div id="loader" class="loading-overlay">Verificando sessão...</div>
+
+    <!-- Bibliotecas e API -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Importante: Reusar o api.js para pegar as configurações -->
     <script src="assets/js/api.js"></script>
 
     <script>
       const form = document.getElementById("loginForm");
       const msg = document.getElementById("msg");
+      const card = document.getElementById("cardLogin");
+      const loader = document.getElementById("loader");
 
+      /**
+       * Lógica de Inicialização:
+       * Se o usuário já tiver uma sessão ativa, pula o login.
+       */
+      window.addEventListener("DOMContentLoaded", async () => {
+        const session = await window.api.checkSession();
+        if (session) {
+          card.style.display = "none";
+          loader.style.display = "block";
+          window.location.href = "dashboard.html";
+        }
+      });
+
+      /**
+       * Lógica de Submissão do Formulário
+       */
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
-        msg.textContent = "Verificando...";
+
+        const btn = document.getElementById("btnEntrar");
+        btn.disabled = true;
+        btn.textContent = "VERIFICANDO...";
+        msg.style.color = "#666";
+        msg.textContent = "Aguarde um momento...";
 
         const email = document.getElementById("email").value;
         const password = document.getElementById("senha").value;
 
-        // Login via Supabase
+        // Executa o login via Camada API (Supabase)
         const { data, error } = await window.api.client.auth.signInWithPassword(
           {
             email: email,
@@ -99,15 +146,18 @@
         );
 
         if (error) {
+          msg.style.color = "red";
           msg.textContent = "Erro: " + error.message;
+          btn.disabled = false;
+          btn.textContent = "ENTRAR";
         } else {
           msg.style.color = "green";
-          msg.textContent = "Sucesso! Redirecionando...";
+          msg.textContent = "Sucesso! Entrando no painel...";
 
-          // Salvar sessão e ir para o calendário
+          // Redirecionamento para o Dashboard
           setTimeout(() => {
-            window.location.href = "index.html";
-          }, 1000);
+            window.location.href = "dashboard.html";
+          }, 800);
         }
       });
     </script>
