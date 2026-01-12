@@ -3,21 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Acesso Administrativo | Paróquia Bom Jesus</title>
-
-    <!-- Dependências -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Admin - Liturgia Paroquial</title>
     <link rel="stylesheet" href="assets/css/styles.css" />
-
     <style>
-      /* Estilos de Layout de Acesso */
+      /* Estilo Específico de Login */
       body {
-        display: flex;
         align-items: center;
         justify-content: center;
         background-color: var(--cor-vinho);
-        height: 100vh;
-        margin: 0;
       }
       .login-card {
         background: #fff;
@@ -39,7 +32,6 @@
         border: 1px solid #ddd;
         border-radius: 6px;
         box-sizing: border-box;
-        font-family: "AntennaCond", sans-serif;
       }
       button {
         width: 100%;
@@ -51,16 +43,14 @@
         font-weight: bold;
         cursor: pointer;
         transition: 0.3s;
-        font-family: "Neulis", sans-serif;
       }
       button:hover {
-        background: #a41d31;
-        transform: translateY(-2px);
+        background: var(--cor-vinho);
       }
       .msg {
         margin-top: 15px;
         font-size: 0.9rem;
-        min-height: 20px;
+        color: red;
       }
     </style>
   </head>
@@ -68,108 +58,58 @@
     <div class="login-card">
       <img
         src="assets/img/logo-paroquia-colorida.png"
-        alt="Logo Paróquia"
+        alt="Logo"
         class="login-logo"
       />
-      <h2
-        style="
-          color: var(--cor-vinho);
-          margin-bottom: 20px;
-          font-family: 'Neulis', sans-serif;
-        "
-      >
-        Acesso à Sacristia Digital
+      <h2 style="color: var(--cor-vinho); margin-bottom: 20px">
+        Acesso Coordenador
       </h2>
 
-      <!-- Formulário de Autenticação -->
       <form id="loginForm">
-        <input
-          type="email"
-          id="email"
-          placeholder="E-mail do Coordenador"
-          required
-        />
-        <input type="password" id="senha" placeholder="Sua Senha" required />
-        <button type="submit" id="btn-entrar">ENTRAR NO PAINEL</button>
+        <input type="email" id="email" placeholder="Seu E-mail" required />
+        <input type="password" id="senha" placeholder="Senha" required />
+        <button type="submit">ENTRAR</button>
       </form>
 
       <div id="msg" class="msg"></div>
-
-      <div
-        style="margin-top: 25px; border-top: 1px solid #eee; padding-top: 15px"
-      >
-        <a
-          href="index.html"
-          style="color: #888; text-decoration: none; font-size: 0.8rem"
-          >← Voltar ao Calendário Público</a
-        >
-      </div>
     </div>
 
-    <!-- Módulos de Lógica -->
+    <!-- Supabase e Lógica -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Importante: Reusar o api.js para pegar as configurações -->
     <script src="assets/js/api.js"></script>
 
     <script>
-      /*
-       * LOGICA DE ACESSO ADMINISTRATIVO
-       */
-
       const form = document.getElementById("loginForm");
       const msg = document.getElementById("msg");
-      const btn = document.getElementById("btn-entrar");
 
-      // [INÍCIO: Verificação de Sessão Ativa]
-      // Se o usuário já estiver logado, não precisa logar de novo.
-      window.addEventListener("load", async () => {
-        const session = await window.api.checkSession();
-        if (session) {
-          window.location.href = "dashboard.html";
-        }
-      });
-      // [FIM: Verificação]
-
-      // [INÍCIO: Processamento do Login]
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
-
-        // UI Feedback
-        msg.style.color = "#666";
-        msg.textContent = "Validando credenciais...";
-        btn.disabled = true;
-        btn.style.opacity = "0.7";
+        msg.textContent = "Verificando...";
 
         const email = document.getElementById("email").value;
         const password = document.getElementById("senha").value;
 
-        try {
-          // Chamada de Autenticação via API/Supabase
-          const { data, error } =
-            await window.api.client.auth.signInWithPassword({
-              email: email,
-              password: password,
-            });
+        // Login via Supabase
+        const { data, error } = await window.api.client.auth.signInWithPassword(
+          {
+            email: email,
+            password: password,
+          }
+        );
 
-          if (error) throw error;
-
-          // Sucesso: Redirecionamento para o Dashboard (O Cérebro do Sistema)
+        if (error) {
+          msg.textContent = "Erro: " + error.message;
+        } else {
           msg.style.color = "green";
-          msg.textContent = "Sucesso! Abrindo painel...";
+          msg.textContent = "Sucesso! Redirecionando...";
 
+          // Salvar sessão e ir para o calendário
           setTimeout(() => {
-            window.location.href = "dashboard.html";
-          }, 800);
-        } catch (err) {
-          msg.style.color = "red";
-          msg.textContent =
-            "Erro: " +
-            (err.message === "Invalid login credentials"
-              ? "E-mail ou senha incorretos."
-              : err.message);
-          btn.disabled = false;
-          btn.style.opacity = "1";
+            window.location.href = "index.html";
+          }, 1000);
         }
       });
-      // [FIM: Processamento]
     </script>
   </body>
 </html>
