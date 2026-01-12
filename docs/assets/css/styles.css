@@ -1100,7 +1100,7 @@ header {
     align-items: center !important;
     width: 100% !important;
     border-bottom: 3px solid #fbb558 !important;
-    padding-bottom: 10px !important;
+    padding-bottom: 15px !important;
     margin-bottom: 25px !important;
     box-sizing: border-box !important;
   }
@@ -1181,7 +1181,7 @@ header {
   .print-table {
     width: 100% !important;
     border-collapse: collapse !important;
-    margin-top: 10px !important;
+    margin-top: 5px !important;
     table-layout: auto !important;
   }
 
