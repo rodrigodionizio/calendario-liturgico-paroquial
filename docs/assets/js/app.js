@@ -338,136 +338,171 @@ function ativarModoEdicao(evento) {
     const btnEditar = document.getElementById("btnEditar");
     if (btnEditar) btnEditar.style.display = "none";
 
-    const tituloVal = evento.titulo || "Novo Evento";
-    const tempoVal = evento.tempo_liturgico || "Paroquial";
-    const corAtualId = evento.cor_id || evento.liturgia_cores?.id || 1; 
+    // Valores Iniciais
+    const tituloVal = evento.titulo || "";
+    const tipoCompromisso = evento.tipo_compromisso || "liturgia";
+    const localVal = evento.local || "";
+    const respVal = evento.responsavel || "";
+    
+    // HTML do Formulário
+    let html = `
+        <h3 style="color:var(--cor-vinho); margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:5px;">Editar Agenda</h3>
+        
+        <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #e0e0e0; margin-bottom:15px;">
+            <!-- SELETOR DE TIPO -->
+            <label style="font-size:0.7rem; font-weight:bold; color:#888;">TIPO DE COMPROMISSO</label>
+            <select id="editTipoComp" onchange="toggleCamposEditor()" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; margin-bottom:15px; background:#f9f9f9; font-weight:bold;">
+                <option value="liturgia" ${tipoCompromisso==='liturgia'?'selected':''}>✝️ Celebração Litúrgica / Missa</option>
+                <option value="reuniao" ${tipoCompromisso==='reuniao'?'selected':''}>👥 Reunião / Encontro</option>
+                <option value="evento" ${tipoCompromisso==='evento'?'selected':''}>🎉 Evento / Festa</option>
+                <option value="atendimento" ${tipoCompromisso==='atendimento'?'selected':''}>🗣️ Atendimento do Padre</option>
+            </select>
 
+            <label style="font-size:0.7rem; font-weight:bold; color:#888;">TÍTULO</label>
+            <input type="text" id="editTitulo" value="${tituloVal}" placeholder="Ex: Missa ou Reunião do CPP" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; font-weight:bold; font-size:1rem; margin-bottom:10px;">
+
+            <!-- CAMPOS EXCLUSIVOS DE REUNIÃO/EVENTO (Inicialmente ocultos se for liturgia) -->
+            <div id="campos-extras" style="display:none; grid-template-columns: 1fr 1fr; gap:10px;">
+                <div>
+                    <label style="font-size:0.7rem; font-weight:bold; color:#888;">LOCAL</label>
+                    <input type="text" id="editLocal" value="${localVal}" placeholder="Ex: Salão" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
+                </div>
+                <div>
+                    <label style="font-size:0.7rem; font-weight:bold; color:#888;">RESPONSÁVEL</label>
+                    <input type="text" id="editResp" value="${respVal}" placeholder="Ex: Coord. Maria" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
+                </div>
+            </div>
+
+            <!-- CAMPOS EXCLUSIVOS DE LITURGIA -->
+            <div id="campos-liturgia">
+                <!-- (Aqui vem os selects de Cor, Tempo, Solenidade que já tínhamos) -->
+                ${gerarCamposLiturgia(evento)}
+            </div>
+        </div>
+
+        <!-- ÁREA DE ESCALAS (Só aparece se for Liturgia) -->
+        <div id="area-escalas">
+            <h4 style="color:#666; font-size:0.9rem; margin-bottom:10px;">Escalas e Horários</h4>
+            <div id="listaEditor" style="display:flex; flex-direction:column; gap:15px;">
+                ${gerarListaEscalasIniciais(evento)}
+            </div>
+            <button onclick="adicionarNovaEscala()" style="margin-top:15px; background:#f0f0f0; border:1px dashed #ccc; padding:10px; width:100%; border-radius:6px; cursor:pointer; font-weight:bold; color:#555;">➕ Adicionar Horário</button>
+        </div>
+
+        <!-- BOTÕES -->
+        <div style="margin-top:25px; display:flex; gap:10px;">
+            <button onclick="salvarEdicoes()" style="flex:1; background:var(--cor-verde); color:#fff; border:none; padding:12px; border-radius:6px; font-weight:bold; cursor:pointer;">💾 SALVAR</button>
+            <button onclick="fecharModalForce()" style="background:#eee; border:none; padding:12px 20px; border-radius:6px; cursor:pointer; color:#555;">Cancelar</button>
+        </div>
+    `;
+
+    area.innerHTML = htmlEditor;
+    
+    // Ativa a lógica visual inicial
+    window.toggleCamposEditor();
+}
+
+// Helpers para limpar o código principal
+function gerarCamposLiturgia(evento) {
+    const tempoVal = evento.tempo_liturgico || "Paroquial";
+    const corAtualId = evento.cor_id || 1;
     const tempos = ["Tempo Comum", "Advento", "Tempo do Natal", "Quaresma", "Semana Santa", "Tríduo Pascal", "Tempo Pascal", "Paroquial"];
     const optionsTempo = tempos.map(t => `<option value="${t}" ${t===tempoVal?'selected':''}>${t}</option>`).join('');
 
-    let htmlEditor = `
-        <h3 style="color:var(--cor-vinho); margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:5px;">Editar Evento</h3>
-        <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #e0e0e0; margin-bottom:15px;">
-            <label style="font-size:0.7rem; font-weight:bold; color:#888;">TÍTULO</label>
-            <input type="text" id="editTitulo" value="${tituloVal}" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; font-weight:bold; font-size:1rem; margin-top:5px; margin-bottom:10px;">
-            
-            <div style="display:flex; gap:10px; margin-bottom:10px;">
-                <div style="flex:1;">
-                    <label style="font-size:0.7rem; font-weight:bold; color:#888;">TEMPO</label>
-                    <select id="editTempo" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">${optionsTempo}</select>
-                </div>
-                <div style="flex:1;">
-                    <label style="font-size:0.7rem; font-weight:bold; color:#888;">TIPO</label>
-                    <select id="editTipo" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
-                        <option value="comum" ${!evento.is_solenidade?'selected':''}>Comum</option>
-                        <option value="solenidade" ${evento.is_solenidade?'selected':''}>Solenidade</option>
-                    </select>
-                </div>
-            </div>
-            <div>
-                <label style="font-size:0.7rem; font-weight:bold; color:#888;">COR</label>
-                <select id="editCor" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
-                    <option value="1" ${corAtualId==1?'selected':''}>Verde</option>
-                    <option value="2" ${corAtualId==2?'selected':''}>Branco</option>
-                    <option value="3" ${corAtualId==3?'selected':''}>Vermelho</option>
-                    <option value="4" ${corAtualId==4?'selected':''}>Roxo</option>
-                    <option value="5" ${corAtualId==5?'selected':''}>Rosa</option>
-                </select>
-            </div>
-        </div>
-        <h4 style="color:#666; font-size:0.9rem; margin-bottom:10px;">Escalas</h4>
-        <div id="listaEditor" style="display:flex; flex-direction:column; gap:15px;">`;
-
-    if (evento.escalas) {
-        evento.escalas.forEach((esc, index) => {
-            htmlEditor += gerarLinhaEditor(esc, index);
-        });
-    }
-
-    htmlEditor += `</div>
-        <button onclick="adicionarNovaEscala()" style="margin-top:15px; background:#f0f0f0; border:1px dashed #ccc; padding:10px; width:100%; border-radius:6px; cursor:pointer; font-weight:bold; color:#555;">➕ Adicionar Horário</button>
-        <div style="margin-top:25px; display:flex; gap:10px;">
-            <button onclick="salvarEdicoes()" style="flex:1; background:var(--cor-verde); color:#fff; border:none; padding:12px; border-radius:6px; font-weight:bold; cursor:pointer;">💾 SALVAR TUDO</button>
-            <button onclick="fecharModalForce()" style="background:#eee; border:none; padding:12px 20px; border-radius:6px; cursor:pointer; color:#555;">Cancelar</button>
-        </div>`;
-
-    area.innerHTML = htmlEditor;
-}
-
-function gerarLinhaEditor(escala, index) {
-    const idLeit = escala.equipe_leitura?.id || escala.equipe_leitura_id;
-    const idCant = escala.equipe_canto?.id || escala.equipe_canto_id;
-    const horaVal = escala.hora_celebracao ? escala.hora_celebracao.substring(0, 5) : "19:00";
-
-    const buildOpts = (lista, selId) => {
-        let h = '<option value="">-- Selecione --</option>';
-        lista.forEach(eq => {
-            const s = eq.id === selId ? 'selected' : '';
-            h += `<option value="${eq.id}" ${s}>${eq.nome_equipe}</option>`;
-        });
-        return h;
-    };
-
     return `
-    <div class="editor-row" style="background:#fff; padding:15px; border-radius:8px; border:1px solid #e0e0e0;">
-        <div style="display:flex; justify-content:space-between; margin-bottom:10px; border-bottom:1px solid #f5f5f5;">
-            <label style="font-size:0.8rem; font-weight:bold; color:#888;">HORÁRIO</label>
-            <button onclick="removerLinha(this)" style="color:red; border:none; background:none; cursor:pointer;">🗑️</button>
+    <div style="display:flex; gap:10px; margin-bottom:10px;">
+        <div style="flex:1;">
+            <label style="font-size:0.7rem; font-weight:bold; color:#888;">TEMPO LITÚRGICO</label>
+            <select id="editTempo" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">${optionsTempo}</select>
         </div>
-        <input type="time" class="edit-hora" value="${horaVal}" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; margin-bottom:10px; font-weight:bold;">
-        <div style="display:grid; gap:10px;">
-            <div><label style="font-size:0.7rem; font-weight:bold; color:#666;">LEITURA</label>
-            <select class="edit-leitura" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
-                ${buildOpts(cacheEquipesLeitura, idLeit)}
-            </select></div>
-            <div><label style="font-size:0.7rem; font-weight:bold; color:#666;">CANTO</label>
-            <select class="edit-canto" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
-                ${buildOpts(cacheEquipesCanto, idCant)}
-            </select></div>
+        <div style="flex:1;">
+            <label style="font-size:0.7rem; font-weight:bold; color:#888;">TIPO</label>
+            <select id="editTipo" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
+                <option value="comum" ${!evento.is_solenidade?'selected':''}>Comum</option>
+                <option value="solenidade" ${evento.is_solenidade?'selected':''}>Solenidade</option>
+            </select>
         </div>
+    </div>
+    <div>
+        <label style="font-size:0.7rem; font-weight:bold; color:#888;">COR</label>
+        <select id="editCor" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
+            <option value="1" ${corAtualId==1?'selected':''}>Verde</option>
+            <option value="2" ${corAtualId==2?'selected':''}>Branco</option>
+            <option value="3" ${corAtualId==3?'selected':''}>Vermelho</option>
+            <option value="4" ${corAtualId==4?'selected':''}>Roxo</option>
+            <option value="5" ${corAtualId==5?'selected':''}>Rosa</option>
+        </select>
     </div>`;
 }
 
-window.adicionarNovaEscala = function () {
-    const lista = document.getElementById("listaEditor");
-    const div = document.createElement("div");
-    div.innerHTML = gerarLinhaEditor({ hora_celebracao: "19:00" }, 999);
-    lista.appendChild(div.firstElementChild);
-    div.firstElementChild.scrollIntoView({ behavior: "smooth" });
+function gerarListaEscalasIniciais(evento) {
+    if (!evento.escalas) return '';
+    let html = '';
+    evento.escalas.forEach((esc, index) => {
+        html += gerarLinhaEditor(esc, index);
+    });
+    return html;
+}
+
+// Lógica de Toggle (Show/Hide)
+window.toggleCamposEditor = function() {
+    const tipo = document.getElementById('editTipoComp').value;
+    const divLiturgia = document.getElementById('campos-liturgia');
+    const divExtras = document.getElementById('campos-extras');
+    const divEscalas = document.getElementById('area-escalas');
+
+    if (tipo === 'liturgia') {
+        divLiturgia.style.display = 'block';
+        divEscalas.style.display = 'block';
+        divExtras.style.display = 'none';
+    } else {
+        // Modo Reunião/Evento
+        divLiturgia.style.display = 'none';
+        divEscalas.style.display = 'none'; // Esconde escalas pois reunião não tem canto/leitura
+        divExtras.style.display = 'grid'; // Mostra Local/Responsável
+    }
 };
-
-window.removerLinha = function (btn) { if (confirm("Remover?")) btn.closest(".editor-row").remove(); };
-
 window.salvarEdicoes = async function () {
+    const tipoComp = document.getElementById("editTipoComp").value;
     const novoTitulo = document.getElementById("editTitulo").value;
-    const novoTempo = document.getElementById("editTempo").value;
-    const novoCorId = document.getElementById("editCor").value;
-    const tipoEvento = document.getElementById("editTipo").value;
-
+    
     if (!novoTitulo) { alert("Informe o Título!"); return; }
 
+    // Objeto Base
     const dadosEvento = {
         id: eventoEmEdicao.id,
         data: eventoEmEdicao.data,
         titulo: novoTitulo,
-        tempo_liturgico: novoTempo,
-        cor_id: parseInt(novoCorId),
-        is_solenidade: tipoEvento === "solenidade",
+        tipo_compromisso: tipoComp,
+        // Campos Extras (só salva se não for liturgia, ou salva vazio)
+        local: tipoComp !== 'liturgia' ? document.getElementById("editLocal").value : null,
+        responsavel: tipoComp !== 'liturgia' ? document.getElementById("editResp").value : null,
+        
+        // Campos Litúrgicos (Default se for reunião)
+        tempo_liturgico: tipoComp === 'liturgia' ? document.getElementById("editTempo").value : 'Paroquial',
+        cor_id: tipoComp === 'liturgia' ? parseInt(document.getElementById("editCor").value) : 1, // 1=Verde (neutro)
+        is_solenidade: tipoComp === 'liturgia' ? (document.getElementById("editTipo").value === "solenidade") : false,
         is_festa: false,
     };
 
-    const linhas = document.querySelectorAll(".editor-row");
+    // Escalas (Só coleta se for Liturgia)
     const novasEscalas = [];
-    linhas.forEach((row) => {
-        const hora = row.querySelector(".edit-hora").value;
-        const leit = row.querySelector(".edit-leitura").value || null;
-        const cant = row.querySelector(".edit-canto").value || null;
-        if (hora) novasEscalas.push({ hora_celebracao: hora, equipe_leitura_id: leit, equipe_canto_id: cant });
-    });
+    if (tipoComp === 'liturgia') {
+        const linhas = document.querySelectorAll(".editor-row");
+        linhas.forEach((row) => {
+            const hora = row.querySelector(".edit-hora").value;
+            const leit = row.querySelector(".edit-leitura").value || null;
+            const cant = row.querySelector(".edit-canto").value || null;
+            if (hora) novasEscalas.push({ hora_celebracao: hora, equipe_leitura_id: leit, equipe_canto_id: cant });
+        });
+    }
 
     try {
         document.getElementById("areaConteudo").innerHTML = '<div style="text-align:center; padding:40px;">💾 Salvando...</div>';
+        
+        // Reusa a mesma função da API (ela já está pronta para receber campos extras se o objeto tiver)
         await window.api.salvarEventoCompleto(dadosEvento, novasEscalas);
+        
         alert("✅ Salvo com sucesso!");
         fecharModalForce();
         carregarMes(ESTADO.anoAtual, ESTADO.mesAtual);

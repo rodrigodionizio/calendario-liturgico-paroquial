@@ -59,6 +59,9 @@ window.api = {
             cor_id: eventoDados.cor_id || 1,
             is_solenidade: eventoDados.is_solenidade || false,
             is_festa: eventoDados.is_festa || false,
+            tipo_compromisso: eventoDados.tipo_compromisso || 'liturgia',
+            local: eventoDados.local,
+            responsavel: eventoDados.responsavel
         };
 
         if (eventoId) {
