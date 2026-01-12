@@ -1136,6 +1136,32 @@ header {
     font-weight: normal !important;
   }
 
+  /* --- ESTILO DO BLOCO DE MÊS/ANO NO RELATÓRIO (LAYOUT APROVADO) --- */
+  .print-mes {
+    margin-left: auto !important;
+    text-align: right !important;
+    display: block !important;
+  }
+
+  .print-mes h3#print-month-name {
+    margin: 0 !important;
+    font-size: 28pt !important;
+    color: #a41d31 !important; /* Cor Vinho Oficial */
+    text-transform: uppercase !important;
+    line-height: 1 !important;
+    font-family: "Neulis", sans-serif !important;
+  }
+
+  .print-mes span#print-year-val {
+    margin: 0 !important;
+    font-size: 14pt !important;
+    color: #fbb558 !important; /* Cor Dourada Oficial */
+    font-weight: bold !important;
+    display: block !important;
+    line-height: 1.2 !important;
+    font-family: "AntennaCond", sans-serif !important;
+  }
+
   /* 6. TABELA DE DADOS */
   .print-table {
     width: 100% !important;
