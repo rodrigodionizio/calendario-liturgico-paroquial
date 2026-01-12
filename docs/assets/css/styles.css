@@ -1096,11 +1096,13 @@ header {
   /* 5. CABEÇALHO DO PDF (Preview Estilo Oficial) */
   .print-header {
     display: flex !important;
+    justify-content: space-between !important; /* Distribui os 3 elementos (logo, info, mês) */
     align-items: center !important;
-    border-bottom: 3px solid #fbb558 !important; /* Dourado */
-    padding-bottom: 15px !important;
-    margin-bottom: 25px !important;
-    width: 100%;
+    width: 100% !important;
+    border-bottom: 3px solid #fbb558 !important;
+    padding-bottom: 20px !important;
+    margin-bottom: 30px !important;
+    box-sizing: border-box !important;
   }
 
   /* Limita o tamanho do logo para não cobrir a página */
@@ -1109,7 +1111,8 @@ header {
     width: 80px !important; /* Valor exato do layout aprovado */
     height: 80px !important; /* Valor exato do layout aprovado */
     object-fit: contain; /* Garante que a imagem não distorça */
-    margin-right: 20px !important;
+    flex-shrink: 0 !important; /* Impede que a logo diminua */
+    margin-right: 15px !important;
     display: block !important;
     /* border-radius: 50%; */ /* Opcional: use se a imagem não for circular e você quiser arredondar */
   }
@@ -1121,7 +1124,10 @@ header {
   }
 
   .print-info h1 {
-    margin: 0 !important;
+    flex-grow: 1 !important; /* Ocupa o espaço central */
+    padding: 0 10px !important;
+    text-align: left !important;
+    overflow: hidden !important; /* Impede que o texto empurre o vizinho */
     font-size: 18pt !important;
     color: #a41d31 !important; /* Vinho */
     text-transform: uppercase !important;
@@ -1138,18 +1144,21 @@ header {
 
   /* --- ESTILO DO BLOCO DE MÊS/ANO NO RELATÓRIO (LAYOUT APROVADO) --- */
   .print-mes {
-    margin-left: auto !important;
-    text-align: right !important;
     display: block !important;
+    flex-shrink: 0 !important; /* GARANTE que o bloco do mês não seja esmagado */
+    text-align: right !important;
+    min-width: 150px !important; /* Reserva espaço para o nome do mês */
+    padding-right: 5px !important; /* Pequena folga da borda do papel */
   }
 
   .print-mes h3#print-month-name {
     margin: 0 !important;
-    font-size: 28pt !important;
+    font-size: 26pt !important;
     color: #a41d31 !important; /* Cor Vinho Oficial */
     text-transform: uppercase !important;
     line-height: 1 !important;
     font-family: "Neulis", sans-serif !important;
+    white-space: nowrap !important; /* Impede quebra de linha no mês */
   }
 
   .print-mes span#print-year-val {
@@ -1240,6 +1249,6 @@ header {
 
   @page {
     size: A4;
-    margin: 1.5cm;
+    margin: 1.2cm 1.5cm !important; /
   }
 }
