@@ -1104,6 +1104,15 @@ header {
   }
 
   /* Limita o tamanho do logo para não cobrir a página */
+  /* Define o tamanho proporcional da logo */
+  .print-logo-circ {
+    width: 80px !important; /* Valor exato do layout aprovado */
+    height: 80px !important; /* Valor exato do layout aprovado */
+    object-fit: contain; /* Garante que a imagem não distorça */
+    margin-right: 20px !important;
+    display: block !important;
+    /* border-radius: 50%; */ /* Opcional: use se a imagem não for circular e você quiser arredondar */
+  }
   .print-logo {
     height: 70px !important;
     width: auto !important;
