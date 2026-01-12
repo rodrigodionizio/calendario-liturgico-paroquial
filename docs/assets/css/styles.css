@@ -1066,13 +1066,23 @@ header {
 }
 
 @media print {
-  /* Esconde a App */
-  .app-layout,
-  header,
-  .modal-overlay,
-  #btn-mobile-menu {
-    display: none !important;
-  }
+    body * { visibility: hidden; }
+    #relatorio-impressao, #relatorio-impressao * { visibility: visible; }
+    #relatorio-impressao {
+        position: absolute; left: 0; top: 0; width: 100%;
+        background: white !important; color: #000 !important;
+        padding: 0 !important; margin: 0 !important;
+    }
+    .pdf-header { display: flex; align-items: center; border-bottom: 3px solid #FBB558; padding-bottom: 20px; margin-bottom: 20px; }
+    .pdf-info h1 { color: #A41D31; margin: 0; font-size: 22pt; }
+    .pdf-mes-ano { margin-left: auto; text-align: right; }
+    .pdf-table { width: 100%; border-collapse: collapse; }
+    .pdf-table th { background: #A41D31 !important; color: white !important; -webkit-print-color-adjust: exact; padding: 10px; }
+    .pdf-table td { border-bottom: 1px solid #ddd; padding: 10px; vertical-align: top; }
+    .dia-grande { font-size: 18pt; font-weight: bold; display: block; color: #A41D31; }
+    .tipo-solenidade { background: #fff3cd !important; font-weight: bold; -webkit-print-color-adjust: exact; }
+    .pdf-footer { position: fixed; bottom: 10px; width: 100%; border-top: 1px solid #ccc; font-size: 9pt; display: flex; justify-content: space-between; }
+}
 
   /* Mostra o Relatório */
   .print-only {
