@@ -42,10 +42,15 @@ window.api = {
     // Salva ou Cria um Evento (Com suporte a Agenda Total e Mural)
      salvarEventoCompleto: async function (eventoDados, escalasLista) {
         let eventoId = eventoDados.id;
+        
+        // Payload CORRIGIDO com hora_inicio
         const payload = {
-            data: eventoDados.data, titulo: eventoDados.titulo,
+            data: eventoDados.data, 
+            titulo: eventoDados.titulo,
             tipo_compromisso: eventoDados.tipo_compromisso || 'liturgia',
-            local: eventoDados.local, responsavel: eventoDados.responsavel,
+            local: eventoDados.local, 
+            responsavel: eventoDados.responsavel,
+            hora_inicio: eventoDados.hora_inicio, // <--- CAMPO CRÍTICO ADICIONADO
             mural_destaque: eventoDados.mural_destaque || false,
             mural_prioridade: eventoDados.mural_prioridade || 2,
             tempo_liturgico: eventoDados.tempo_liturgico || "Tempo Comum",
@@ -53,7 +58,7 @@ window.api = {
             is_solenidade: eventoDados.is_solenidade || false,
             is_festa: eventoDados.is_festa || false
         };
-
+        // Upsert do Evento
         if (eventoId) {
             const { error } = await _supabaseClient.from("eventos_base").update(payload).eq("id", eventoId);
             if (error) throw error;
@@ -63,6 +68,7 @@ window.api = {
             eventoId = data[0].id;
         }
 
+        // Upsert das Escalas (Se for Liturgia)
         if (eventoDados.tipo_compromisso === 'liturgia') {
             await _supabaseClient.from("escalas").delete().eq("evento_id", eventoId);
             if (escalasLista.length > 0) {
@@ -73,10 +79,12 @@ window.api = {
         return true;
     },
 
+   // 4. Utils
     listarEquipes: async function () {
         const { data } = await _supabaseClient.from("equipes").select("*").order("nome_equipe");
         return data || [];
     },
+    
     checkSession: async function () {
         const { data } = await _supabaseClient.auth.getSession();
         return data.session;
@@ -92,8 +100,8 @@ window.api = {
         const hoje = new Date().toISOString().split('T')[0];
         
         const { data, error } = await _supabaseClient
-            .from('eventos_base') // <--- MUDANÇA AQUI
-            .select('id, titulo, data, local, mural_prioridade')
+            .from('eventos_base')
+            .select('id, titulo, data, local, mural_prioridade, hora_inicio') // Adicionei hora_inicio
             .eq('mural_destaque', true)
             .gte('data', hoje)
             .order('data', { ascending: true })
