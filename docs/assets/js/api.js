@@ -32,73 +32,54 @@ window.api = {
 
         const { data, error } = await _supabaseClient
             .from("eventos_base")
-            .select(`
-                *,
-                liturgia_cores ( hex_code ),
-                escalas (
-                    id, hora_celebracao,
-                    equipe_leitura:equipes!equipe_leitura_id(id, nome_equipe),
-                    equipe_canto:equipes!equipe_canto_id(id, nome_equipe)
-                )
-            `)
-            .gte("data", inicio)
-            .lte("data", fim)
-            .order("data", { ascending: true });
+            .select(`*, liturgia_cores(hex_code), escalas(id, hora_celebracao, equipe_leitura:equipes!equipe_leitura_id(id, nome_equipe), equipe_canto:equipes!equipe_canto_id(id, nome_equipe))`)
+            .gte("data", inicio).lte("data", fim).order("data", { ascending: true });
 
         if (error) { console.error("Erro busca:", error); return []; }
         return data;
     },
 
     // Salva ou Cria um Evento (Com suporte a Agenda Total e Mural)
-    salvarEventoCompleto: async function (eventoDados, escalasLista) {
+     salvarEventoCompleto: async function (eventoDados, escalasLista) {
         let eventoId = eventoDados.id;
-
-        // Payload Unificado (Liturgia + Agenda + Mural)
-        const payloadEvento = {
-            data: eventoDados.data,
-            titulo: eventoDados.titulo,
+        const payload = {
+            data: eventoDados.data, titulo: eventoDados.titulo,
             tipo_compromisso: eventoDados.tipo_compromisso || 'liturgia',
-            
-            // Campos de Agenda
-            local: eventoDados.local,
-            responsavel: eventoDados.responsavel,
-            
-            // Campos do Mural
+            local: eventoDados.local, responsavel: eventoDados.responsavel,
             mural_destaque: eventoDados.mural_destaque || false,
             mural_prioridade: eventoDados.mural_prioridade || 2,
-
-            // Campos Litúrgicos (Default se for outro tipo)
             tempo_liturgico: eventoDados.tempo_liturgico || "Tempo Comum",
             cor_id: eventoDados.cor_id || 1,
             is_solenidade: eventoDados.is_solenidade || false,
-            is_festa: eventoDados.is_festa || false,
+            is_festa: eventoDados.is_festa || false
         };
 
-        // 1. Upsert do Evento Pai
         if (eventoId) {
-            const { error } = await _supabaseClient.from("eventos_base").update(payloadEvento).eq("id", eventoId);
+            const { error } = await _supabaseClient.from("eventos_base").update(payload).eq("id", eventoId);
             if (error) throw error;
         } else {
-            const { data, error } = await _supabaseClient.from("eventos_base").insert(payloadEvento).select();
+            const { data, error } = await _supabaseClient.from("eventos_base").insert(payload).select();
             if (error) throw error;
             eventoId = data[0].id;
         }
 
-        // 2. Gerenciamento de Escalas (Apenas se for tipo liturgia)
         if (eventoDados.tipo_compromisso === 'liturgia') {
-            // Limpa escalas antigas para garantir integridade
-            const { error: errDel } = await _supabaseClient.from("escalas").delete().eq("evento_id", eventoId);
-            if (errDel) throw errDel;
-
-            // Insere novas se houver
+            await _supabaseClient.from("escalas").delete().eq("evento_id", eventoId);
             if (escalasLista.length > 0) {
                 const escalasComId = escalasLista.map((e) => ({ ...e, evento_id: eventoId }));
-                const { error: errIns } = await _supabaseClient.from("escalas").insert(escalasComId);
-                if (errIns) throw errIns;
+                await _supabaseClient.from("escalas").insert(escalasComId);
             }
         }
-
         return true;
+    },
+
+    listarEquipes: async function () {
+        const { data } = await _supabaseClient.from("equipes").select("*").order("nome_equipe");
+        return data || [];
+    },
+    checkSession: async function () {
+        const { data } = await _supabaseClient.auth.getSession();
+        return data.session;
     },
     // FIM FEATURE CALENDÁRIO
 
@@ -108,10 +89,10 @@ window.api = {
     
     // Busca apenas eventos marcados como destaque para o futuro
     buscarAvisos: async function() {
-        const hoje = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        const hoje = new Date().toISOString().split('T')[0];
         
         const { data, error } = await _supabaseClient
-            .from('eventos_base')
+            .from('eventos_base') // <--- MUDANÇA AQUI
             .select('id, titulo, data, local, mural_prioridade')
             .eq('mural_destaque', true)
             .gte('data', hoje)
