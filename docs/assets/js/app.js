@@ -1,161 +1,162 @@
 /*
  * ARQUIVO: app.js
- * DESCRIÇÃO: Motor de Interface (UI Engine) do Calendário e Sistema de Escalas
+ * DESCRIÇÃO: Motor de Interface (UI Engine) - Controle de Fluxo e Renderização
  * PROJETO: Liturgia Paroquial 2026
- * AUTOR: Rodrigo & Dev AI (Senior Specialist approach)
- * VERSÃO: 3.0 (Modular & Extensível)
+ * AUTOR: Rodrigo & Dev AI (Senior Specialist)
+ * VERSÃO: 3.2 (Correção de Botões e Padronização Global)
  */
 
 window.CalendarUI = {
   // ==========================================================================
-  // 0. CONFIGURAÇÕES E ESTADO INTERNO
+  // 0. ESTADO E CACHE
   // ==========================================================================
-  config: {
-    isAdmin: false,
-    containerGrid: ".calendar-wrapper",
-    mostrarPendentes: false,
-    elementoMesNome: ".month-name",
-  },
-
   estado: {
-    anoAtual: 2026,
-    mesAtual: 1,
-    dadosEventos: {}, // Estrutura: { 'YYYY-MM-DD': [evento1, evento2] }
+    anoAtual: new Date().getFullYear(),
+    mesAtual: new Date().getMonth() + 1,
+    dadosEventos: {},
+    isAdmin: false,
     listaEquipes: [],
     filtrosAtivos: new Set(),
-  },
-
-  cache: {
-    equipesLeitura: [],
-    equipesCanto: [],
+    config: { containerGrid: ".calendar-wrapper", mostrarPendentes: false },
   },
 
   // ==========================================================================
-  // 1. INICIALIZAÇÃO DO MOTOR
+  // 1. INICIALIZAÇÃO
   // ==========================================================================
   /* INÍCIO: Método init */
-  init: async function (parametros = {}) {
-    console.log("🚀 Motor UI: Inicializando...");
+  init: async function (config = {}) {
+    console.log("🚀 CalendarUI: Sincronizando Motor...");
+    this.estado.config = { ...this.estado.config, ...config };
+    this.estado.isAdmin = config.isAdmin || false;
 
-    // 1.1. Merge de configurações (Override de parâmetros)
-    this.config = { ...this.config, ...parametros };
-
-    // 1.2. Carregamento de Dependências de Dados
     try {
+      // 1.1. Verifica Sessão e Gerencia Botões (Cadeado/Sair)
+      await this.gerenciarBotoesAcesso();
+
+      // 1.2. Carrega Dados Necessários
       if (this.estado.listaEquipes.length === 0) {
         this.estado.listaEquipes = await window.api.listarEquipes();
-        this.cache.equipesLeitura = this.estado.listaEquipes.filter(
-          (e) => e.tipo_atuacao === "Leitura" || e.tipo_atuacao === "Ambos"
-        );
-        this.cache.equipesCanto = this.estado.listaEquipes.filter(
-          (e) => e.tipo_atuacao === "Canto" || e.tipo_atuacao === "Ambos"
-        );
       }
 
-      // 1.3. Configuração de Navegação e Primeiros Dados
-      this.configurarBotoesNavegacao();
-      await this.carregarDadosMes(this.estado.anoAtual, this.estado.mesAtual);
-
-      console.log(
-        "✅ Motor UI: Pronto em modo " +
-          (this.config.isAdmin ? "ADMIN" : "LEITURA")
-      );
-    } catch (error) {
-      console.error("❌ Falha Crítica no Motor UI:", error);
+      // 1.3. Renderização Inicial
+      await this.carregarMes();
+      this.renderizarMural();
+      this.inicializarSidebarFiltros();
+    } catch (e) {
+      console.error("❌ CalendarUI: Falha na inicialização:", e);
     }
   },
   /* FIM: Método init */
 
   // ==========================================================================
-  // 2. LOGICA DE RENDERIZAÇÃO DO GRID
+  // 2. CONTROLE DE ACESSO E INTERFACE (FIX CADEADO/LOGOUT)
   // ==========================================================================
-  /* INÍCIO: Método carregarDadosMes */
-  carregarDadosMes: async function (ano, mes) {
-    // 2.1. Atualização do Título do Mês
-    const nomeMes = new Date(ano, mes - 1).toLocaleString("pt-BR", {
-      month: "long",
-    });
-    const elNome = document.querySelector(this.config.elementoMesNome);
-    if (elNome) elNome.textContent = `${nomeMes.toUpperCase()} ${ano}`;
+  /* INÍCIO: Método gerenciarBotoesAcesso */
+  gerenciarBotoesAcesso: async function () {
+    const header = document.querySelector("header");
+    if (!header) return;
 
-    const grid = document.querySelector(this.config.containerGrid);
+    // Remove botões existentes para evitar duplicação
+    const btnAntigo = header.querySelector(".auth-btn-container");
+    if (btnAntigo) btnAntigo.remove();
+
+    const session = await window.api.checkSession();
+    const container = document.createElement("div");
+    container.className = "auth-btn-container";
+    container.style.position = "absolute";
+    container.style.right = "20px";
+
+    if (session) {
+      // Se logado: Botão Sair + Link Dashboard
+      container.innerHTML = `
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <a href="dashboard.html" style="color:#fff; text-decoration:none; font-size:0.8rem; background:rgba(255,255,255,0.2); padding:5px 10px; border-radius:4px;">Dashboard</a>
+                    <button onclick="window.api.logout()" style="background:rgba(255,255,255,0.2); border:1px solid #fff; color:#fff; padding:5px 12px; border-radius:20px; cursor:pointer; font-size:0.8rem;">Sair</button>
+                </div>`;
+    } else {
+      // Se deslogado: Ícone do Cadeado (Login)
+      container.innerHTML = `
+                <a href="admin.html" title="Acesso Restrito" style="color:rgba(255,255,255,0.5); text-decoration:none;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                </a>`;
+    }
+    header.appendChild(container);
+  },
+  /* FIM: Método gerenciarBotoesAcesso */
+
+  // ==========================================================================
+  // 3. RENDERIZAÇÃO DO CALENDÁRIO
+  // ==========================================================================
+  /* INÍCIO: Método carregarMes */
+  carregarMes: async function () {
+    const grid = document.querySelector(this.estado.config.containerGrid);
     if (!grid) return;
 
-    // 2.2. Feedback visual de carregamento
-    grid.style.opacity = "0.5";
+    const { anoAtual, mesAtual, config } = this.estado;
 
-    try {
-      // Chamada à API (Passando a flag de aprovação dependendo do contexto)
-      const eventos = await window.api.buscarEventos(
-        ano,
-        mes,
-        !this.config.mostrarPendentes
-      );
+    // Atualiza Título
+    const nomeMes = new Date(anoAtual, mesAtual - 1).toLocaleString("pt-BR", {
+      month: "long",
+    });
+    const elNome = document.querySelector(".month-name");
+    if (elNome) elNome.textContent = `${nomeMes.toUpperCase()} ${anoAtual}`;
 
-      this.estado.dadosEventos = {};
-      eventos.forEach((ev) => {
-        if (!this.estado.dadosEventos[ev.data])
-          this.estado.dadosEventos[ev.data] = [];
-        this.estado.dadosEventos[ev.data].push(ev);
-      });
+    // Busca Eventos
+    const eventos = await window.api.buscarEventos(
+      anoAtual,
+      mesAtual,
+      !config.mostrarPendentes
+    );
 
-      this.renderizarGrid(grid, ano, mes);
-    } catch (erro) {
-      console.error("Erro ao processar dados do mês:", erro);
-    } finally {
-      grid.style.opacity = "1";
-    }
+    this.estado.dadosEventos = {};
+    eventos.forEach((ev) => {
+      if (!this.estado.dadosEventos[ev.data])
+        this.estado.dadosEventos[ev.data] = [];
+      this.estado.dadosEventos[ev.data].push(ev);
+    });
+
+    this.renderizarGrid(grid);
   },
-  /* FIM: Método carregarDadosMes */
+  /* FIM: Método carregarMes */
 
   /* INÍCIO: Método renderizarGrid */
-  renderizarGrid: function (gridElement, ano, mes) {
-    // Limpeza e preservação do Header (DOM manipulation otimizada)
+  renderizarGrid: function (gridElement) {
+    const { anoAtual, mesAtual } = this.estado;
+    const primeiroDia = new Date(anoAtual, mesAtual - 1, 1).getDay();
+    const ultimoDia = new Date(anoAtual, mesAtual, 0).getDate();
+
     const headers = Array.from(gridElement.querySelectorAll(".day-header"))
       .map((h) => h.outerHTML)
       .join("");
     let html = headers;
 
-    const primeiroDia = new Date(ano, mes - 1, 1).getDay();
-    const ultimoDia = new Date(ano, mes, 0).getDate();
-    const ultimoDiaMesAnt = new Date(ano, mes - 1, 0).getDate();
-
-    // 2.3. Cálculo de dias do mês anterior
-    for (let i = primeiroDia - 1; i >= 0; i--) {
-      html += `<div class="day-cell other-month"><span class="day-number">${
-        ultimoDiaMesAnt - i
-      }</span></div>`;
+    // Preenchimento Mês Anterior
+    for (let i = 0; i < primeiroDia; i++) {
+      html += `<div class="day-cell other-month"></div>`;
     }
 
-    // 2.4. Renderização dos dias do mês atual (Integração de Múltiplos Eventos)
+    // Dias Atuais
     for (let dia = 1; dia <= ultimoDia; dia++) {
-      const dataISO = `${ano}-${String(mes).padStart(2, "0")}-${String(
-        dia
-      ).padStart(2, "0")}`;
-      const listaEventos = this.estado.dadosEventos[dataISO] || [];
+      const dataISO = `${anoAtual}-${String(mesAtual).padStart(
+        2,
+        "0"
+      )}-${String(dia).padStart(2, "0")}`;
+      const eventos = this.estado.dadosEventos[dataISO] || [];
 
-      let pílulasHTML = "";
-      listaEventos.forEach((evento) => {
-        let corHex = evento.liturgia_cores?.hex_code || "#64748b";
-        if (evento.tipo_compromisso !== "liturgia") corHex = "#475569";
-
-        const statusInfo =
-          this.config.isAdmin && evento.status === "pendente"
-            ? '<span class="status-badge-pendente">!</span>'
-            : "";
-        pílulasHTML += `
-                    <div class="pill ${
-                      evento.is_solenidade ? "solenidade" : ""
-                    }" 
-                         style="border-left: 3px solid ${corHex}; background-color: var(--cor-vinho);">
-                        ${statusInfo}${evento.titulo}
-                    </div>`;
-      });
+      let pílulas = eventos
+        .map((ev) => {
+          let cor = ev.liturgia_cores?.hex_code || "#64748b";
+          return `<div class="pill" style="border-left:3px solid ${cor}; background:var(--cor-vinho)">${ev.titulo}</div>`;
+        })
+        .join("");
 
       html += `
-                <div class="day-cell" data-iso="${dataISO}" onclick="CalendarUI.abrirModal('${dataISO}')">
+                <div class="day-cell" data-iso="${dataISO}" onclick="window.CalendarUI.abrirModal('${dataISO}')">
                     <span class="day-number">${dia}</span>
-                    <div class="pill-container">${pílulasHTML}</div>
+                    <div class="pill-container">${pílulas}</div>
                 </div>`;
     }
 
@@ -164,108 +165,59 @@ window.CalendarUI = {
   /* FIM: Método renderizarGrid */
 
   // ==========================================================================
-  // 3. MODAL E EDITOR (LOGICA DE NEGOCIO ADMINISTRATIVA)
+  // 4. INTERAÇÕES E MODAIS
   // ==========================================================================
   /* INÍCIO: Método abrirModal */
   abrirModal: function (dataISO) {
-    const listaEventos = this.estado.dadosEventos[dataISO] || [];
     const overlay = document.getElementById("modalOverlay");
     const content = document.getElementById("modalContent");
-
-    const dataObj = new Date(dataISO + "T12:00:00");
-    const diaNum = dataObj.getDate();
-    const mesNome = dataObj
-      .toLocaleString("pt-BR", { month: "short" })
-      .toUpperCase();
-
-    let htmlLista = "";
-    listaEventos.forEach((ev) => {
-      const evString = encodeURIComponent(JSON.stringify(ev));
-      const btnEdit = this.config.isAdmin
-        ? `<button class="btn-edit" onclick='CalendarUI.prepararEdicao(decodeURIComponent("${evString}"))'>✏️</button>`
-        : "";
-
-      htmlLista += `
-                <div class="modal-event-card" style="border-left: 4px solid ${
-                  ev.liturgia_cores?.hex_code || "#ccc"
-                }">
-                    ${btnEdit}
-                    <div class="meta">${
-                      ev.tempo_liturgico || ev.tipo_compromisso
-                    }</div>
-                    <div class="titulo">${ev.titulo}</div>
-                    <div class="detalhes">${this.gerarDetalhesEvento(ev)}</div>
-                </div>`;
-    });
-
-    const btnNovo = this.config.isAdmin
-      ? `<button class="btn-add-novo" onclick="CalendarUI.iniciarCriacao('${dataISO}')">+ ADICIONAR NOVO</button>`
-      : "";
+    const eventos = this.estado.dadosEventos[dataISO] || [];
 
     content.innerHTML = `
             <div class="modal-card">
-                <button class="btn-close" onclick="CalendarUI.fecharModalForce()">×</button>
-                <div class="modal-body" id="modalBody">
-                    <div class="modal-header">
-                        <span class="modal-day">${diaNum}</span><span class="modal-month">${mesNome}</span>
-                    </div>
-                    <div class="lista-eventos">${htmlLista}</div>
-                    ${btnNovo}
+                <button class="btn-close" onclick="window.CalendarUI.fecharModalForce()">×</button>
+                <div class="modal-body">
+                    <h3 style="margin-bottom:15px; color:var(--cor-vinho); font-family:'Neulis', sans-serif;">Eventos em ${dataISO
+                      .split("-")
+                      .reverse()
+                      .join("/")}</h3>
+                    ${eventos
+                      .map(
+                        (ev) => `
+                        <div style="background:#f9f9f9; padding:10px; border-radius:8px; margin-bottom:10px; border-left:4px solid ${
+                          ev.liturgia_cores?.hex_code || "#ccc"
+                        }">
+                            <strong style="color:var(--text-main)">${
+                              ev.titulo
+                            }</strong><br>
+                            <small style="color:#666">📍 ${
+                              ev.local || "Paróquia"
+                            }</small>
+                        </div>`
+                      )
+                      .join("")}
+                    ${
+                      eventos.length === 0
+                        ? '<p style="color:#999; text-align:center;">Nenhum compromisso agendado para este dia.</p>'
+                        : ""
+                    }
                 </div>
             </div>`;
-
     overlay.classList.add("active");
   },
   /* FIM: Método abrirModal */
 
-  /* INÍCIO: Método gerarDetalhesEvento */
-  gerarDetalhesEvento: function (ev) {
-    if (ev.tipo_compromisso === "liturgia") {
-      return (ev.escalas || [])
-        .map(
-          (esc) => `
-                <div class="escala-row">
-                    <strong>${esc.hora_celebracao.substring(0, 5)}</strong> | 
-                    📖 ${esc.equipe_leitura?.nome_equipe || "-"} | 
-                    🎵 ${esc.equipe_canto?.nome_equipe || "-"}
-                </div>`
-        )
-        .join("");
-    }
-    const hora = ev.hora_inicio ? `🕒 ${ev.hora_inicio.substring(0, 5)}` : "";
-    return `${hora} | 📍 ${ev.local || "Paróquia"} | 👤 ${
-      ev.responsavel || "-"
-    }`;
-  },
-  /* FIM: Método gerarDetalhesEvento */
-
   // ==========================================================================
-  // 4. UTILS E NAVEGAÇÃO
+  // 5. NAVEGAÇÃO E UTILS
   // ==========================================================================
-  /* INÍCIO: Método configurarBotoesNavegacao */
-  configurarBotoesNavegacao: function () {
-    // Encontra os botões de navegação dependendo se está no site ou no admin
-    const seletor = this.config.isAdmin ? "#tab-agenda-total" : "body";
-    const btnPrev =
-      document.querySelector(
-        `${seletor} .btn-nav[aria-label="Mês Anterior"]`
-      ) || document.getElementById("prev-btn");
-    const btnNext =
-      document.querySelector(`${seletor} .btn-nav[aria-label="Próximo Mês"]`) ||
-      document.getElementById("next-btn");
-
-    if (btnPrev)
-      btnPrev.onclick = () => {
-        this.mudarMes(-1);
-      };
-    if (btnNext)
-      btnNext.onclick = () => {
-        this.mudarMes(1);
-      };
+  irParaHoje: function () {
+    const hoje = new Date();
+    this.estado.anoAtual = hoje.getFullYear();
+    this.estado.mesAtual = hoje.getMonth() + 1;
+    this.carregarMes();
   },
-  /* FIM: Método configurarBotoesNavegacao */
 
-  mudarMes: async function (delta) {
+  mudarMes: function (delta) {
     this.estado.mesAtual += delta;
     if (this.estado.mesAtual < 1) {
       this.estado.mesAtual = 12;
@@ -275,23 +227,60 @@ window.CalendarUI = {
       this.estado.mesAtual = 1;
       this.estado.anoAtual++;
     }
-    await this.carregarDadosMes(this.estado.anoAtual, this.estado.mesAtual);
+    this.carregarMes();
   },
 
   fecharModalForce: function () {
     document.getElementById("modalOverlay").classList.remove("active");
   },
+
+  toggleSidebarMobile: function () {
+    document.querySelector(".sidebar").classList.toggle("active");
+    document.getElementById("sidebar-overlay").classList.toggle("active");
+  },
+
+  renderizarMural: async function () {
+    const container = document.getElementById("sidebar-mural");
+    if (!container) return;
+    const avisos = await window.api.buscarAvisos();
+    container.innerHTML =
+      `<div class="mural-header">MURAL PAROQUIAL</div>` +
+      avisos
+        .map(
+          (a) => `
+            <div class="aviso-card" style="padding:10px; border-bottom:1px solid #eee;">
+                <div style="font-weight:bold; font-size:0.8rem; color:var(--cor-vinho)">${
+                  a.titulo
+                }</div>
+                <div style="font-size:0.7rem; color:#666;">📍 ${
+                  a.local || "Paróquia"
+                }</div>
+            </div>`
+        )
+        .join("");
+  },
+
+  inicializarSidebarFiltros: function () {
+    const container = document.getElementById("filtro-equipes");
+    if (!container) return;
+    container.innerHTML =
+      `<h3>FILTRAR EQUIPES</h3>` +
+      this.estado.listaEquipes
+        .map(
+          (eq) => `
+            <div class="filter-item" style="padding:5px 0; font-size:0.9rem;"><input type="checkbox"> ${eq.nome_equipe}</div>
+        `
+        )
+        .join("");
+  },
 };
 
-/* INÍCIO: Auto-inicialização Condicional */
-// Se estiver no index.html (público), inicia o motor automaticamente em modo leitura.
-// No dashboard.html, ele será iniciado manualmente pelo dashboard.js
+// AUTO-INICIALIZAÇÃO PARA O SITE PÚBLICO
 document.addEventListener("DOMContentLoaded", () => {
-  const paginaPublica =
+  if (
     document.querySelector(".calendar-wrapper") &&
-    !document.querySelector(".admin-sidebar");
-  if (paginaPublica) {
+    !window.location.pathname.includes("dashboard")
+  ) {
     window.CalendarUI.init({ isAdmin: false });
   }
 });
-/* FIM: Auto-inicialização Condicional */
