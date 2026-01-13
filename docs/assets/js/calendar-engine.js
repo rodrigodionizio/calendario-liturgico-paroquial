@@ -32,43 +32,46 @@ window.CalendarEngine = {
   // 1 - FIM: init
   // =============================
 
-  // =============================
-  // 2 - INÍCIO: carregarERenderizar
-  // =============================
-  // Argumentos: Nenhum (Utiliza estado interno do objeto)
-  // Descrição: Realiza a ponte com a api.js para buscar dados do Supabase e prepara o container.
+  // =============/================
+  // 2 - INÍCIO: carregarERenderizar (Revisado)
+  // =============/================
   carregarERenderizar: async function () {
     const grid = document.querySelector(this.selector);
-
-    // Verificação de integridade do DOM
-    if (!grid) {
-      console.error(
-        "❌ Motor Erro: Alvo de renderização não encontrado no DOM:",
-        this.selector
-      );
-      return;
-    }
+    if (!grid) return;
 
     try {
-      // Feedback visual para o usuário durante a latência da rede
-      grid.innerHTML =
-        '<div style="grid-column: 1/-1; padding: 50px; text-align: center; color: #999; font-style: italic;">Sincronizando com a Sacristia Digital...</div>';
-
-      // Chamada à API pública para buscar eventos do mês
       const eventos = await window.api.buscarEventos(this.ano, this.mes);
-      console.log("📦 Motor: Dados recebidos da API.");
 
-      // Indexação local por data para busca rápida (O(1)) durante o loop de dias
+      // MUDANÇA: Agora agrupamos por data em um Array
       this.eventosLocal = {};
-      eventos.forEach((ev) => (this.eventosLocal[ev.data] = ev));
+      eventos.forEach((ev) => {
+        if (!this.eventosLocal[ev.data]) this.eventosLocal[ev.data] = [];
+        this.eventosLocal[ev.data].push(ev);
+      });
 
-      // Chamada ao motor de desenho do grid
       this.renderizarGrid(grid);
     } catch (error) {
-      console.error("❌ Motor Erro Fatal:", error);
-      grid.innerHTML =
-        '<div style="grid-column: 1/-1; padding: 50px; text-align: center; color: var(--cor-cereja);">Erro de conexão. Verifique sua internet.</div>';
+      console.error(error);
     }
+  },
+
+  // No renderizarGrid, a função gerarPilulas deve ser chamada assim:
+  // ${this.gerarPilulas(this.eventosLocal[dataISO])}
+
+  gerarPilulas: function (listaEventos) {
+    if (!listaEventos || listaEventos.length === 0) return "";
+
+    return listaEventos
+      .map((evento) => {
+        let corHex = evento.liturgia_cores?.hex_code || "#64748b"; // Cinza para não-litúrgicos
+        const hora = evento.hora_inicio
+          ? evento.hora_inicio.substring(0, 5)
+          : evento.escalas?.[0]?.hora_celebracao.substring(0, 5) || "";
+        return `<div class="pill" style="border-left: 3px solid ${corHex}; background-color: var(--cor-vinho); font-size: 0.65rem;">
+            ${hora} ${evento.titulo}
+        </div>`;
+      })
+      .join("");
   },
   // =============================
   // 2 - FIM: carregarERenderizar

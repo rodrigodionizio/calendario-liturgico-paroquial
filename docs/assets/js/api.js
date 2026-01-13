@@ -213,8 +213,8 @@ window.api = {
       .select("*")
       .order("nome_equipe");
     if (error) {
-        console.error("Erro API listarEquipes:", error);
-        return [];
+      console.error("Erro API listarEquipes:", error);
+      return [];
     }
     return data;
   },
@@ -229,33 +229,60 @@ window.api = {
     window.location.href = "index.html";
   },
   /**
-     * @function salvarEquipe
-     * @description Cria ou atualiza uma equipe/pastoral.
-     */
-    salvarEquipe: async function(equipe) {
-        if (equipe.id) {
-            const { error } = await _supabaseClient.from("equipes").update({
-                nome_equipe: equipe.nome,
-                tipo_atuacao: equipe.tipo
-            }).eq("id", equipe.id);
-            if (error) throw error;
-        } else {
-            const { error } = await _supabaseClient.from("equipes").insert({
-                nome_equipe: equipe.nome,
-                tipo_atuacao: equipe.tipo
-            });
-            if (error) throw error;
-        }
-        return true;
-    },
+   * @function salvarEquipe
+   * @description Cria ou atualiza uma equipe/pastoral.
+   */
+  salvarEquipe: async function (equipe) {
+    if (equipe.id) {
+      const { error } = await _supabaseClient
+        .from("equipes")
+        .update({
+          nome_equipe: equipe.nome,
+          tipo_atuacao: equipe.tipo,
+        })
+        .eq("id", equipe.id);
+      if (error) throw error;
+    } else {
+      const { error } = await _supabaseClient.from("equipes").insert({
+        nome_equipe: equipe.nome,
+        tipo_atuacao: equipe.tipo,
+      });
+      if (error) throw error;
+    }
+    return true;
+  },
 
-    /**
-     * @function excluirEquipe
-     * @description Remove uma equipe (Cuidado: pode afetar escalas existentes).
-     */
-    excluirEquipe: async function(id) {
-        const { error } = await _supabaseClient.from("equipes").delete().eq("id", id);
-        if (error) throw error;
-        return true;
-    },
+  /**
+   * @function excluirEquipe
+   * @description Remove uma equipe (Cuidado: pode afetar escalas existentes).
+   */
+  excluirEquipe: async function (id) {
+    const { error } = await _supabaseClient
+      .from("equipes")
+      .delete()
+      .eq("id", id);
+    if (error) throw error;
+    return true;
+  },
+
+  // =============================
+  // 5 - INÍCIO: buscarEventosDia
+  // =============================
+  // Argumentos: dataISO (String YYYY-MM-DD)
+  // Descrição: Busca todos os compromissos de uma data específica para o gerenciador.
+  buscarEventosDia: async function (dataISO) {
+    const { data, error } = await _supabaseClient
+      .from("eventos_base")
+      .select(
+        `*, liturgia_cores(hex_code), escalas(id, hora_celebracao, equipe_leitura:equipes!equipe_leitura_id(id, nome_equipe), equipe_canto:equipes!equipe_canto_id(id, nome_equipe))`
+      )
+      .eq("data", dataISO)
+      .order("hora_inicio", { ascending: true });
+
+    if (error) return [];
+    return data;
+  },
+  // =============================
+  // 5 - FIM: buscarEventosDia
+  // =============================
 };
