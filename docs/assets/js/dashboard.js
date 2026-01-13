@@ -26,6 +26,14 @@ window.DashboardController = {
       window.location.href = "admin.html";
       return;
     }
+    // Dentro do init: async function() { ...
+    const equipes = await window.api.listarEquipes();
+    window.api.cacheEquipesLeitura = equipes.filter(
+      (e) => e.tipo_atuacao !== "Canto"
+    );
+    window.api.cacheEquipesCanto = equipes.filter(
+      (e) => e.tipo_atuacao !== "Leitura"
+    );
     document.body.classList.add("auth-ok");
     // 1.2. Configuração de Nome na UI
     const userNameElem = document.getElementById("user-name");
@@ -408,55 +416,138 @@ window.DashboardController = {
   // 8 - INÍCIO: renderizarEditorNoModal
   // =============================
   // Argumentos: evento (Object)
-  // Descrição: Constrói o formulário de edição de compromissos dentro do modal.
+  // Descrição: Constrói o formulário com a Identidade Visual Oficial (Vinho/Dourado/Ícones).
   renderizarEditorNoModal: function (evento) {
     const container = document.getElementById("modalContent");
     if (!container) return;
 
-    const dataFmt = new Date(evento.data + "T12:00:00").toLocaleDateString(
-      "pt-BR"
-    );
+    const dataObj = new Date(evento.data + "T12:00:00");
+    const diaNum = dataObj.getDate();
+    const mesNome = dataObj
+      .toLocaleString("pt-BR", { month: "short" })
+      .toUpperCase()
+      .replace(".", "");
+    const diaSemana = dataObj.toLocaleString("pt-BR", { weekday: "long" });
+
+    // Ícones Oficiais (Mantendo sofisticação)
+    const ICONS = {
+      leitura:
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="color:var(--cor-vinho)"><path d="M12 3v18.5c-2.3-.6-4.4-1-6.5-1-2.4 0-4.6.5-6.5 1.2V3.2C1.4 2.5 3.6 2 6 2c2.1 0 4.1.4 6 1zm10.5-.8c-1.9-.7-4.1-1.2-6.5-1.2v18.5c2.1 0 4.2.4 6.5 1V3.2z"/></svg>',
+      canto:
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="color:var(--cor-dourado)"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>',
+    };
+
+    // Define a cor da barra lateral do modal
+    let corSidebar = evento.liturgia_cores?.hex_code || "#ccc";
+    if (corSidebar.toLowerCase() === "#ffffff") corSidebar = "#eee";
 
     container.innerHTML = `
-        <div class="modal-card" style="max-width: 500px; flex-direction: column;">
-            <div class="modal-body">
-                <button class="btn-close" onclick="document.getElementById('modalOverlay').classList.remove('active')">×</button>
-                <h3 style="color: var(--cor-vinho); margin-bottom: 5px;">Gerenciar Agenda</h3>
-                <p style="font-size: 0.9rem; color: #666; margin-bottom: 20px;">Data: <strong>${dataFmt}</strong></p>
+        <div class="modal-card" style="max-width: 650px; border-radius: 20px; overflow: hidden; display: flex; flex-direction: row; height: auto; max-height: 90vh;">
+            <!-- Faixa Lateral de Cor Litúrgica -->
+            <div style="width: 12px; background: ${corSidebar}; flex-shrink: 0;"></div>
+
+            <div class="modal-body" style="padding: 30px; flex: 1; overflow-y: auto; background: #fff;">
+                <button class="btn-close" onclick="document.getElementById('modalOverlay').classList.remove('active')" style="top: 20px; right: 20px;">×</button>
                 
-                <div id="form-agenda-admin">
-                    <label style="display:block; font-size: 0.8rem; font-weight: bold; margin-bottom: 5px;">TÍTULO DO EVENTO</label>
+                <!-- Header de Identidade -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; border-bottom: 1px solid #f0f0f0; padding-bottom: 15px;">
+                    <div>
+                        <span style="font-family:'Neulis'; font-size: 2.5rem; font-weight: 900; line-height: 1; color: var(--cor-vinho);">${diaNum}</span>
+                        <span style="font-family:'Neulis'; font-size: 1rem; font-weight: 700; color: #666; margin-left: 5px;">${mesNome}</span>
+                        <div style="font-size: 0.75rem; text-transform: uppercase; color: #aaa; letter-spacing: 1px;">${diaSemana}</div>
+                    </div>
+                    <div style="text-align: right">
+                        <div style="font-family:'Neulis'; font-size: 0.8rem; font-weight: 800; color: var(--cor-vinho);">GERENCIADOR DE AGENDA</div>
+                        <div style="font-size: 0.7rem; color: #999;">Sacristia Digital v4.0</div>
+                    </div>
+                </div>
+
+                <!-- Formulário -->
+                <div id="form-agenda-admin" style="font-family:'AntennaCond';">
+                    <label style="font-size: 0.7rem; font-weight: 800; color: #bbb; text-transform: uppercase; letter-spacing: 1px;">Título do Compromisso</label>
                     <input type="text" id="edit-titulo" value="${
-                      evento.titulo
-                    }" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ddd; border-radius:6px;">
+                      evento.titulo || ""
+                    }" placeholder="Ex: Missa Dominical..." 
+                           style="width:100%; padding:12px; margin: 5px 0 20px 0; border: 1px solid #eee; border-radius: 8px; font-size: 1.1rem; font-weight: bold; font-family:'AntennaCond'; background: #fcfcfc;">
 
-                    <label style="display:block; font-size: 0.8rem; font-weight: bold; margin-bottom: 5px;">TIPO</label>
-                    <select id="edit-tipo" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ddd; border-radius:6px;">
-                        <option value="liturgia" ${
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                        <div>
+                            <label style="font-size: 0.7rem; font-weight: 800; color: #bbb; text-transform: uppercase;">Tipo de Atividade</label>
+                            <select id="edit-tipo" onchange="window.DashboardController.alternarCamposEvento(this.value)" 
+                                    style="width:100%; padding:10px; border: 1px solid #eee; border-radius: 8px; font-family:'AntennaCond'; font-weight: bold; cursor: pointer;">
+                                <option value="liturgia" ${
+                                  evento.tipo_compromisso === "liturgia"
+                                    ? "selected"
+                                    : ""
+                                }>✝️ Liturgia / Missa</option>
+                                <option value="reuniao" ${
+                                  evento.tipo_compromisso === "reuniao"
+                                    ? "selected"
+                                    : ""
+                                }>👥 Reunião / Pastoral</option>
+                                <option value="evento" ${
+                                  evento.tipo_compromisso === "evento"
+                                    ? "selected"
+                                    : ""
+                                }>🎉 Evento / Festa</option>
+                            </select>
+                        </div>
+                        <div id="campo-cor" style="display: ${
                           evento.tipo_compromisso === "liturgia"
-                            ? "selected"
-                            : ""
-                        }>✝️ Liturgia / Missa</option>
-                        <option value="reuniao" ${
-                          evento.tipo_compromisso === "reuniao"
-                            ? "selected"
-                            : ""
-                        }>👥 Reunião / Pastoral</option>
-                        <option value="evento" ${
-                          evento.tipo_compromisso === "evento" ? "selected" : ""
-                        }>🎉 Evento / Festa</option>
-                    </select>
+                            ? "block"
+                            : "none"
+                        }">
+                            <label style="font-size: 0.7rem; font-weight: 800; color: #bbb; text-transform: uppercase;">Cor Litúrgica</label>
+                            <select id="edit-cor" style="width:100%; padding:10px; border: 1px solid #eee; border-radius: 8px; font-family:'AntennaCond'; font-weight: bold;">
+                                <option value="1">🟢 Verde (Tempo Comum)</option>
+                                <option value="2">⚪ Branco (Festas/Solenidades)</option>
+                                <option value="3">🔴 Vermelho (Mártires/Pentecostes)</option>
+                                <option value="4">🟣 Roxo (Advento/Quaresma)</option>
+                                <option value="5">💗 Rosa (Gaudete/Laetare)</option>
+                            </select>
+                        </div>
+                    </div>
 
-                    <div style="display:flex; gap:10px;">
+                    <!-- Sessão de Escalas (Onde entra a sofisticação dos ícones) -->
+                    <div id="area-escalas-liturgia" style="display: ${
+                      evento.tipo_compromisso === "liturgia" ? "block" : "none"
+                    }; border-top: 1px solid #f0f0f0; padding-top: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <label style="font-size: 0.7rem; font-weight: 800; color: #bbb; text-transform: uppercase;">Escalas e Horários</label>
+                            <button onclick="window.DashboardController.adicionarLinhaEscala()" 
+                                    style="background: #f0f4f7; border: none; padding: 5px 12px; border-radius: 15px; font-size: 0.7rem; font-weight: bold; color: #555; cursor: pointer;">＋ ADICIONAR HORÁRIO</button>
+                        </div>
+                        <div id="lista-escalas-editor" style="display:flex; flex-direction:column; gap:12px;">
+                            ${this.gerarLinhasEscalaEditor(
+                              evento.escalas,
+                              ICONS
+                            )}
+                        </div>
+                    </div>
+
+                    <!-- Campos Reunião -->
+                    <div id="extras-reuniao" style="display: ${
+                      evento.tipo_compromisso !== "liturgia" ? "block" : "none"
+                    }; background: #fafafa; padding: 15px; border-radius: 12px; border: 1px solid #f0f0f0;">
+                        <input type="text" id="edit-local" value="${
+                          evento.local || ""
+                        }" placeholder="📍 Local (Ex: Salão Paroquial)" style="width:100%; padding:10px; margin-bottom:10px; border: 1px solid #ddd; border-radius: 6px;">
+                        <input type="text" id="edit-resp" value="${
+                          evento.responsavel || ""
+                        }" placeholder="👤 Responsável (Ex: Coord. João)" style="width:100%; padding:10px; border: 1px solid #ddd; border-radius: 6px;">
+                    </div>
+
+                    <!-- Ações Finais -->
+                    <div style="display:flex; gap:15px; margin-top:35px;">
                         <button onclick="window.DashboardController.salvarAlteracoesAgenda('${
                           evento.data
-                        }')" 
-                                style="flex:1; background: var(--cor-verde); color:white; border:none; padding:12px; border-radius:6px; font-weight:bold; cursor:pointer;">
-                                SALVAR
+                        }', ${evento.id || "null"})" 
+                                style="flex:2; background: var(--cor-verde); color:white; border:none; padding:16px; border-radius:12px; font-family:'Neulis'; font-weight:900; font-size:1rem; cursor:pointer; box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);">
+                                💾 SALVAR ALTERAÇÕES
                         </button>
                         <button onclick="document.getElementById('modalOverlay').classList.remove('active')" 
-                                style="flex:1; background: #eee; border:none; padding:12px; border-radius:6px; cursor:pointer;">
-                                CANCELAR
+                                style="flex:1; background: #fff; border: 1px solid #eee; padding:16px; border-radius:12px; font-family:'AntennaCond'; font-weight:bold; color:#999; cursor:pointer;">
+                                Cancelar
                         </button>
                     </div>
                 </div>
@@ -466,6 +557,58 @@ window.DashboardController = {
   },
   // =============================
   // 8 - FIM: renderizarEditorNoModal
+  // =============================
+
+  // =============================
+  // 9 - INÍCIO: gerarLinhasEscalaEditor
+  // =============================
+  // Argumentos: escalas (Array), icons (Object)
+  // Descrição: Cria as linhas de escala com selects estilizados e ícones.
+  gerarLinhasEscalaEditor: function (escalas = [], icons = null) {
+    const eL = window.api.cacheEquipesLeitura || [];
+    const eC = window.api.cacheEquipesCanto || [];
+
+    const buildOpts = (list, sel) =>
+      `<option value="">--</option>` +
+      list
+        .map(
+          (e) =>
+            `<option value="${e.id}" ${e.id == sel ? "selected" : ""}>${
+              e.nome_equipe
+            }</option>`
+        )
+        .join("");
+
+    if (!escalas || escalas.length === 0)
+      escalas = [{ hora_celebracao: "19:00" }];
+
+    return escalas
+      .map(
+        (esc) => `
+        <div class="row-escala-edit" style="display: grid; grid-template-columns: 90px 1fr 1fr 40px; gap: 10px; align-items: center; background: #fff; border: 1px solid #f0f0f0; padding: 10px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+            <input type="time" class="esc-hora" value="${
+              esc.hora_celebracao?.substring(0, 5) || "19:00"
+            }" style="border: none; background: #f5f5f5; padding: 8px; border-radius: 6px; font-weight: bold; font-family:'AntennaCond';">
+            <div style="display:flex; align-items:center; gap:5px;">${
+              icons.leitura
+            } <select class="esc-leitura" style="width:100%; border:none; font-size:0.8rem; font-weight:bold;">${buildOpts(
+          eL,
+          esc.equipe_leitura_id || esc.equipe_leitura?.id
+        )}</select></div>
+            <div style="display:flex; align-items:center; gap:5px;">${
+              icons.canto
+            } <select class="esc-canto" style="width:100%; border:none; font-size:0.8rem; font-weight:bold;">${buildOpts(
+          eC,
+          esc.equipe_canto_id || esc.equipe_canto?.id
+        )}</select></div>
+            <button onclick="this.parentElement.remove()" style="background:none; border:none; color:#ff4444; font-size:1.2rem; cursor:pointer; opacity:0.3;">&times;</button>
+        </div>
+    `
+      )
+      .join("");
+  },
+  // =============================
+  // 9 - FIM: gerarLinhasEscalaEditor
   // =============================
 };
 
