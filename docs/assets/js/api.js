@@ -225,4 +225,34 @@ window.api = {
     await _supabaseClient.auth.signOut();
     window.location.href = "index.html";
   },
+  /**
+     * @function salvarEquipe
+     * @description Cria ou atualiza uma equipe/pastoral.
+     */
+    salvarEquipe: async function(equipe) {
+        if (equipe.id) {
+            const { error } = await _supabaseClient.from("equipes").update({
+                nome_equipe: equipe.nome,
+                tipo_atuacao: equipe.tipo
+            }).eq("id", equipe.id);
+            if (error) throw error;
+        } else {
+            const { error } = await _supabaseClient.from("equipes").insert({
+                nome_equipe: equipe.nome,
+                tipo_atuacao: equipe.tipo
+            });
+            if (error) throw error;
+        }
+        return true;
+    },
+
+    /**
+     * @function excluirEquipe
+     * @description Remove uma equipe (Cuidado: pode afetar escalas existentes).
+     */
+    excluirEquipe: async function(id) {
+        const { error } = await _supabaseClient.from("equipes").delete().eq("id", id);
+        if (error) throw error;
+        return true;
+    },
 };

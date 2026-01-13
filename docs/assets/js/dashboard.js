@@ -231,11 +231,77 @@ const Dashboard = {
         tituloPagina.textContent = item.textContent
           .replace(/[^\w\sà-úÀ-Ú]/gi, "")
           .trim();
+        
+          // ADICIONE ESTA CONDIÇÃO AQUI:
+        if (targetTab === 'equipes') {
+            Dashboard.renderizarAbaEquipes(); 
+        }
 
         this.abaAtiva = targetTab;
       });
     });
   },
+  // ==========================================================================
+  // 7. GESTÃO DE EQUIPES
+  // ==========================================================================
+renderizarAbaEquipes: async function() {
+    const container = document.getElementById('tab-equipes');
+    const equipes = await window.api.listarEquipes();
+
+    container.innerHTML = `
+        <div class="panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <div class="panel-title">Gestão de Equipes</div>
+                <button onclick="Dashboard.abrirModalEquipe()" class="btn-ver-todas">＋ Nova Equipe</button>
+            </div>
+            
+            <table class="print-table" style="display:table; width:100%">
+                <thead>
+                    <tr>
+                        <th>Nome da Pastoral/Equipe</th>
+                        <th>Atuação</th>
+                        <th style="text-align:right">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${equipes.map(eq => `
+                        <tr>
+                            <td><strong>${eq.nome_equipe}</strong></td>
+                            <td><span class="print-tipo">${eq.tipo_atuacao}</span></td>
+                            <td style="text-align:right">
+                                <button onclick="Dashboard.abrirModalEquipe(${JSON.stringify(eq).replace(/"/g, '&quot;')})" style="background:none; border:none; cursor:pointer;">✏️</button>
+                                <button onclick="Dashboard.deletarEquipe(${eq.id})" style="background:none; border:none; cursor:pointer; margin-left:10px;">🗑️</button>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+},
+
+abrirModalEquipe: function(equipe = null) {
+    const nome = equipe ? equipe.nome_equipe : '';
+    const id = equipe ? equipe.id : '';
+    const tipo = equipe ? equipe.tipo_atuacao : 'Ambos';
+
+    const novoNome = prompt("Nome da Equipe:", nome);
+    if (novoNome) {
+        const novoTipo = prompt("Tipo (Leitura, Canto ou Ambos):", tipo);
+        window.api.salvarEquipe({ id, nome: novoNome, tipo: novoTipo })
+            .then(() => {
+                alert("Equipe salva!");
+                this.renderizarAbaEquipes();
+            });
+    }
+},
+
+deletarEquipe: async function(id) {
+    if (confirm("Tem certeza? Isso pode afetar escalas onde esta equipe está escalada.")) {
+        await window.api.excluirEquipe(id);
+        this.renderizarAbaEquipes();
+    }
+}
 };
 
 // Inicializa o Dashboard ao carregar o script
