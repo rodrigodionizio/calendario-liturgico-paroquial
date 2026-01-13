@@ -212,7 +212,10 @@ window.api = {
       .from("equipes")
       .select("*")
       .order("nome_equipe");
-    if (error) return [];
+    if (error) {
+        console.error("Erro API listarEquipes:", error);
+        return [];
+    }
     return data;
   },
 
