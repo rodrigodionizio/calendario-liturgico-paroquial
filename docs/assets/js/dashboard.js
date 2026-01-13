@@ -245,39 +245,59 @@ const Dashboard = {
   // 7. GESTÃO DE EQUIPES
   // ==========================================================================
 renderizarAbaEquipes: async function() {
+    console.log("🔍 Tentando carregar aba de equipes..."); // Log de rastro
     const container = document.getElementById('tab-equipes');
-    const equipes = await window.api.listarEquipes();
+    
+    try {
+        const equipes = await window.api.listarEquipes();
+        console.log("📦 Dados recebidos do banco:", equipes); // Verifica se os dados chegaram
 
-    container.innerHTML = `
-        <div class="panel">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <div class="panel-title">Gestão de Equipes</div>
-                <button onclick="Dashboard.abrirModalEquipe()" class="btn-ver-todas">＋ Nova Equipe</button>
-            </div>
-            
-            <table class="print-table" style="display:table; width:100%">
-                <thead>
-                    <tr>
-                        <th>Nome da Pastoral/Equipe</th>
-                        <th>Atuação</th>
-                        <th style="text-align:right">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${equipes.map(eq => `
+        if (!equipes || equipes.length === 0) {
+            container.innerHTML = `
+                <div class="panel">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div class="panel-title">Gestão de Equipes</div>
+                        <button onclick="Dashboard.abrirModalEquipe()" class="btn-ver-todas">＋ Nova Equipe</button>
+                    </div>
+                    <p style="padding:20px; color:#999;">Nenhuma equipe cadastrada no banco de dados.</p>
+                </div>`;
+            return;
+        }
+
+        container.innerHTML = `
+            <div class="panel">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <div class="panel-title">Gestão de Equipes</div>
+                    <button onclick="Dashboard.abrirModalEquipe()" class="btn-ver-todas">＋ Nova Equipe</button>
+                </div>
+                
+                <table class="print-table" style="display:table; width:100%">
+                    <thead>
                         <tr>
-                            <td><strong>${eq.nome_equipe}</strong></td>
-                            <td><span class="print-tipo">${eq.tipo_atuacao}</span></td>
-                            <td style="text-align:right">
-                                <button onclick="Dashboard.abrirModalEquipe(${JSON.stringify(eq).replace(/"/g, '&quot;')})" style="background:none; border:none; cursor:pointer;">✏️</button>
-                                <button onclick="Dashboard.deletarEquipe(${eq.id})" style="background:none; border:none; cursor:pointer; margin-left:10px;">🗑️</button>
-                            </td>
+                            <th style="text-align:left">Equipe</th>
+                            <th style="text-align:left">Atuação</th>
+                            <th style="text-align:right">Ações</th>
                         </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        </div>
-    `;
+                    </thead>
+                    <tbody>
+                        ${equipes.map(eq => `
+                            <tr>
+                                <td><strong>${eq.nome_equipe}</strong></td>
+                                <td><span class="print-tipo">${eq.tipo_atuacao}</span></td>
+                                <td style="text-align:right">
+                                    <button onclick="Dashboard.abrirModalEquipe(${JSON.stringify(eq).replace(/"/g, '&quot;')})" style="background:none; border:none; cursor:pointer; font-size:1.1rem;">✏️</button>
+                                    <button onclick="Dashboard.deletarEquipe(${eq.id})" style="background:none; border:none; cursor:pointer; font-size:1.1rem; margin-left:10px;">🗑️</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    } catch (error) {
+        console.error("❌ Erro fatal na renderização:", error);
+        container.innerHTML = `<div class="panel" style="color:red">Erro ao conectar com o banco de dados. Verifique o console.</div>`;
+    }
 },
 
 abrirModalEquipe: function(equipe = null) {
