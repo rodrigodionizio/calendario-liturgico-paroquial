@@ -1,337 +1,370 @@
 /*
  * ARQUIVO: dashboard.js
- * DESCRIÇÃO: Controlador do Painel Administrativo (Métricas e Aprovações)
+ * DESCRIÇÃO: Controlador Principal do Painel Administrativo (Hub de Gestão)
  * PROJETO: Liturgia Paroquial 2026
  * AUTOR: Rodrigo & Dev AI (Senior Specialist Approach)
- * VERSÃO: 4.0
+ * VERSÃO: 4.0 (Revisada e Estável)
  */
 
-// ==========================================================================
-// 1. ESTADO E CONFIGURAÇÃO
-// ==========================================================================
-const Dashboard = {
-  dadosStats: null,
-  abaAtiva: "visao-geral",
+window.DashboardController = {
+  // ==========================================================================
+  // 1. INICIALIZAÇÃO E SEGURANÇA
+  // ==========================================================================
 
-  // ==========================================================================
-  // 2. INICIALIZAÇÃO E SEGURANÇA
-  // ==========================================================================
+  // =============================
+  // 1 - INÍCIO: init
+  // =============================
+  // Argumentos: Nenhum
+  // Descrição: Valida a sessão do usuário, define identidade visual e dispara métricas iniciais.
   init: async function () {
-    console.log("🛡️ Dashboard: Validando acesso...");
+    console.log("🛠️ Dashboard: Inicializando Controlador de Gestão...");
 
-    // 2.1. Verifica se o usuário está autenticado
+    // 1.1. Verificação Crítica de Sessão via API
     const session = await window.api.checkSession();
     if (!session) {
-      console.warn("⚠️ Acesso negado. Redirecionando...");
+      console.warn("🚫 Acesso negado. Redirecionando para login.");
       window.location.href = "admin.html";
       return;
     }
 
-    // 2.2. Prepara a Interface
-    document.body.classList.add("auth-ok");
-    document.getElementById("admin-nome").textContent = session.user.email
-      .split("@")[0]
-      .toUpperCase();
+    // 1.2. Configuração de Nome na UI
+    const userNameElem = document.getElementById("user-name");
+    if (userNameElem) {
+      userNameElem.textContent = session.user.email.split("@")[0].toUpperCase();
+    }
 
-    // 2.3. Carrega os dados iniciais
-    await this.carregarDadosIniciais();
+    // 1.3. Carregamento de Dados Iniciais (Métricas e KPIs)
+    await this.atualizarVisaoGeral();
+
+    // 1.4. Configuração de Listeners de Navegação (Tabs)
     this.configurarNavegacao();
 
-    console.log("✅ Dashboard pronto.");
+    console.log("✅ Dashboard: Sistema pronto para operação.");
   },
+  // =============================
+  // 1 - FIM: init
+  // =============================
 
   // ==========================================================================
-  // 3. CARREGAMENTO DE DADOS (KPIs e GRÁFICOS)
+  // 2. GESTÃO DE MÉTRICAS (KPIs)
   // ==========================================================================
-  carregarDadosIniciais: async function () {
+
+  // =============/================
+  // 2 - INÍCIO: atualizarVisaoGeral
+  // =============/================
+  // Argumentos: Nenhum
+  // Descrição: Busca estatísticas no banco e atualiza os contadores e gráficos da tela principal.
+  atualizarVisaoGeral: async function () {
     try {
-      // Busca estatísticas consolidadas da API
-      this.dadosStats = await window.api.buscarEstatisticasDashboard();
+      // Chamada consolidada das estatísticas via Supabase
+      const stats = await window.api.buscarEstatisticasDashboard();
 
-      // Atualiza os Cards de KPI
-      this.renderizarKPIs();
+      // Atualização dos elementos de KPI (IDs baseados no HTML)
+      if (document.getElementById("kpi-semana")) {
+        document.getElementById("kpi-semana").textContent = stats.semana;
+        document.getElementById("kpi-pendentes").textContent = stats.pendentes;
+        document.getElementById("kpi-mural").textContent = stats.mural;
+        document.getElementById("kpi-equipes").textContent = stats.equipes;
+      }
 
-      // Renderiza o Gráfico de Carga Semanal
-      await this.renderizarGraficoSemanal();
+      // Atualização do distintivo de notificação na Sidebar
+      const badge = document.getElementById("badge-pendentes");
+      if (badge) badge.textContent = stats.pendentes;
 
-      // Busca e renderiza o resumo de pendências
-      await this.renderizarListaAprovacao();
+      // Renderização visual dos componentes de suporte
+      await this.renderizarGraficoCarga();
+      await this.renderizarListaRecentes();
     } catch (error) {
-      console.error("❌ Erro ao carregar Dashboard:", error);
+      console.error("❌ Erro ao atualizar métricas do Dashboard:", error);
     }
   },
+  // =============/================
+  // 2 - FIM: atualizarVisaoGeral
+  // =============/================
 
-  renderizarKPIs: function () {
-    const container = document.getElementById("kpi-container");
-    if (!container || !this.dadosStats) return;
+  // ==========================================================================
+  // 3. INTEGRAÇÃO COM MOTORES DE CONTEÚDO
+  // ==========================================================================
 
-    const s = this.dadosStats;
-    container.innerHTML = `
-            <div class="kpi-card">
-                <div class="kpi-value">${s.semana}</div>
-                <div class="kpi-label">Eventos nos Próximos 7 Dias</div>
-            </div>
-            <div class="kpi-card" style="border-left-color: var(--cor-cereja);">
-                <div class="kpi-value">${s.pendentes}</div>
-                <div class="kpi-label">Aguardando Aprovação</div>
-            </div>
-            <div class="kpi-card" style="border-left-color: #2E7D32;">
-                <div class="kpi-value">${s.mural}</div>
-                <div class="kpi-label">Destaques no Mural</div>
-            </div>
-            <div class="kpi-card" style="border-left-color: #2196F3;">
-                <div class="kpi-value">${s.equipes}</div>
-                <div class="kpi-label">Equipes Ativas</div>
-            </div>
-        `;
+  // =============/================
+  // 3 - INÍCIO: carregarAgendaTotal
+  // =============/================
+  // Argumentos: Nenhum
+  // Descrição: Aciona o motor de calendário unificado em modo administrador.
+  carregarAgendaTotal: async function () {
+    console.log("📅 Dashboard: Acionando Motor de Calendário...");
 
-    // Atualiza a badge de notificações na sidebar
-    const badge = document.getElementById("badge-pendentes");
-    if (badge) badge.textContent = s.pendentes;
+    // Verificamos se o Motor de Calendário (CalendarEngine ou UI) está disponível
+    if (window.CalendarEngine) {
+      await window.CalendarEngine.init({
+        selector: "#admin-calendar-grid",
+        isAdmin: true,
+        ano: 2026,
+        mes: 1,
+      });
+    } else {
+      console.error("❌ Erro: Motor de Calendário não carregado.");
+    }
   },
+  // =============/================
+  // 3 - FIM: carregarAgendaTotal
+  // =============/================
 
   // ==========================================================================
-  // 4. MOTOR DO GRÁFICO (CSS BARS)
+  // 4. CONTROLE DE INTERFACE (NAVEGAÇÃO)
   // ==========================================================================
-  renderizarGraficoSemanal: async function () {
-    const chartArea = document.getElementById("admin-chart");
-    if (!chartArea) return;
 
-    const eventosSemana = await window.api.buscarEventosProximos(7);
+  // =============/================
+  // 4 - INÍCIO: configurarNavegacao
+  // =============/================
+  // Argumentos: Nenhum
+  // Descrição: Gerencia a troca de abas (Tabs) e dispara os carregamentos específicos de cada módulo.
+  configurarNavegacao: function () {
+    const menuItems = document.querySelectorAll(".menu-item[data-tab]");
+    const tabs = document.querySelectorAll(".tab-content");
+
+    menuItems.forEach((item) => {
+      item.addEventListener("click", async () => {
+        const targetTab = item.getAttribute("data-tab");
+
+        // Alternância visual das classes ativas
+        menuItems.forEach((i) => i.classList.remove("active"));
+        tabs.forEach((t) => t.classList.remove("active"));
+
+        item.classList.add("active");
+        const targetElement = document.getElementById(`tab-${targetTab}`);
+        if (targetElement) targetElement.classList.add("active");
+
+        // Orquestração de carregamento baseado na aba selecionada
+        if (targetTab === "agenda-total") {
+          await this.carregarAgendaTotal();
+        } else if (targetTab === "visao-geral") {
+          await this.atualizarVisaoGeral();
+        } else if (targetTab === "equipes") {
+          await this.renderizarAbaEquipes();
+        }
+      });
+    });
+  },
+  // =============/================
+  // 4 - FIM: configurarNavegacao
+  // =============/================
+
+  // ==========================================================================
+  // 5. GESTÃO DE EQUIPES (CRUD)
+  // ==========================================================================
+
+  // =============/================
+  // 5 - INÍCIO: renderizarAbaEquipes
+  // =============/================
+  // Argumentos: Nenhum
+  // Descrição: Gera a interface de gerenciamento de equipes de forma dinâmica.
+  renderizarAbaEquipes: async function () {
+    const container = document.getElementById("tab-equipes");
+    if (!container) return;
+
+    try {
+      const equipes = await window.api.listarEquipes();
+
+      container.innerHTML = `
+                <div class="panel">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <div class="panel-title">Gestão de Equipes</div>
+                        <button onclick="window.DashboardController.abrirModalEquipe()" class="btn-ver-todas">＋ Nova Equipe</button>
+                    </div>
+                    
+                    <table class="print-table" style="display:table; width:100%">
+                        <thead>
+                            <tr>
+                                <th>Equipe / Pastoral</th>
+                                <th>Atuação</th>
+                                <th style="text-align:right">Gerenciar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${equipes
+                              .map(
+                                (eq) => `
+                                <tr>
+                                    <td><strong>${eq.nome_equipe}</strong></td>
+                                    <td><span class="print-tipo">${
+                                      eq.tipo_atuacao
+                                    }</span></td>
+                                    <td style="text-align:right">
+                                        <button onclick='window.DashboardController.abrirModalEquipe(${JSON.stringify(
+                                          eq
+                                        )})' style="cursor:pointer; background:none; border:none;">✏️</button>
+                                        <button onclick="window.DashboardController.deletarEquipe(${
+                                          eq.id
+                                        })" style="cursor:pointer; background:none; border:none; margin-left:10px;">🗑️</button>
+                                    </td>
+                                </tr>
+                            `
+                              )
+                              .join("")}
+                        </tbody>
+                    </table>
+                </div>`;
+    } catch (error) {
+      console.error("❌ Falha ao renderizar aba de equipes:", error);
+    }
+  },
+  // =============/================
+  // 5 - FIM: renderizarAbaEquipes
+  // =============/================
+
+  // =============/================
+  // 5 - INÍCIO: abrirModalEquipe
+  // =============/================
+  // Argumentos: equipe (Object|null)
+  // Descrição: Abre caixa de diálogo para criação ou edição de equipes.
+  abrirModalEquipe: function (equipe = null) {
+    const nome = equipe ? equipe.nome_equipe : "";
+    const id = equipe ? equipe.id : null;
+    const tipo = equipe ? equipe.tipo_atuacao : "Ambos";
+
+    const novoNome = prompt("Nome da Equipe:", nome);
+    if (novoNome) {
+      const novoTipo = prompt("Tipo (Leitura, Canto ou Ambos):", tipo);
+      window.api
+        .salvarEquipe({ id, nome: novoNome, tipo: novoTipo })
+        .then(() => {
+          alert("✅ Registro salvo com sucesso!");
+          this.renderizarAbaEquipes();
+        })
+        .catch((err) => alert("❌ Erro ao salvar: " + err.message));
+    }
+  },
+  // =============/================
+  // 5 - FIM: abrirModalEquipe
+  // =============/================
+
+  // =============/================
+  // 5 - INÍCIO: deletarEquipe
+  // =============/================
+  // Argumentos: id (Integer)
+  // Descrição: Remove uma equipe do banco após confirmação.
+  deletarEquipe: async function (id) {
+    if (confirm("⚠️ Tem certeza? Isso pode afetar escalas existentes.")) {
+      try {
+        await window.api.excluirEquipe(id);
+        this.renderizarAbaEquipes();
+      } catch (err) {
+        alert("❌ Erro ao excluir: " + err.message);
+      }
+    }
+  },
+  // =============/================
+  // 5 - FIM: deletarEquipe
+  // =============/================
+
+  // ==========================================================================
+  // 6. MÉTODOS DE RENDERIZAÇÃO GRÁFICA E STATUS
+  // ==========================================================================
+
+  // =============/================
+  // 6 - INÍCIO: renderizarGraficoCarga
+  // =============/================
+  // Argumentos: Nenhum
+  // Descrição: Gera o gráfico de barras de carga de trabalho para os próximos 7 dias.
+  renderizarGraficoCarga: async function () {
+    const container = document.getElementById("chart-week");
+    if (!container) return;
+
+    const eventos = await window.api.buscarEventosProximos(7);
     const diasSemana = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"];
-    const contagemPorDia = [0, 0, 0, 0, 0, 0, 0];
+    const densidade = [0, 0, 0, 0, 0, 0, 0];
 
-    // Processa a carga por dia da semana
-    eventosSemana.forEach((ev) => {
-      const data = new Date(ev.data + "T12:00:00");
-      contagemPorDia[data.getDay()]++;
+    eventos.forEach((ev) => {
+      const d = new Date(ev.data + "T12:00:00").getDay();
+      densidade[d]++;
     });
 
-    // Define a altura máxima para escala do gráfico
-    const maxEventos = Math.max(...contagemPorDia, 1);
+    const max = Math.max(...densidade, 1);
 
-    chartArea.innerHTML = contagemPorDia
-      .map((total, i) => {
-        const alturaPecent = (total / maxEventos) * 100;
+    container.innerHTML = densidade
+      .map((count, i) => {
+        const perc = (count / max) * 100;
         return `
                 <div class="chart-bar-group">
-                    <div class="chart-bar" style="height: ${alturaPecent}%" title="${total} eventos"></div>
+                    <div class="chart-bar" style="height: ${perc}%" title="${count} eventos"></div>
                     <div class="chart-label">${diasSemana[i]}</div>
-                </div>
-            `;
+                </div>`;
       })
       .join("");
   },
+  // =============/================
+  // 6 - FIM: renderizarGraficoCarga
+  // =============/================
 
-  // ==========================================================================
-  // 5. GESTÃO DE APROVAÇÕES
-  // ==========================================================================
-  renderizarListaAprovacao: async function () {
-    const resumoDiv = document.getElementById("lista-pendentes-resumo");
-    const listaCompletaDiv = document.getElementById(
-      "lista-aprovacao-completa"
-    );
+  // =============/================
+  // 6 - INÍCIO: renderizarListaRecentes
+  // =============/================
+  // Argumentos: Nenhum
+  // Descrição: Lista os compromissos mais recentes e seu status atual.
+  renderizarListaRecentes: async function () {
+    const container = document.getElementById("admin-recent-list");
+    if (!container) return;
 
-    // Busca eventos pendentes no banco
-    const { data: pendentes, error } = await window.api.client
-      .from("eventos_base")
-      .select("*")
-      .eq("status", "pendente")
-      .order("data", { ascending: true });
+    try {
+      const eventos = await window.api.buscarEventosRecentes(5);
 
-    if (error || !pendentes || pendentes.length === 0) {
-      const msgVazio =
-        '<div style="color:#999; font-style:italic; padding:20px; text-align:center;">Nenhum compromisso aguardando aprovação.</div>';
-      if (resumoDiv) resumoDiv.innerHTML = msgVazio;
-      if (listaCompletaDiv) listaCompletaDiv.innerHTML = msgVazio;
-      return;
-    }
+      container.innerHTML = eventos
+        .map((ev) => {
+          const statusClass =
+            ev.status === "pendente" ? "status-wait" : "status-ok";
+          const dataObj = new Date(ev.data + "T12:00:00");
+          const dia = dataObj.getDate().toString().padStart(2, "0");
+          const mes = dataObj
+            .toLocaleString("pt-BR", { month: "short" })
+            .toUpperCase()
+            .replace(".", "");
 
-    // Renderiza no Resumo (Visão Geral)
-    if (resumoDiv) {
-      resumoDiv.innerHTML = pendentes
-        .slice(0, 3)
-        .map((p) => this.gerarHtmlCardAprovacao(p))
+          return `
+                    <div class="list-item">
+                        <div class="list-date"><span>${dia}</span><small>${mes}</small></div>
+                        <div class="list-content">
+                            <div class="list-title">${ev.titulo}</div>
+                            <div class="list-meta">${ev.tipo_compromisso.toUpperCase()} • ${
+            ev.local || "Paróquia"
+          }</div>
+                        </div>
+                        <div class="status-dot ${statusClass}" title="Status: ${
+            ev.status
+          }"></div>
+                    </div>`;
+        })
         .join("");
-    }
-
-    // Renderiza na Aba Completa (Aprovações)
-    if (listaCompletaDiv) {
-      listaCompletaDiv.innerHTML = pendentes
-        .map((p) => this.gerarHtmlCardAprovacao(p, true))
-        .join("");
+    } catch (error) {
+      console.error("❌ Erro ao renderizar lista recente:", error);
     }
   },
+  // =============/================
+  // 6 - FIM: renderizarListaRecentes
+  // =============/================
 
-  gerarHtmlCardAprovacao: function (evento, modoCompleto = false) {
-    const dataFormatada = new Date(
-      evento.data + "T12:00:00"
-    ).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
-    const dia = dataFormatada.split(" de ")[0];
-    const mes =
-      dataFormatada.split(" de ")[1]?.substring(0, 3).toUpperCase() || "";
-
-    return `
-            <div class="list-item">
-                <div class="list-date"><span>${dia}</span><small>${mes}</small></div>
-                <div class="list-content">
-                    <div class="list-title">${evento.titulo}</div>
-                    <div class="list-meta">Sugerido por: ${
-                      evento.responsavel || "Pastoral"
-                    } • ${evento.tipo_compromisso}</div>
-                </div>
-                <div style="display:flex; gap:10px; align-items:center;">
-                    <button onclick="Dashboard.processarStatus('${
-                      evento.id
-                    }', 'aprovado')" title="Aprovar" style="cursor:pointer; background:#e8f5e9; border:none; color:#2e7d32; padding:5px; border-radius:4px;">✅</button>
-                    <button onclick="Dashboard.processarStatus('${
-                      evento.id
-                    }', 'rejeitado')" title="Rejeitar" style="cursor:pointer; background:#ffebee; border:none; color:#c62828; padding:5px; border-radius:4px;">❌</button>
-                </div>
-            </div>
-        `;
-  },
-
+  // =============/================
+  // 6 - INÍCIO: processarStatus
+  // =============/================
+  // Argumentos: id (UUID), novoStatus (String)
+  // Descrição: Aprova ou rejeita eventos pendentes.
   processarStatus: async function (id, novoStatus) {
     if (!confirm(`Deseja definir este evento como ${novoStatus}?`)) return;
 
     try {
       await window.api.atualizarStatusEvento(id, novoStatus);
-      alert(`Sucesso! Evento ${novoStatus}.`);
-      this.carregarDadosIniciais(); // Recarrega tudo para atualizar KPIs
+      await this.atualizarVisaoGeral();
+      alert("✅ Status atualizado!");
     } catch (err) {
-      alert("Erro ao atualizar status.");
+      alert("❌ Falha na atualização.");
     }
   },
-
-  // ==========================================================================
-  // 6. NAVEGAÇÃO DE ABAS
-  // ==========================================================================
-  configurarNavegacao: function () {
-    const menuItems = document.querySelectorAll(".menu-item[data-tab]");
-    const tituloPagina = document.getElementById("tab-title");
-
-    menuItems.forEach((item) => {
-      item.addEventListener("click", () => {
-        const targetTab = item.getAttribute("data-tab");
-
-        // Remove ativos
-        document
-          .querySelectorAll(".menu-item")
-          .forEach((i) => i.classList.remove("active"));
-        document
-          .querySelectorAll(".tab-content")
-          .forEach((t) => t.classList.remove("active"));
-
-        // Ativa alvo
-        item.classList.add("active");
-        document.getElementById(`tab-${targetTab}`).classList.add("active");
-
-        // Atualiza Título
-        tituloPagina.textContent = item.textContent
-          .replace(/[^\w\sà-úÀ-Ú]/gi, "")
-          .trim();
-        
-          // GERENCIAR EQUIPES
-        if (targetTab === 'equipes') {
-            Dashboard.renderizarAbaEquipes(); 
-        }
-
-        // GERENCIAR AGENDA TOTAL
-        if (targetTab === 'agenda-total') {
-        window.CalendarEngine.init({
-        selector: '#calendar-admin-root',
-        isAdmin: true, // Modo Admin Ativado
-        ano: 2026,
-        mes: 1
-        });
-
-        this.abaAtiva = targetTab;
-      };
-    });
-  },
-  // ==========================================================================
-  // 7. GESTÃO DE EQUIPES
-  // ==========================================================================
-renderizarAbaEquipes: async function() {
-    console.log("🔍 Tentando carregar aba de equipes..."); // Log de rastro
-    const container = document.getElementById('tab-equipes');
-    
-    try {
-        const equipes = await window.api.listarEquipes();
-        console.log("📦 Dados recebidos do banco:", equipes); // Verifica se os dados chegaram
-
-        if (!equipes || equipes.length === 0) {
-            container.innerHTML = `
-                <div class="panel">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div class="panel-title">Gestão de Equipes</div>
-                        <button onclick="Dashboard.abrirModalEquipe()" class="btn-ver-todas">＋ Nova Equipe</button>
-                    </div>
-                    <p style="padding:20px; color:#999;">Nenhuma equipe cadastrada no banco de dados.</p>
-                </div>`;
-            return;
-        }
-
-        container.innerHTML = `
-            <div class="panel">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                    <div class="panel-title">Gestão de Equipes</div>
-                    <button onclick="Dashboard.abrirModalEquipe()" class="btn-ver-todas">＋ Nova Equipe</button>
-                </div>
-                
-                <table class="print-table" style="display:table; width:100%">
-                    <thead>
-                        <tr>
-                            <th style="text-align:left">Equipe</th>
-                            <th style="text-align:left">Atuação</th>
-                            <th style="text-align:right">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${equipes.map(eq => `
-                            <tr>
-                                <td><strong>${eq.nome_equipe}</strong></td>
-                                <td><span class="print-tipo">${eq.tipo_atuacao}</span></td>
-                                <td style="text-align:right">
-                                    <button onclick="Dashboard.abrirModalEquipe(${JSON.stringify(eq).replace(/"/g, '&quot;')})" style="background:none; border:none; cursor:pointer; font-size:1.1rem;">✏️</button>
-                                    <button onclick="Dashboard.deletarEquipe(${eq.id})" style="background:none; border:none; cursor:pointer; font-size:1.1rem; margin-left:10px;">🗑️</button>
-                                </td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
-        `;
-    } catch (error) {
-        console.error("❌ Erro fatal na renderização:", error);
-        container.innerHTML = `<div class="panel" style="color:red">Erro ao conectar com o banco de dados. Verifique o console.</div>`;
-    }
-},
-
-abrirModalEquipe: function(equipe = null) {
-    const nome = equipe ? equipe.nome_equipe : '';
-    const id = equipe ? equipe.id : '';
-    const tipo = equipe ? equipe.tipo_atuacao : 'Ambos';
-
-    const novoNome = prompt("Nome da Equipe:", nome);
-    if (novoNome) {
-        const novoTipo = prompt("Tipo (Leitura, Canto ou Ambos):", tipo);
-        window.api.salvarEquipe({ id, nome: novoNome, tipo: novoTipo })
-            .then(() => {
-                alert("Equipe salva!");
-                this.renderizarAbaEquipes();
-            });
-    }
-},
-
-deletarEquipe: async function(id) {
-    if (confirm("Tem certeza? Isso pode afetar escalas onde esta equipe está escalada.")) {
-        await window.api.excluirEquipe(id);
-        this.renderizarAbaEquipes();
-    }
-}
+  // =============/================
+  // 6 - FIM: processarStatus
+  // =============/================
 };
 
-// Inicializa o Dashboard ao carregar o script
-document.addEventListener("DOMContentLoaded", () => Dashboard.init());
+// Inicialização segura via DOMContentLoaded
+document.addEventListener("DOMContentLoaded", () =>
+  window.DashboardController.init()
+);
