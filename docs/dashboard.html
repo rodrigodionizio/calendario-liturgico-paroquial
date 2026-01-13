@@ -134,6 +134,51 @@
       <section id="tab-agenda-total" class="tab-content">
         <div class="panel">
           <div class="panel-title">Gerenciar Agenda Paroquial</div>
+          <!-- HEADER DE NAVEGAÇÃO DA AGENDA (DINÂMICO) -->
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 20px;
+              border-bottom: 1px solid #f0f0f0;
+              padding-bottom: 15px;
+            "
+          >
+            <!-- O ID "admin-calendar-month" será preenchido pelo DashboardController.js -->
+            <h2
+              id="admin-calendar-month"
+              class="month-name"
+              style="margin: 0; color: var(--cor-vinho); font-size: 1.8rem"
+            >
+              Carregando...
+            </h2>
+
+            <!-- BOTÕES DE CONTROLE DE FLUXO -->
+            <div class="nav-buttons">
+              <button
+                class="btn-nav"
+                onclick="window.DashboardController.navegarAgenda(-1)"
+                title="Mês Anterior"
+              >
+                &lt;
+              </button>
+              <button
+                class="btn-nav"
+                onclick="window.DashboardController.navegarAgenda(0)"
+              >
+                Hoje
+              </button>
+              <button
+                class="btn-nav"
+                onclick="window.DashboardController.navegarAgenda(1)"
+                title="Próximo Mês"
+              >
+                &gt;
+              </button>
+            </div>
+          </div>
+
           <!-- O MOTOR VAI CONSTRUIR O CALENDÁRIO AQUI DENTRO -->
           <div id="admin-calendar-grid" class="calendar-wrapper"></div>
         </div>

@@ -91,19 +91,38 @@ window.DashboardController = {
   // =============/================
   // 3 - INÍCIO: carregarAgendaTotal
   // =============/================
+  // Argumentos: Nenhum
+  // Descrição: Inicializa o motor com o mês/ano atual definido no controlador.
   carregarAgendaTotal: async function () {
+    // Se ainda não definimos uma data de navegação, usamos a atual
+    if (!this.agendaAno) this.agendaAno = new Date().getFullYear();
+    if (!this.agendaMes) this.agendaMes = new Date().getMonth() + 1;
+
     const selector = "#admin-calendar-grid";
+    const titleSelector = "#admin-calendar-month";
+
     if (window.CalendarEngine) {
+      // Atualiza o título do mês na tela
+      const nomeMes = new Date(
+        this.agendaAno,
+        this.agendaMes - 1
+      ).toLocaleString("pt-BR", { month: "long" });
+      document.querySelector(
+        titleSelector
+      ).textContent = `${nomeMes} ${this.agendaAno}`;
+
+      // Dispara o Motor
       await window.CalendarEngine.init({
         selector: selector,
         isAdmin: true,
-        ano: 2026,
-        mes: 1,
+        ano: this.agendaAno,
+        mes: this.agendaMes,
       });
     }
   },
   // =============/================
   // 3 - FIM: carregarAgendaTotal
+  // =============/================
   // =============/================
 
   // ==========================================================================
@@ -594,6 +613,40 @@ window.DashboardController = {
       })
       .join("");
   },
+  // ==========================================================================
+  // 10. NAVEGAÇÃO CRONOLÓGICA (NOVA)
+  // ==========================================================================
+
+  // =============/================
+  // 10 - INÍCIO: navegarAgenda
+  // =============/================
+  // Argumentos: direcao (Integer: -1, 0, 1)
+  // Descrição: Altera o mês de visualização da agenda e solicita novo carregamento ao Motor.
+  navegarAgenda: async function (direcao) {
+    if (direcao === 0) {
+      // Volta para o mês atual (Hoje)
+      this.agendaAno = new Date().getFullYear();
+      this.agendaMes = new Date().getMonth() + 1;
+    } else {
+      // Move para frente ou para trás
+      this.agendaMes += direcao;
+
+      // Tratamento de virada de ano
+      if (this.agendaMes < 1) {
+        this.agendaMes = 12;
+        this.agendaAno--;
+      } else if (this.agendaMes > 12) {
+        this.agendaMes = 1;
+        this.agendaAno++;
+      }
+    }
+
+    // Solicita ao motor para recarregar com as novas datas
+    await this.carregarAgendaTotal();
+  },
+  // =============/================
+  // 10 - FIM: navegarAgenda
+  // =============/================
 };
 
 document.addEventListener("DOMContentLoaded", () =>
