@@ -232,10 +232,19 @@ const Dashboard = {
           .replace(/[^\w\sà-úÀ-Ú]/gi, "")
           .trim();
         
-          // ADICIONE ESTA CONDIÇÃO AQUI:
+          // GERENCIAR EQUIPES
         if (targetTab === 'equipes') {
             Dashboard.renderizarAbaEquipes(); 
         }
+
+        // GERENCIAR AGENDA TOTAL
+        if (targetTab === 'agenda-total') {
+        window.CalendarEngine.init({
+        selector: '#calendar-admin-root',
+        isAdmin: true, // Modo Admin Ativado
+        ano: 2026,
+        mes: 1
+        });
 
         this.abaAtiva = targetTab;
       });
