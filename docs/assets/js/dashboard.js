@@ -26,7 +26,7 @@ window.DashboardController = {
       window.location.href = "admin.html";
       return;
     }
-
+    document.body.classList.add("auth-ok");
     // 1.2. Configuração de Nome na UI
     const userNameElem = document.getElementById("user-name");
     if (userNameElem) {
