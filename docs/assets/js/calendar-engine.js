@@ -1,7 +1,8 @@
 /*
  * ARQUIVO: calendar-engine.js
- * DESCRIÇÃO: Motor de Renderização Único e Universal (V11.2)
+ * DESCRIÇÃO: Motor de Renderização Único e Universal (V12.0)
  * FUNCIONALIDADE: Gerencia a lógica visual do calendário para áreas públicas e administrativas.
+ * SUPORTE: Múltiplos eventos por dia (Arquitetura SaaS).
  * PROJETO: Liturgia Paroquial 2026
  */
 
@@ -32,46 +33,40 @@ window.CalendarEngine = {
   // 1 - FIM: init
   // =============================
 
-  // =============/================
-  // 2 - INÍCIO: carregarERenderizar (Revisado)
-  // =============/================
+  // =============================
+  // 2 - INÍCIO: carregarERenderizar
+  // =============================
+  // Argumentos: Nenhum
+  // Descrição: Busca dados na API e organiza os eventos em Arrays por data (agrupamento).
   carregarERenderizar: async function () {
     const grid = document.querySelector(this.selector);
-    if (!grid) return;
+    if (!grid) {
+      console.error("❌ Motor Erro: Container não encontrado:", this.selector);
+      return;
+    }
 
     try {
+      // Feedback visual de carregamento
+      grid.innerHTML =
+        '<div style="grid-column: 1/-1; padding: 50px; text-align: center; color: #999;">Sincronizando agenda...</div>';
+
       const eventos = await window.api.buscarEventos(this.ano, this.mes);
 
-      // MUDANÇA: Agora agrupamos por data em um Array
+      // MUDANÇA ESTRUTURAL: Agrupamos os eventos em listas (Arrays) dentro do objeto por data
       this.eventosLocal = {};
       eventos.forEach((ev) => {
-        if (!this.eventosLocal[ev.data]) this.eventosLocal[ev.data] = [];
+        if (!this.eventosLocal[ev.data]) {
+          this.eventosLocal[ev.data] = [];
+        }
         this.eventosLocal[ev.data].push(ev);
       });
 
       this.renderizarGrid(grid);
     } catch (error) {
-      console.error(error);
+      console.error("❌ Motor Erro ao carregar dados:", error);
+      grid.innerHTML =
+        '<div style="grid-column: 1/-1; padding: 50px; text-align: center; color: red;">Falha na conexão com o banco.</div>';
     }
-  },
-
-  // No renderizarGrid, a função gerarPilulas deve ser chamada assim:
-  // ${this.gerarPilulas(this.eventosLocal[dataISO])}
-
-  gerarPilulas: function (listaEventos) {
-    if (!listaEventos || listaEventos.length === 0) return "";
-
-    return listaEventos
-      .map((evento) => {
-        let corHex = evento.liturgia_cores?.hex_code || "#64748b"; // Cinza para não-litúrgicos
-        const hora = evento.hora_inicio
-          ? evento.hora_inicio.substring(0, 5)
-          : evento.escalas?.[0]?.hora_celebracao.substring(0, 5) || "";
-        return `<div class="pill" style="border-left: 3px solid ${corHex}; background-color: var(--cor-vinho); font-size: 0.65rem;">
-            ${hora} ${evento.titulo}
-        </div>`;
-      })
-      .join("");
   },
   // =============================
   // 2 - FIM: carregarERenderizar
@@ -81,14 +76,14 @@ window.CalendarEngine = {
   // 3 - INÍCIO: renderizarGrid
   // =============================
   // Argumentos: gridElement (HTMLElement)
-  // Descrição: Executa o cálculo matemático das células do mês e injeta o HTML estrutural.
+  // Descrição: Calcula os dias do mês e constrói o HTML do grid injetando as pílulas.
   renderizarGrid: function (gridElement) {
-    // Lógica de cálculo de calendário
+    // 3.1. Cálculos Matemáticos de Calendário
     const primeiroDia = new Date(this.ano, this.mes - 1, 1).getDay();
     const ultimoDia = new Date(this.ano, this.mes, 0).getDate();
     const ultimoDiaMesAnt = new Date(this.ano, this.mes - 1, 0).getDate();
 
-    // Template inicial com cabeçalhos de dias da semana
+    // 3.2. Template de Cabeçalho
     let html = `
             <div class="day-header">Dom</div><div class="day-header">Seg</div>
             <div class="day-header">Ter</div><div class="day-header">Qua</div>
@@ -96,34 +91,35 @@ window.CalendarEngine = {
             <div class="day-header">Sáb</div>
         `;
 
-    // Loop 1: Dias residuais do mês anterior (preenchimento visual)
+    // 3.3. Preenchimento de dias do mês anterior
     for (let i = primeiroDia - 1; i >= 0; i--) {
-      html += `<div class="day-cell other-month"><span class="day-number">${
-        ultimoDiaMesAnt - i
-      }</span></div>`;
+      const diaResiduo = ultimoDiaMesAnt - i;
+      html += `<div class="day-cell other-month"><span class="day-number">${diaResiduo}</span></div>`;
     }
 
-    // Loop 2: Dias do mês vigente
+    // 3.4. Renderização dos dias do mês atual
     for (let dia = 1; dia <= ultimoDia; dia++) {
       const dataISO = `${this.ano}-${String(this.mes).padStart(
         2,
         "0"
       )}-${String(dia).padStart(2, "0")}`;
-      const evento = this.eventosLocal[dataISO];
 
-      // Definição dinâmica do comportamento de clique baseado no perfil (SaaS Ready)
+      // Busca a lista de eventos para este dia específico (Sempre retorna um Array)
+      const listaEventosDia = this.eventosLocal[dataISO] || [];
+
+      // CORREÇÃO: Definição dinâmica do atributo de clique conforme privilégio
       const clickAttr = this.isAdmin
         ? `onclick="window.DashboardController.abrirGerenciadorAgenda('${dataISO}')"`
         : `onclick="window.CalendarUI.abrirModal('${dataISO}')"`;
 
       html += `
-                <div class="day-cell" data-iso="${dataISO}" ${clickAttr}>
-                    <span class="day-number">${dia}</span>
-                    ${this.gerarPilulas(evento)}
-                </div>`;
+        <div class="day-cell" data-iso="${dataISO}" ${clickAttr}>
+            <span class="day-number">${dia}</span>
+            ${this.gerarPilulas(listaEventosDia)} 
+        </div>`;
     }
 
-    // Injeção final no DOM
+    // 3.5. Injeção Final no DOM
     gridElement.innerHTML = html;
     console.log("✅ Motor: Grid renderizado com sucesso.");
   },
@@ -134,28 +130,62 @@ window.CalendarEngine = {
   // =============================
   // 4 - INÍCIO: gerarPilulas
   // =============================
-  // Argumentos: evento (Object|null)
-  // Descrição: Constrói a representação visual (tags/badges) dos eventos dentro de cada dia.
-  gerarPilulas: function (evento) {
-    if (!evento) return "";
-
-    // Tratamento de cor litúrgica
-    let corHex = evento.liturgia_cores?.hex_code || "#ccc";
-    if (corHex.toLowerCase() === "#ffffff") corHex = "#ccc"; // Fix para visibilidade em fundo branco
-
-    // Pílula principal (Título do evento)
-    let html = `<div class="pill" style="border-left: 3px solid ${corHex}; background-color: var(--cor-vinho);">${evento.titulo}</div>`;
-
-    // Pílulas secundárias (Horários e Escalas)
-    if (evento.escalas && evento.escalas.length > 0) {
-      evento.escalas.forEach((esc) => {
-        html += `
-                    <div class="pill" style="background:#f0f0f0; color:#333; border-left:3px solid #ccc">
-                        ${esc.hora_celebracao.substring(0, 5)} Missa
-                    </div>`;
-      });
+  // Argumentos: listaEventos (Array|null)
+  // Descrição: Processa a lista de compromissos do dia e gera as pílulas visuais formatadas.
+  gerarPilulas: function (listaEventos) {
+    // Se não houver eventos, não renderiza nada
+    if (
+      !listaEventos ||
+      !Array.isArray(listaEventos) ||
+      listaEventos.length === 0
+    ) {
+      return "";
     }
-    return html;
+
+    // Mapeia a lista para gerar o HTML de cada compromisso (SaaS Multi-Agenda)
+    return listaEventos
+      .map((evento) => {
+        // 4.1. Definição da Cor Visual (Liturgia vs Outros)
+        let corHex =
+          evento.tipo_compromisso === "liturgia"
+            ? evento.liturgia_cores?.hex_code || "#2e7d32"
+            : "#64748b"; // Cinza azulado para reuniões/agenda padre
+
+        // Ajuste de contraste para o branco
+        if (corHex.toLowerCase() === "#ffffff") corHex = "#ccc";
+
+        // 4.2. Captura do Horário do Evento
+        let horaExibicao = "";
+        if (evento.hora_inicio) {
+          horaExibicao = evento.hora_inicio.substring(0, 5);
+        } else if (evento.escalas && evento.escalas.length > 0) {
+          horaExibicao = evento.escalas[0].hora_celebracao.substring(0, 5);
+        }
+
+        // 4.3. Template da Pílula (Padrão Sofisticado Sacristia Digital)
+        let htmlPill = `
+        <div class="pill" style="border-left: 3px solid ${corHex}; background-color: var(--cor-vinho); margin-bottom: 2px;">
+            <span style="font-size: 0.6rem; opacity: 0.8; margin-right: 4px;">${horaExibicao}</span>
+            ${evento.titulo}
+        </div>`;
+
+        // 4.4. Suporte a múltiplas escalas de horários no mesmo registro de liturgia
+        if (
+          evento.tipo_compromisso === "liturgia" &&
+          evento.escalas &&
+          evento.escalas.length > 1
+        ) {
+          evento.escalas.slice(1).forEach((esc) => {
+            htmlPill += `
+                <div class="pill" style="background:#f0f0f0; color:#333; border-left:3px solid #ccc; font-size: 0.65rem;">
+                    ${esc.hora_celebracao.substring(0, 5)} Missa
+                </div>`;
+          });
+        }
+
+        return htmlPill;
+      })
+      .join(""); // Une o HTML de todos os eventos do dia
   },
   // =============================
   // 4 - FIM: gerarPilulas

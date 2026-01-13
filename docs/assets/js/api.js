@@ -285,4 +285,24 @@ window.api = {
   // =============================
   // 5 - FIM: buscarEventosDia
   // =============================
+
+  // =============/================
+  // 6 - INÍCIO: buscarEventosRecentes
+  // =============/================
+  buscarEventosRecentes: async function (limite = 5) {
+    const { data, error } = await _supabaseClient
+      .from("eventos_base")
+      .select(`*, liturgia_cores(hex_code)`)
+      .order("data", { ascending: false })
+      .limit(limite);
+
+    if (error) {
+      console.error("Erro API buscarEventosRecentes:", error);
+      return [];
+    }
+    return data;
+  },
+  // =============/================
+  // 6 - FIM: buscarEventosRecentes
+  // =============/================
 };
