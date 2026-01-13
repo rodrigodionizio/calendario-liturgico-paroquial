@@ -362,6 +362,111 @@ window.DashboardController = {
   // =============/================
   // 6 - FIM: processarStatus
   // =============/================
+  // ==========================================================================
+  // 7. GESTÃO DE AGENDA (AÇÕES DO CALENDÁRIO)
+  // ==========================================================================
+
+  // =============================
+  // 7 - INÍCIO: abrirGerenciadorAgenda
+  // =============================
+  // Argumentos: dataISO (String YYYY-MM-DD)
+  // Descrição: Captura o clique no calendário e abre o modal de edição/gerenciamento.
+  abrirGerenciadorAgenda: async function (dataISO) {
+    console.log("🛠️ Dashboard: Abrindo gerenciador para a data:", dataISO);
+
+    // 1. Busca se já existe um evento para esta data no cache do motor
+    const evento = window.CalendarEngine.eventosLocal[dataISO] || {
+      data: dataISO,
+      titulo: "Novo Evento",
+      tipo_compromisso: "liturgia",
+      status: "aprovado",
+    };
+
+    // 2. Reutilizamos a estrutura de Modal que já existe no CSS (modal-overlay)
+    // Se você não tiver o HTML do modal no dashboard.html, vamos injetar agora
+    let modal = document.getElementById("modalOverlay");
+    if (!modal) {
+      console.error(
+        "❌ Erro: Elemento #modalOverlay não encontrado no dashboard.html"
+      );
+      alert("Erro visual: Estrutura de modal faltando.");
+      return;
+    }
+
+    // 3. Prepara o conteúdo do Modal para Edição
+    // Nota: Aqui invocamos a lógica de "Ativar Edição" que o Admin usa
+    this.renderizarEditorNoModal(evento);
+
+    // 4. Exibe o Modal
+    modal.classList.add("active");
+  },
+  // =============================
+  // 7 - FIM: abrirGerenciadorAgenda
+  // =============================
+
+  // =============================
+  // 8 - INÍCIO: renderizarEditorNoModal
+  // =============================
+  // Argumentos: evento (Object)
+  // Descrição: Constrói o formulário de edição de compromissos dentro do modal.
+  renderizarEditorNoModal: function (evento) {
+    const container = document.getElementById("modalContent");
+    if (!container) return;
+
+    const dataFmt = new Date(evento.data + "T12:00:00").toLocaleDateString(
+      "pt-BR"
+    );
+
+    container.innerHTML = `
+        <div class="modal-card" style="max-width: 500px; flex-direction: column;">
+            <div class="modal-body">
+                <button class="btn-close" onclick="document.getElementById('modalOverlay').classList.remove('active')">×</button>
+                <h3 style="color: var(--cor-vinho); margin-bottom: 5px;">Gerenciar Agenda</h3>
+                <p style="font-size: 0.9rem; color: #666; margin-bottom: 20px;">Data: <strong>${dataFmt}</strong></p>
+                
+                <div id="form-agenda-admin">
+                    <label style="display:block; font-size: 0.8rem; font-weight: bold; margin-bottom: 5px;">TÍTULO DO EVENTO</label>
+                    <input type="text" id="edit-titulo" value="${
+                      evento.titulo
+                    }" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ddd; border-radius:6px;">
+
+                    <label style="display:block; font-size: 0.8rem; font-weight: bold; margin-bottom: 5px;">TIPO</label>
+                    <select id="edit-tipo" style="width:100%; padding:10px; margin-bottom:15px; border:1px solid #ddd; border-radius:6px;">
+                        <option value="liturgia" ${
+                          evento.tipo_compromisso === "liturgia"
+                            ? "selected"
+                            : ""
+                        }>✝️ Liturgia / Missa</option>
+                        <option value="reuniao" ${
+                          evento.tipo_compromisso === "reuniao"
+                            ? "selected"
+                            : ""
+                        }>👥 Reunião / Pastoral</option>
+                        <option value="evento" ${
+                          evento.tipo_compromisso === "evento" ? "selected" : ""
+                        }>🎉 Evento / Festa</option>
+                    </select>
+
+                    <div style="display:flex; gap:10px;">
+                        <button onclick="window.DashboardController.salvarAlteracoesAgenda('${
+                          evento.data
+                        }')" 
+                                style="flex:1; background: var(--cor-verde); color:white; border:none; padding:12px; border-radius:6px; font-weight:bold; cursor:pointer;">
+                                SALVAR
+                        </button>
+                        <button onclick="document.getElementById('modalOverlay').classList.remove('active')" 
+                                style="flex:1; background: #eee; border:none; padding:12px; border-radius:6px; cursor:pointer;">
+                                CANCELAR
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+  },
+  // =============================
+  // 8 - FIM: renderizarEditorNoModal
+  // =============================
 };
 
 // Inicialização segura via DOMContentLoaded

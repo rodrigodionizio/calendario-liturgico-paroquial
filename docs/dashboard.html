@@ -139,6 +139,22 @@
         </div>
       </section>
     </main>
+    <!-- ==========================================================================
+         COMPONENTES DE INTERFACE (MODAIS)
+         Devem ficar ao final para garantir prioridade visual (Z-Index)
+    ========================================================================== -->
+    <div
+      class="modal-overlay"
+      id="modalOverlay"
+      onclick="if(event.target == this) this.classList.remove('active')"
+    >
+      <div id="modalContent">
+        <!-- O DashboardController.js vai injetar o formulário aqui -->
+      </div>
+    </div>
+
+    <!-- MÁSCARA PARA MENU MOBILE (Se aplicável) -->
+    <div id="sidebar-overlay" onclick="window.toggleSidebarMobile()"></div>
 
     <!-- SCRIPTS DE INICIALIZAÇÃO -->
     <script src="assets/js/api.js"></script>
