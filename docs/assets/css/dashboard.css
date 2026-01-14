@@ -19,8 +19,10 @@
 
   /* Semântica de Status (Acessibilidade WCAG 2.1) */
   --sys-color-success: #2e7d32;
-  --sys-color-warning: #fbb558; /* Dourado Paroquial */
-  --sys-color-error: #c82038; /* Cereja */
+  --sys-color-warning: #fbb558;
+  /* Dourado Paroquial */
+  --sys-color-error: #c82038;
+  /* Cereja */
   --sys-color-info: #0288d1;
 
   /* Tokens de Elevação (Sombras) */
@@ -38,8 +40,10 @@
 
   /* Destructive Action Tokens */
   --sys-alert-danger-bg: #fff5f5;
-  --sys-alert-danger-text: #a41d31; /* Nosso Vinho como tom escuro */
-  --sys-alert-danger-border: #c82038; /* Nosso Cereja como borda */
+  --sys-alert-danger-text: #a41d31;
+  /* Nosso Vinho como tom escuro */
+  --sys-alert-danger-border: #c82038;
+  /* Nosso Cereja como borda */
 }
 
 /* ==========================================================================
@@ -120,6 +124,7 @@
   font-family: "Neulis", sans-serif;
   letter-spacing: -0.5px;
 }
+
 /* Componente Atômico: Alert */
 .c-alert {
   display: flex;
@@ -137,7 +142,8 @@
 /* Modificador Destrutivo (Exclusão) */
 .c-alert--destructive {
   background-color: var(--sys-alert-danger-bg);
-  border-color: rgba(200, 32, 56, 0.1); /* Cereja com baixa opacidade */
+  border-color: rgba(200, 32, 56, 0.1);
+  /* Cereja com baixa opacidade */
   border-left: 4px solid var(--sys-alert-danger-border);
   color: var(--sys-alert-danger-text);
 }
@@ -156,6 +162,7 @@
   font-size: 0.8rem;
   letter-spacing: 0.5px;
 }
+
 /* Estados de Botão no SDS */
 .c-button {
   position: relative;
@@ -190,7 +197,8 @@
   padding: 20px;
   margin-top: 15px;
   border: 1px solid rgba(164, 29, 49, 0.1);
-  animation: slideInUp 0.3s ease-out; /* Entrada suave de baixo para cima */
+  animation: slideInUp 0.3s ease-out;
+  /* Entrada suave de baixo para cima */
 }
 
 @keyframes spin {
@@ -198,11 +206,13 @@
     transform: rotate(360deg);
   }
 }
+
 @keyframes slideInUp {
   from {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -328,6 +338,7 @@
   font-size: 1.2rem;
   line-height: 1;
 }
+
 .list-date small {
   font-size: 0.65rem;
   text-transform: uppercase;
@@ -357,10 +368,12 @@
   border-radius: 50%;
   margin-left: 15px;
 }
+
 .status-ok {
   background: var(--sys-color-success);
   box-shadow: 0 0 5px rgba(46, 125, 50, 0.4);
 }
+
 .status-wait {
   background: var(--sys-color-warning);
   animation: pulse 2s infinite;
@@ -450,10 +463,12 @@
     transform: scale(1);
     opacity: 1;
   }
+
   50% {
     transform: scale(1.2);
     opacity: 0.7;
   }
+
   100% {
     transform: scale(1);
     opacity: 1;
@@ -471,22 +486,26 @@
 }
 
 .mobile-overlay-active {
-  overflow: hidden !important; /* Trava o body quando menu aberto */
+  overflow: hidden !important;
+  /* Trava o body quando menu aberto */
 }
 
 @media (max-width: 768px) {
+
   /* 
      10.1. SHELL & LAYOUT FLUIDO 
      Remoção do modelo de Sidebar Fixa Desktop e adoção de Gaveta 
   */
   .admin-body {
     flex-direction: column !important;
-    overflow-y: auto !important; /* Habilita scroll nativo da janela */
+    overflow-y: auto !important;
+    /* Habilita scroll nativo da janela */
     height: auto !important;
   }
 
   .admin-main {
-    padding: 80px 15px 30px 15px; /* Topo compensa o Header Fixo */
+    padding: 80px 15px 80px 15px;
+    /* Topo compensa Header; Base compensa botão flutuante se houver */
     height: auto;
     overflow: visible;
   }
@@ -523,7 +542,6 @@
     height: 28px;
   }
 
-  /* Placeholder de Avatar no Header */
   .mobile-avatar {
     width: 32px;
     height: 32px;
@@ -539,7 +557,6 @@
 
   /* 
      10.3. SIDEBAR COMO DRAWER (GAVETA)
-     Esconde lateralmente e desliza quando ativa
   */
   .admin-sidebar {
     position: fixed;
@@ -547,10 +564,15 @@
     left: 0;
     height: 100vh;
     z-index: 1100;
-    width: 280px; /* Um pouco mais larga para toque */
+    /* Sidebar acima do Header */
+    width: 280px;
     transform: translateX(-100%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 2px 0 20px rgba(0, 0, 0, 0.5);
+    overflow-y: auto;
+    /* CORREÇÃO: Permite scroll se menu for longo e tela pequena */
+    padding-bottom: 20px;
+    /* Espaço para o botão de logout não colar no fundo */
   }
 
   .admin-sidebar.active {
@@ -566,7 +588,8 @@
     height: 100vh;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
-    z-index: 1090; /* Logo abaixo da sidebar */
+    z-index: 1090;
+    /* Logo abaixo da sidebar */
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease;
@@ -580,35 +603,41 @@
   /* 
      10.4. ADAPTAÇÕES DE CONTEÚDO
   */
-  
-  /* Esconde Header Desktop redundante */
   .page-header {
     display: none;
   }
 
-  /* Grid de KPIs - 2 Colunas (Mobile Landscape/Portrait Big) */
   .kpi-grid {
     grid-template-columns: 1fr 1fr;
     gap: 10px;
   }
-  
-  /* Cartões com menos padding */
-  .kpi-card, .panel {
+
+  .kpi-card,
+  .panel {
     padding: 15px;
   }
 
-  /* Ajuste de Texto em KPIs */
   .kpi-value {
     font-size: 1.8rem;
   }
-  
+
   .kpi-label {
     font-size: 0.65rem;
   }
 
   /* 
      10.5. AJUSTES DE MODAL (FULLSCREEN / BOTTOM SHEET)
+     CORREÇÃO CRÍTICA: Z-Index e Padding Top
   */
+  /* Sobrescreve estilo global do .modal-overlay */
+  #modalOverlay {
+    z-index: 2000 !important;
+    /* Acima do Header (1050) e Sidebar (1100) opcionalmente */
+    align-items: flex-end !important;
+    /* Comportamento Bottom Sheet ou Full */
+    padding: 0;
+  }
+
   #modalContent {
     width: 100% !important;
     height: 100% !important;
@@ -617,6 +646,8 @@
     border-radius: 0 !important;
     display: flex;
     flex-direction: column;
+    background: #f5f7fa;
+    /* Fundo leve para diferenciar */
   }
 
   .modal-card {
@@ -624,31 +655,45 @@
     display: flex;
     flex-direction: column;
     border-radius: 0;
+    box-shadow: none;
   }
 
   .modal-body {
     flex: 1;
     overflow-y: auto;
-    padding-bottom: 80px; /* Espaço para botões flutuantes se houver */
+    /* CORREÇÃO: Padding extra no topo para segurança visual em alguns browsers */
+    padding: 20px !important;
+    padding-bottom: 80px !important;
   }
 
-  /* Botão Fechar maior para toque */
   .btn-close {
     padding: 15px;
     font-size: 2rem;
+    /* Facilita fechar no mobile */
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
   }
-  
+
   /* 
      10.6. VISUALIZAÇÃO DE LISTA (Dashboard)
   */
   .chart-container {
-    height: 160px; /* Gráfico menor */
+    height: 160px;
   }
 }
 
 /* Telas muito pequenas (iPhone SE, etc) */
 @media (max-width: 375px) {
   .kpi-grid {
-    grid-template-columns: 1fr; /* Empilha tudo */
+    grid-template-columns: 1fr;
   }
 }
