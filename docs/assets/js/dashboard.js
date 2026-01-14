@@ -1,255 +1,214 @@
-/**
- * SACRISTIA DIGITAL - DASHBOARD CONTROLLER
- * Versão: 5.5 (SDS - System Design Standard)
- * 
- * Responsabilidade: Gerenciar a lógica de negócios da área administrativa, 
- * renderização de KPIs, Gráficos de Carga e Gestão de Compromissos.
- * 
- * Padrões: 
- * - Micro-interações otimizadas
- * - OOCSS Integration (Uso de .o-surface-card)
- * - Error Handling Robusto
+/*
+ * ARQUIVO: dashboard.js
+ * VERSÃO: 5.6 (Correção de Escopo e Métodos UI)
  */
 
 window.DashboardController = {
-    // Estado interno para navegação cronológica
-    agendaAno: new Date().getFullYear(),
-    agendaMes: new Date().getMonth() + 1,
-    meuPerfil: null,
+  meuPerfil: null,
 
-    /**
-     * @function init
-     * @description Ponto de entrada do Dashboard. Valida sessão e sincroniza componentes.
-     */
-    init: async function () {
-        console.log("🛠️ SDS Engine: Inicializando Painel Administrativo...");
+  // =============================
+  // 1 - INÍCIO: init
+  // =============================
+  init: async function () {
+    const session = await window.api.checkSession();
+    if (!session) {
+      window.location.href = "admin.html";
+      return;
+    }
 
-        try {
-            const session = await window.api.checkSession();
-            if (!session) {
-                window.location.href = "admin.html";
-                return;
-            }
+    document.body.classList.add("auth-ok");
 
-            // Ativa transição suave de entrada (Alpha-blending)
-            document.body.classList.add("auth-ok");
+    // Carrega Perfil do Usuário
+    const { data: perfil } = await window.api.client
+      .from("admins_allowlist")
+      .select("*")
+      .eq("email", session.user.email)
+      .single();
+    this.meuPerfil = perfil;
 
-            // Sincroniza Perfil e Permissões
-            const { data: perfil } = await window.api.client
-                .from('admins_allowlist')
-                .select('*')
-                .eq('email', session.user.email)
-                .single();
+    if (this.meuPerfil?.perfil_nivel <= 2) {
+      const menuUser = document.getElementById("menu-usuarios");
+      if (menuUser) menuUser.style.display = "flex";
+    }
 
-            this.meuPerfil = perfil;
+    document.getElementById("user-name").textContent = (
+      perfil?.nome || session.user.email.split("@")[0]
+    ).toUpperCase();
 
-            // UI Hint: Mostra menu de usuários apenas para níveis 1 e 2 (Admin/Master)
-            if (this.meuPerfil?.perfil_nivel <= 2) {
-                const menuUser = document.getElementById('menu-usuarios');
-                if (menuUser) menuUser.style.display = 'flex';
-            }
+    await this.atualizarVisaoGeral();
+    this.configurarNavegacao();
+  },
 
-            // Inicializa componentes de dados
-            await this.atualizarVisaoGeral();
-            this.configurarNavegacao();
-            
-            console.log("✅ SDS Engine: Prontidão operacional confirmada.");
-        } catch (error) {
-            console.error("❌ Erro na inicialização do Dashboard:", error);
-        }
-    },
+  // =============================
+  // 2 - INÍCIO: carregarAgendaTotal
+  // =============================
+  carregarAgendaTotal: async function () {
+    if (window.CalendarEngine) {
+      await window.CalendarEngine.init({
+        selector: "#admin-calendar-grid",
+        isAdmin: true,
+        ano: new Date().getFullYear(),
+        mes: new Date().getMonth() + 1,
+      });
+    }
+  },
 
-    /**
-     * @function atualizarVisaoGeral
-     * @description Atualiza KPIs e listas de atividade recente (Mecanismo de 'Real-time sync').
-     */
-    atualizarVisaoGeral: async function () {
-        const stats = await window.api.buscarEstatisticasDashboard();
+  // =============================
+  // 3 - INÍCIO: configurarNavegacao (CORREÇÃO DE ESCOPO)
+  // =============/================
+  configurarNavegacao: function () {
+    const menuItems = document.querySelectorAll(".menu-item[data-tab]");
+    const ctrl = window.DashboardController; // Referência fixa para evitar erro de 'this'
 
-        // Atualização de KPIs com segurança de existência (Optional Chaining)
-        const mappings = {
-            'kpi-semana': stats.semana,
-            'kpi-pendentes': stats.pendentes,
-            'kpi-mural': stats.mural,
-            'kpi-equipes': stats.equipes,
-            'badge-pendentes': stats.pendentes
-        };
+    menuItems.forEach((item) => {
+      item.addEventListener("click", async () => {
+        const targetTab = item.getAttribute("data-tab");
+        document
+          .querySelectorAll(".menu-item, .tab-content")
+          .forEach((el) => el.classList.remove("active"));
 
-        Object.entries(mappings).forEach(([id, val]) => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = val;
-        });
+        item.classList.add("active");
+        const targetPanel = document.getElementById(`tab-${targetTab}`);
+        if (targetPanel) targetPanel.classList.add("active");
 
-        await this.renderizarGraficoCarga();
-        await this.renderizarListaRecentes();
-    },
+        // Chamadas usando a referência fixa 'ctrl'
+        if (targetTab === "agenda-total") await ctrl.carregarAgendaTotal();
+        else if (targetTab === "visao-geral") await ctrl.atualizarVisaoGeral();
+        else if (targetTab === "equipes") await ctrl.renderizarAbaEquipes();
+        else if (targetTab === "usuarios") await ctrl.renderizarAbaUsuarios();
+      });
+    });
+  },
 
-    /**
-     * @function renderizarListaRecentes
-     * @description Converte dados em 'Action Cards' seguindo o Design System.
-     * @ux Transforma tabelas estáticas em unidades de decisão intuitivas.
-     */
-    renderizarListaRecentes: async function () {
-        const container = document.getElementById("admin-recent-list") || document.getElementById("lista-pendentes-resumo");
-        if (!container) return;
+  // =============================
+  // 4 - INÍCIO: Gestão de Usuários (Aba Acesso)
+  // =============================
+  renderizarAbaUsuarios: async function () {
+    const container = document.getElementById("tab-usuarios");
+    const users = await window.api.buscarUsuarios();
 
-        const eventos = await window.api.buscarEventosRecentes(6);
-        
-        container.innerHTML = eventos.map(ev => {
-            const dataObj = new Date(ev.data + "T12:00:00");
-            const isPending = ev.status === "pendente";
-            const dia = dataObj.getDate().toString().padStart(2, '0');
-            const mes = dataObj.toLocaleString("pt-BR", { month: "short" }).toUpperCase().replace(".", "");
-
-            // BEM: c-approval-card (Card de Aprovação)
-            return `
-                <div class="list-item o-surface-card">
-                    <div class="list-date">
-                        <span>${dia}</span>
-                        <small>${mes}</small>
-                    </div>
-                    
-                    <div class="list-content">
-                        <div class="list-title">${ev.titulo}</div>
-                        <div class="list-meta">
-                            ${ev.tipo_compromisso.toUpperCase()} | 📍 ${ev.local || 'Geral'}
-                        </div>
-                    </div>
-
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        ${isPending ? `
-                            <button onclick="window.DashboardController.aprovarRapido('${ev.id}')" 
-                                    class="btn-ver-todas" style="background: var(--sys-color-success); padding: 6px 12px; font-size: 0.7rem;">
-                                APROVAR
-                            </button>
-                            <div class="status-dot status-wait"></div>
-                        ` : `
-                            <div class="status-dot status-ok"></div>
-                        `}
-                    </div>
+    container.innerHTML = `
+            <div class="panel">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h3 class="page-title" style="font-size:1.2rem;">Usuários do Sistema</h3>
+                    <button onclick="window.DashboardController.abrirModalUsuario()" class="btn-ver-todas">＋ Novo Acesso</button>
                 </div>
-            `;
-        }).join("");
-    },
-
-    /**
-     * @function renderizarFormulario
-     * @description Renderiza o formulário de edição usando seções visuais (.form-section).
-     * @ux Melhora a legibilidade dividindo o conteúdo em grupos lógicos.
-     */
-    renderizarFormulario: async function (dataISO, eventoId = null) {
-        let evento = { data: dataISO, tipo_compromisso: "liturgia", titulo: "", escalas: [] };
-
-        if (eventoId && eventoId !== "null") {
-            const { data } = await window.api.client
-                .from("eventos_base")
-                .select("*, escalas(*)")
-                .eq("id", eventoId)
-                .single();
-            evento = data;
-        }
-
-        const container = document.getElementById("modalContent");
-        container.innerHTML = `
-            <div class="modal-card" style="max-width: 550px; border-radius: 20px;">
-                <div class="modal-body" style="padding: 30px;">
-                    <header style="margin-bottom: 25px;">
-                        <h3 class="page-title" style="font-size: 1.4rem;">${eventoId ? 'Editar' : 'Novo'} Compromisso</h3>
-                        <p style="color: #666; font-size: 0.9rem;">Preencha os dados para a agenda de ${new Date(dataISO + "T12:00:00").toLocaleDateString('pt-BR')}</p>
-                    </header>
-                    
-                    <div class="form-section">
-                        <span class="form-section-title">1. Informações de Identificação</span>
-                        <div style="margin-bottom: 15px;">
-                            <label class="kpi-label" style="display:block; margin-bottom:5px;">Tipo de Evento</label>
-                            <select id="edit-tipo" onchange="window.DashboardController.toggleCamposEditor(this.value)" style="width:100%; padding:12px; border-radius:8px; border:1px solid #ddd;">
-                                <option value="liturgia" ${evento.tipo_compromisso === 'liturgia' ? 'selected' : ''}>✝️ Liturgia / Missa</option>
-                                <option value="reuniao" ${evento.tipo_compromisso === 'reuniao' ? 'selected' : ''}>👥 Reunião / Pastoral</option>
-                                <option value="atendimento" ${evento.tipo_compromisso === 'atendimento' ? 'selected' : ''}>🗣️ Agenda do Padre</option>
-                            </select>
+                <div id="users-list">
+                    ${users
+                      .map(
+                        (u) => `
+                        <div class="list-item o-surface-card">
+                            <div class="list-content">
+                                <strong>${u.nome || "Sem nome"}</strong><br>
+                                <small>${u.email} • Nível ${
+                          u.perfil_nivel
+                        }</small>
+                            </div>
+                            <button onclick='window.DashboardController.abrirModalUsuario(${JSON.stringify(
+                              u
+                            )})' style="background:none; border:none; cursor:pointer;">✏️</button>
+                            <button onclick="window.DashboardController.deletarUsuario('${
+                              u.id
+                            }')" style="background:none; border:none; cursor:pointer; color:red; margin-left:10px;">🗑️</button>
                         </div>
-                        <div>
-                            <label class="kpi-label" style="display:block; margin-bottom:5px;">Título / Assunto</label>
-                            <input type="text" id="edit-titulo" value="${evento.titulo}" class="o-surface-card" style="width:100%; padding:12px; border-radius:8px; border:1px solid #ddd; box-shadow:none;">
-                        </div>
-                    </div>
-
-                    <div id="campos-liturgia" class="form-section" style="display: ${evento.tipo_compromisso === 'liturgia' ? 'block' : 'none'}">
-                        <span class="form-section-title">2. Escalas e Liturgia</span>
-                        <!-- Conteúdo de escalas omitido para brevidade, manter lógica original de linhas -->
-                        <div id="lista-escalas-editor"> ${this.gerarLinhasEscalaEditor(evento.escalas)} </div>
-                        <button onclick="window.DashboardController.adicionarLinhaEscala()" style="margin-top:10px; background:none; border:1px dashed #ccc; width:100%; padding:10px; cursor:pointer; color:#888;">＋ Novo Horário</button>
-                    </div>
-
-                    <div style="display: flex; gap: 12px; margin-top: 30px;">
-                        <button onclick="window.DashboardController.salvarFinal('${dataISO}', ${eventoId ? `'${eventoId}'` : "null"})" class="btn-ver-todas" style="flex:2; background: var(--sys-color-success);">💾 SALVAR COMPROMISSO</button>
-                        <button onclick="window.DashboardController.fecharModal()" style="flex:1; background:#eee; color:#666;" class="btn-ver-todas">CANCELAR</button>
-                    </div>
+                    `
+                      )
+                      .join("")}
                 </div>
             </div>`;
-    },
+  },
 
-    /**
-     * @function aprovarRapido
-     * @description Action shorthand para aprovação via Action Cards.
-     * @ux Feedback visual imediato após a ação.
-     */
-    aprovarRapido: async function(id) {
-        if(!confirm("Deseja aprovar este compromisso na agenda oficial?")) return;
-        try {
-            await window.api.atualizarStatusEvento(id, 'aprovado');
-            await this.atualizarVisaoGeral();
-            if(window.CalendarEngine) window.CalendarEngine.carregarERenderizar();
-        } catch (e) {
-            alert("Erro ao sincronizar aprovação.");
-        }
-    },
-
-    // --- MÉTODOS DE SUPORTE MANTIDOS ---
-    configurarNavegacao: function () {
-        const menuItems = document.querySelectorAll(".menu-item[data-tab]");
-        menuItems.forEach(item => {
-            item.addEventListener("click", async () => {
-                const targetTab = item.getAttribute("data-tab");
-                document.querySelectorAll(".menu-item").forEach(i => i.classList.remove("active"));
-                document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
-                item.classList.add("active");
-                document.getElementById(`tab-${targetTab}`).classList.add("active");
-
-                if (targetTab === "agenda-total") this.carregarAgendaTotal();
-            });
-        });
-    },
-
-    fecharModal: function () {
-        document.getElementById("modalOverlay").classList.remove("active");
-    },
-
-    toggleCamposEditor: function (tipo) {
-        document.getElementById("campos-liturgia").style.display = tipo === 'liturgia' ? 'block' : 'none';
-    },
-
-    /**
-     * @function renderizarGraficoCarga
-     * @description Renderiza gráfico de barras com animações baseadas em CSS Transitions.
-     */
-    renderizarGraficoCarga: async function () {
-        const container = document.getElementById("admin-chart");
-        if (!container) return;
-        const eventos = await window.api.buscarEventosProximos(7);
-        const diasSemana = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"];
-        const densidade = [0, 0, 0, 0, 0, 0, 0];
-        
-        eventos.forEach(ev => densidade[new Date(ev.data + "T12:00:00").getDay()]++);
-        const max = Math.max(...densidade, 1);
-
-        container.innerHTML = densidade.map((count, i) => `
-            <div class="chart-bar-group">
-                <div class="chart-bar" style="height: ${(count / max) * 100}%" title="${count} eventos"></div>
-                <div class="chart-label">${diasSemana[i]}</div>
-            </div>`).join("");
+  abrirModalUsuario: function (u = null) {
+    const email = prompt("E-mail do usuário:", u ? u.email : "");
+    if (email) {
+      const nome = prompt("Nome completo:", u ? u.nome : "");
+      const nivel = prompt(
+        "Nível (1:Master, 2:Secretaria, 3:Coordenador):",
+        u ? u.perfil_nivel : "3"
+      );
+      window.api
+        .salvarUsuario({ id: u?.id, email, nome, perfil_nivel: nivel })
+        .then(() => this.renderizarAbaUsuarios());
     }
+  },
+
+  deletarUsuario: async function (id) {
+    if (confirm("Remover este acesso?")) {
+      await window.api.excluirUsuario(id);
+      this.renderizarAbaUsuarios();
+    }
+  },
+
+  // =============================
+  // 5 - MÉTODOS DE RENDERIZAÇÃO MANTIDOS E REVISADOS
+  // =============================
+  atualizarVisaoGeral: async function () {
+    const stats = await window.api.buscarEstatisticasDashboard();
+    const ids = [
+      "kpi-semana",
+      "kpi-pendentes",
+      "kpi-mural",
+      "kpi-equipes",
+      "badge-pendentes",
+    ];
+    const vals = [
+      stats.semana,
+      stats.pendentes,
+      stats.mural,
+      stats.equipes,
+      stats.pendentes,
+    ];
+
+    ids.forEach((id, i) => {
+      if (document.getElementById(id))
+        document.getElementById(id).textContent = vals[i];
+    });
+
+    await this.renderizarGraficoCarga();
+    await this.renderizarListaRecentes();
+  },
+
+  renderizarGraficoCarga: async function () {
+    const container = document.getElementById("chart-week");
+    if (!container) return;
+    const eventos = await window.api.buscarEventosProximos(7);
+    const densidade = [0, 0, 0, 0, 0, 0, 0];
+    eventos.forEach(
+      (ev) => densidade[new Date(ev.data + "T12:00:00").getDay()]++
+    );
+    const max = Math.max(...densidade, 1);
+    container.innerHTML = densidade
+      .map(
+        (c, i) =>
+          `<div class="chart-bar-group"><div class="chart-bar" style="height:${
+            (c / max) * 100
+          }%"></div><div class="chart-label">${
+            ["D", "S", "T", "Q", "Q", "S", "S"][i]
+          }</div></div>`
+      )
+      .join("");
+  },
+
+  renderizarListaRecentes: async function () {
+    const container = document.getElementById("admin-event-list");
+    if (!container) return;
+    const eventos = await window.api.buscarEventosRecentes(6);
+    container.innerHTML = eventos
+      .map(
+        (ev) => `
+            <div class="list-item o-surface-card">
+                <div class="list-content"><strong>${
+                  ev.titulo
+                }</strong><br><small>${ev.tipo_compromisso}</small></div>
+                <div class="status-dot ${
+                  ev.status === "pendente" ? "status-wait" : "status-ok"
+                }"></div>
+            </div>`
+      )
+      .join("");
+  },
 };
 
-// Auto-inicialização do módulo
-document.addEventListener("DOMContentLoaded", () => window.DashboardController.init());
+document.addEventListener("DOMContentLoaded", () =>
+  window.DashboardController.init()
+);

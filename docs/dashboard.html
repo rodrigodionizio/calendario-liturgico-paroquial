@@ -3,12 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Painel Administrativo | Sacristia Digital</title>
+    <title>Sacristia Digital | Painel de Gestão</title>
 
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- Estilos: Principal + Dashboard Específico -->
+    <!-- Design System: Principal + Dashboard -->
     <link rel="stylesheet" href="assets/css/styles.css" />
     <link rel="stylesheet" href="assets/css/dashboard.css" />
 
@@ -20,147 +20,150 @@
     />
 
     <style>
-      /* Proteção visual inicial enquanto o JS valida a sessão */
+      /* Bloqueio de visibilidade pré-auth (Segurança UX) */
       body {
         opacity: 0;
-        transition: opacity 0.3s;
+        transition: opacity 0.4s ease;
       }
       body.auth-ok {
         opacity: 1;
       }
 
-      /* Estilo para as abas de conteúdo */
+      /* Controle de Abas */
       .tab-content {
         display: none;
       }
       .tab-content.active {
         display: block;
+        animation: fadeIn 0.3s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(5px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
     </style>
   </head>
   <body class="admin-body">
-    <!-- SIDEBAR DE NAVEGAÇÃO -->
+    <!-- SIDEBAR: NAVEGAÇÃO MESTRE -->
     <nav class="admin-sidebar">
       <div class="admin-logo">
         <img
           src="assets/img/logo-horizontal-negativa.png"
-          alt="Logo"
+          alt="Sacristia Digital"
           style="width: 180px"
         />
       </div>
 
       <div class="menu-item active" data-tab="visao-geral">📊 Visão Geral</div>
-      <div class="menu-item" data-tab="aprovacoes">
-        ✅ Aprovações <span class="menu-badge" id="badge-pendentes">0</span>
-      </div>
       <div class="menu-item" data-tab="agenda-total">📅 Agenda Total</div>
-      <div class="menu-item" data-tab="equipes">👥 Equipes</div>
-      <div class="menu-item" data-tab="usuarios" id="menu-usuarios" style="display:none;">👤 Gestão de Acesso </div>
+      <div class="menu-item" data-tab="equipes">👥 Gerenciar Equipes</div>
+
+      <!-- Este menu só aparecerá via JS para Admins Nível 1 e 2 -->
+      <div
+        class="menu-item"
+        data-tab="usuarios"
+        id="menu-usuarios"
+        style="display: none"
+      >
+        🔐 Gestão de Acessos
+      </div>
+
+      <a
+        href="index.html"
+        class="menu-item"
+        style="
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          margin-top: 20px;
+          opacity: 0.6;
+        "
+      >
+        🌐 Ver Site Público
+      </a>
 
       <div
         class="menu-item"
         onclick="window.api.logout()"
-        style="margin-top: auto; border-top: 1px solid rgba(255, 255, 255, 0.1)"
+        style="margin-top: auto; color: #ff9999"
       >
         🚪 Sair do Sistema
       </div>
     </nav>
 
-    <!-- ÁREA DE CONTEÚDO PRINCIPAL -->
+    <!-- ÁREA DE CONTEÚDO DINÂMICO -->
     <main class="admin-main">
-      <!-- HEADER DO PAINEL -->
-      <header class="page-header">
-        <div class="page-title" id="tab-title">Painel de Controle</div>
+      <!-- HEADER COM PERFIL -->
+      <div class="page-header">
+        <h1 class="page-title" id="tab-title-display">Painel de Controle</h1>
         <div class="user-profile">
-          Olá, <span id="admin-nome">Coordenador</span>
+          Olá, <span id="user-name">Carregando...</span>
           <div class="avatar"></div>
         </div>
-      </header>
+      </div>
 
-      <!-- CONTEÚDO DINÂMICO POR ABAS -->
-
-      <!-- ABA 1: VISÃO GERAL -->
+      <!-- ABA 1: VISÃO GERAL (Métricas e Gráficos) -->
       <section id="tab-visao-geral" class="tab-content active">
-        <!-- KPIs (Injetados via Dashboard.js) -->
-        <div class="kpi-grid" id="kpi-container">
-          <div style="padding: 20px; color: #888">Carregando métricas...</div>
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-value" id="kpi-semana">0</div>
+            <div class="kpi-label">Eventos na Semana</div>
+          </div>
+          <div class="kpi-card" style="border-left-color: var(--cor-cereja)">
+            <div class="kpi-value" id="kpi-pendentes">0</div>
+            <div class="kpi-label">Aguardando Aprovação</div>
+          </div>
+          <div class="kpi-card" style="border-left-color: #2e7d32">
+            <div class="kpi-value" id="kpi-mural">0</div>
+            <div class="kpi-label">Avisos no Mural</div>
+          </div>
+          <div class="kpi-card" style="border-left-color: #2196f3">
+            <div class="kpi-value" id="kpi-equipes">0</div>
+            <div class="kpi-label">Equipes Ativas</div>
+          </div>
         </div>
 
         <div class="dashboard-split">
-          <!-- Gráfico de Atividades -->
           <div class="panel">
-            <div class="panel-title">Volume de Atividades (Próx. 7 Dias)</div>
-            <div class="chart-container" id="admin-chart">
-              <!-- Barras dinâmicas injetadas pelo JS -->
-            </div>
+            <div class="panel-title">Volume de Atividades (Carga)</div>
+            <div class="chart-container" id="chart-week"></div>
           </div>
-
-          <!-- Lista de Próximas Pendências -->
           <div class="panel">
-            <div class="panel-title">Aguardando Aprovação</div>
-            <div id="lista-pendentes-resumo">
-              <div style="color: #999; font-style: italic; padding: 10px">
-                Buscando pendências...
-              </div>
-            </div>
-            <div style="margin-top: 20px; text-align: center">
-              <button
-                class="btn-ver-todas"
-                onclick="document.querySelector('[data-tab=aprovacoes]').click()"
-              >
-                Gerenciar Todas
-              </button>
+            <div class="panel-title">Atividades Recentes</div>
+            <div id="admin-event-list">
+              <!-- Injetado por DashboardController.renderizarListaRecentes -->
             </div>
           </div>
         </div>
       </section>
 
-      <!-- ABA 2: APROVAÇÕES -->
-      <section id="tab-aprovacoes" class="tab-content">
-        <div class="panel">
-          <div class="panel-title">Gerenciar Solicitações de Agenda</div>
-          <p style="color: #666; margin-bottom: 20px">
-            Aprove ou rejeite eventos criados pelas pastorais.
-          </p>
-          <div id="lista-aprovacao-completa">
-            <!-- Tabela de aprovação será injetada aqui -->
-          </div>
-        </div>
-      </section>
-
-      <!-- ABA 3: EQUIPES -->
-      <section id="tab-equipes" class="tab-content"></section>
-
-      <!-- ABA 4: AGENDA TOTAL -->
+      <!-- ABA 2: AGENDA TOTAL (O Calendário de Gestão) -->
       <section id="tab-agenda-total" class="tab-content">
         <div class="panel">
-          <div class="panel-title">Gerenciar Agenda Paroquial</div>
-          <!-- HEADER DE NAVEGAÇÃO DA AGENDA (DINÂMICO) -->
           <div
             style="
               display: flex;
               justify-content: space-between;
               align-items: center;
               margin-bottom: 20px;
-              border-bottom: 1px solid #f0f0f0;
-              padding-bottom: 15px;
             "
           >
-            <!-- O ID "admin-calendar-month" será preenchido pelo DashboardController.js -->
             <h2
               id="admin-calendar-month"
               class="month-name"
-              style="margin: 0; color: var(--cor-vinho); font-size: 1.8rem"
+              style="color: var(--cor-vinho); margin: 0"
             >
-              Carregando...
+              ...
             </h2>
-
-            <!-- BOTÕES DE CONTROLE DE FLUXO -->
             <div class="nav-buttons">
               <button
                 class="btn-nav"
                 onclick="window.DashboardController.navegarAgenda(-1)"
-                title="Mês Anterior"
               >
                 &lt;
               </button>
@@ -173,48 +176,38 @@
               <button
                 class="btn-nav"
                 onclick="window.DashboardController.navegarAgenda(1)"
-                title="Próximo Mês"
               >
                 &gt;
               </button>
             </div>
           </div>
-
-          <!-- O MOTOR VAI CONSTRUIR O CALENDÁRIO AQUI DENTRO -->
-          <div id="admin-calendar-grid" class="calendar-wrapper"></div>
+          <div class="calendar-wrapper" id="admin-calendar-grid">
+            <!-- Motor calendar-engine.js atuando aqui -->
+          </div>
         </div>
       </section>
-      <!-- Gerenciamento de Acesso -->
+
+      <!-- ABA 3: EQUIPES (CRUD de Pastorais) -->
+      <section id="tab-equipes" class="tab-content">
+        <!-- Injetado por DashboardController.renderizarAbaEquipes -->
+      </section>
+
+      <!-- ABA 4: USUÁRIOS (Controle de Acesso) -->
       <section id="tab-usuarios" class="tab-content">
-          <div class="panel">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                  <div class="panel-title">Usuários Autorizados</div>
-                  <button onclick="window.DashboardController.abrirModalUsuario()" class="btn-ver-todas">＋ Novo Usuário</button>
-              </div>
-              <div id="lista-usuarios-container">
-                  <!-- Tabela de usuários injetada via JS -->
-              </div>
-          </div>
+        <!-- Injetado por DashboardController.renderizarAbaUsuarios -->
       </section>
     </main>
-    <!-- ==========================================================================
-         COMPONENTES DE INTERFACE (MODAIS)
-         Devem ficar ao final para garantir prioridade visual (Z-Index)
-    ========================================================================== -->
+
+    <!-- MODAL DE EDIÇÃO / GESTÃO -->
     <div
       class="modal-overlay"
       id="modalOverlay"
       onclick="if(event.target == this) this.classList.remove('active')"
     >
-      <div id="modalContent">
-        <!-- O DashboardController.js vai injetar o formulário aqui -->
-      </div>
+      <div id="modalContent"></div>
     </div>
 
-    <!-- MÁSCARA PARA MENU MOBILE (Se aplicável) -->
-    <div id="sidebar-overlay" onclick="window.toggleSidebarMobile()"></div>
-
-    <!-- SCRIPTS DE INICIALIZAÇÃO -->
+    <!-- SCRIPTS MESTRES (Ordem Crítica) -->
     <script src="assets/js/api.js"></script>
     <script src="assets/js/calendar-engine.js"></script>
     <script src="assets/js/dashboard.js"></script>
