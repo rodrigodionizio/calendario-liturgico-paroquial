@@ -205,6 +205,135 @@ window.DashboardController = {
       )
       .join("");
   },
+
+  // ==========================================================================
+  // 6. GESTÃO DE ACESSOS (USUÁRIOS / ALLOWLIST)
+  // ==========================================================================
+
+  // =============/================
+  // 6 - INÍCIO: renderizarAbaUsuarios
+  // =============/================
+  // Argumentos: Nenhum
+  // Descrição: Lista os e-mails autorizados em formato de Action Cards SDS.
+  renderizarAbaUsuarios: async function () {
+    const container = document.getElementById("tab-usuarios");
+    if (!container) return;
+
+    try {
+      const usuarios = await window.api.buscarUsuarios();
+
+      container.innerHTML = `
+                <div class="panel">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+                        <h3 class="page-title" style="font-size:1.2rem;">Gestão de Acessos</h3>
+                        <button onclick="window.DashboardController.abrirModalUsuario()" class="btn-ver-todas">＋ Novo Usuário</button>
+                    </div>
+                    
+                    <div id="users-list-container">
+                        ${usuarios
+                          .map((u) => {
+                            const nivelTxt =
+                              u.perfil_nivel === 1
+                                ? "MASTER"
+                                : u.perfil_nivel === 2
+                                ? "SECRETARIA"
+                                : "COORDENADOR";
+                            const badgeColor =
+                              u.perfil_nivel === 1
+                                ? "var(--cor-dourado)"
+                                : "var(--cor-vinho)";
+
+                            return `
+                                <div class="list-item o-surface-card">
+                                    <div class="list-content">
+                                        <div style="display:flex; align-items:center; gap:10px;">
+                                            <strong>${
+                                              u.nome || "Usuário Sem Nome"
+                                            }</strong>
+                                            <span style="font-size:0.6rem; padding:2px 6px; border-radius:4px; background:${badgeColor}; color:white; font-weight:bold;">${nivelTxt}</span>
+                                        </div>
+                                        <small style="color:#666; font-family:'AntennaCond';">${
+                                          u.email
+                                        }</small>
+                                    </div>
+                                    <div style="display:flex; gap:15px;">
+                                        <button onclick='window.DashboardController.abrirModalUsuario(${JSON.stringify(
+                                          u
+                                        )})' style="background:none; border:none; cursor:pointer; font-size:1.1rem;">✏️</button>
+                                        <button onclick="window.DashboardController.deletarUsuario('${
+                                          u.id
+                                        }')" style="background:none; border:none; cursor:pointer; font-size:1.1rem; color:var(--cor-cereja);">🗑️</button>
+                                    </div>
+                                </div>
+                            `;
+                          })
+                          .join("")}
+                    </div>
+                </div>`;
+    } catch (error) {
+      console.error("❌ Erro ao renderizar aba de usuários:", error);
+    }
+  },
+  // =============/================
+  // 6 - FIM: renderizarAbaUsuarios
+  // =============/================
+
+  // =============/================
+  // 6.2 - INÍCIO: abrirModalUsuario
+  // =============/================
+  // Argumentos: user (Object|null)
+  // Descrição: Abre prompt para cadastro de novo acesso na allowlist.
+  abrirModalUsuario: function (u = null) {
+    const email = prompt("E-mail do novo coordenador:", u ? u.email : "");
+    if (!email) return;
+
+    const nome = prompt("Nome completo:", u ? u.nome : "");
+    const nivel = prompt(
+      "Nível de Acesso (1:Master, 2:Secretaria, 3:Coordenador):",
+      u ? u.perfil_nivel : "3"
+    );
+
+    const payload = {
+      id: u?.id || null,
+      email: email,
+      nome: nome,
+      perfil_nivel: nivel,
+    };
+
+    window.api
+      .salvarUsuario(payload)
+      .then(() => {
+        alert("✅ Acesso atualizado com sucesso!");
+        this.renderizarAbaUsuarios();
+      })
+      .catch((err) => alert("❌ Erro ao salvar usuário."));
+  },
+  // =============/================
+  // 6.2 - FIM: abrirModalUsuario
+  // =============/================
+
+  // =============/================
+  // 6.3 - INÍCIO: deletarUsuario
+  // =============/================
+  // Argumentos: id (UUID)
+  // Descrição: Remove um e-mail da lista de autorizados.
+  deletarUsuario: async function (id) {
+    if (
+      confirm(
+        "⚠️ Deseja remover este acesso? O usuário não conseguirá mais entrar no sistema."
+      )
+    ) {
+      try {
+        await window.api.excluirUsuario(id);
+        this.renderizarAbaUsuarios();
+      } catch (err) {
+        alert("❌ Erro ao excluir usuário.");
+      }
+    }
+  },
+  // =============/================
+  // 6.3 - FIM: deletarUsuario
+  // =============/================
 };
 
 document.addEventListener("DOMContentLoaded", () =>
