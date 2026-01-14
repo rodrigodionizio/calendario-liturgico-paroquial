@@ -160,4 +160,21 @@ window.api = {
     await _supabaseClient.auth.signOut();
     window.location.href = "admin.html";
   },
+  // =============================
+  // 6 - INÍCIO: buscarEventosProximos
+  // =============================
+  // Argumentos: dias (Integer)
+  // Descrição: Busca datas dos próximos eventos para alimentar o gráfico de carga.
+  buscarEventosProximos: async function (dias = 7) {
+    const hoje = new Date().toISOString().split("T")[0];
+    const { data, error } = await _supabaseClient
+      .from("eventos_base")
+      .select("data")
+      .gte("data", hoje)
+      .limit(100);
+    return error ? [] : data;
+  },
+  // =============================
+  // 6 - FIM: buscarEventosProximos
+  // =============================
 };

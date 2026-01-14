@@ -24,6 +24,7 @@
     <link rel="manifest" href="manifest.json" />
     <meta name="theme-color" content="#a41d31" />
     <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta
       name="apple-mobile-web-app-status-bar-style"
       content="black-translucent"
@@ -52,9 +53,10 @@
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
+          // USAMOS './sw.js' (com ponto) para que ele busque na pasta do projeto no GitHub
           navigator.serviceWorker
-            .register("/sw.js")
-            .then((reg) => console.log("PWA: Service Worker Registrado!", reg))
+            .register("./sw.js")
+            .then((reg) => console.log("PWA: Service Worker Ativo!", reg.scope))
             .catch((err) => console.error("PWA: Erro no registro", err));
         });
       }
