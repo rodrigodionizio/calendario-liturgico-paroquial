@@ -128,33 +128,40 @@ window.CalendarEngine = {
   // =============================
 
   // =============================
-  // 4 - INÍCIO: gerarPilulas
+  // 4 - INÍCIO: gerarPilulas (Híbrido v5.6)
   // =============================
   // Argumentos: listaEventos (Array|null)
-  // Descrição: Processa a lista de compromissos do dia e gera as pílulas visuais formatadas.
+  // Descrição: Renderiza Pills (Desktop) ou Dots (Mobile)
   gerarPilulas: function (listaEventos) {
-    // Se não houver eventos, não renderiza nada
-    if (
-      !listaEventos ||
-      !Array.isArray(listaEventos) ||
-      listaEventos.length === 0
-    ) {
+    if (!listaEventos || !Array.isArray(listaEventos) || listaEventos.length === 0) {
       return "";
     }
 
-    // Mapeia a lista para gerar o HTML de cada compromisso (SaaS Multi-Agenda)
+    const isMobile = window.innerWidth <= 768;
+
+    // Se for Mobile, retorna contêiner de Dots
+    if (isMobile) {
+      const dotsHTML = listaEventos.map(ev => {
+        let cor = ev.tipo_compromisso === "liturgia"
+          ? ev.liturgia_cores?.hex_code || "#2e7d32"
+          : "#64748b";
+        if (cor.toLowerCase() === "#ffffff") cor = "#ccc";
+        return `<span style="display:inline-block; width:8px; height:8px; background-color:${cor}; border-radius:50%; margin-right:4px;"></span>`;
+      }).join("");
+
+      return `<div style="display:flex; justify-content:center; flex-wrap:wrap; margin-top:2px; gap:2px;">${dotsHTML}</div>`;
+    }
+
+    // Modo Desktop (Pills Expandidas)
     return listaEventos
       .map((evento) => {
-        // 4.1. Definição da Cor Visual (Liturgia vs Outros)
         let corHex =
           evento.tipo_compromisso === "liturgia"
             ? evento.liturgia_cores?.hex_code || "#2e7d32"
-            : "#64748b"; // Cinza azulado para reuniões/agenda padre
+            : "#64748b";
 
-        // Ajuste de contraste para o branco
         if (corHex.toLowerCase() === "#ffffff") corHex = "#ccc";
 
-        // 4.2. Captura do Horário do Evento
         let horaExibicao = "";
         if (evento.hora_inicio) {
           horaExibicao = evento.hora_inicio.substring(0, 5);
@@ -162,14 +169,12 @@ window.CalendarEngine = {
           horaExibicao = evento.escalas[0].hora_celebracao.substring(0, 5);
         }
 
-        // 4.3. Template da Pílula (Padrão Sofisticado Sacristia Digital)
         let htmlPill = `
         <div class="pill" style="border-left: 3px solid ${corHex}; background-color: var(--cor-vinho); margin-bottom: 2px;">
             <span style="font-size: 0.6rem; opacity: 0.8; margin-right: 4px;">${horaExibicao}</span>
             ${evento.titulo}
         </div>`;
 
-        // 4.4. Suporte a múltiplas escalas de horários no mesmo registro de liturgia
         if (
           evento.tipo_compromisso === "liturgia" &&
           evento.escalas &&
@@ -185,7 +190,7 @@ window.CalendarEngine = {
 
         return htmlPill;
       })
-      .join(""); // Une o HTML de todos os eventos do dia
+      .join("");
   },
   // =============================
   // 4 - FIM: gerarPilulas

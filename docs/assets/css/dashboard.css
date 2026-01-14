@@ -460,16 +460,195 @@
   }
 }
 
-@media (max-width: 1024px) {
-  .dashboard-split {
-    grid-template-columns: 1fr;
+/* ==========================================================================
+   10. MOBILE EXTENSION (SDS v5.6)
+   Implementação de Responsividade Incremental
+   ========================================================================== */
+
+/* Classes Utilitárias Mobile (Injetadas via JS) */
+.mobile-view-active {
+  overflow-x: hidden;
+}
+
+.mobile-overlay-active {
+  overflow: hidden !important; /* Trava o body quando menu aberto */
+}
+
+@media (max-width: 768px) {
+  /* 
+     10.1. SHELL & LAYOUT FLUIDO 
+     Remoção do modelo de Sidebar Fixa Desktop e adoção de Gaveta 
+  */
+  .admin-body {
+    flex-direction: column !important;
+    overflow-y: auto !important; /* Habilita scroll nativo da janela */
+    height: auto !important;
+  }
+
+  .admin-main {
+    padding: 80px 15px 30px 15px; /* Topo compensa o Header Fixo */
+    height: auto;
+    overflow: visible;
+  }
+
+  /* 
+     10.2. MOBILE HEADER (BARRA DE TOPO)
+     Criado via JS, estilizado aqui
+  */
+  .mobile-header {
+    display: flex !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background-color: var(--cor-vinho);
+    z-index: 1050;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+
+  .mobile-menu-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    padding: 5px;
+    cursor: pointer;
+  }
+
+  .mobile-logo-img {
+    height: 28px;
+  }
+
+  /* Placeholder de Avatar no Header */
+  .mobile-avatar {
+    width: 32px;
+    height: 32px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: bold;
+  }
+
+  /* 
+     10.3. SIDEBAR COMO DRAWER (GAVETA)
+     Esconde lateralmente e desliza quando ativa
+  */
+  .admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1100;
+    width: 280px; /* Um pouco mais larga para toque */
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.5);
+  }
+
+  .admin-sidebar.active {
+    transform: translateX(0);
+  }
+
+  /* Overlay Escuro (Backdrop) */
+  .sds-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 1090; /* Logo abaixo da sidebar */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+  }
+
+  .sds-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* 
+     10.4. ADAPTAÇÕES DE CONTEÚDO
+  */
+  
+  /* Esconde Header Desktop redundante */
+  .page-header {
+    display: none;
+  }
+
+  /* Grid de KPIs - 2 Colunas (Mobile Landscape/Portrait Big) */
+  .kpi-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  
+  /* Cartões com menos padding */
+  .kpi-card, .panel {
+    padding: 15px;
+  }
+
+  /* Ajuste de Texto em KPIs */
+  .kpi-value {
+    font-size: 1.8rem;
+  }
+  
+  .kpi-label {
+    font-size: 0.65rem;
+  }
+
+  /* 
+     10.5. AJUSTES DE MODAL (FULLSCREEN / BOTTOM SHEET)
+  */
+  #modalContent {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    border-radius: 0 !important;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0;
+  }
+
+  .modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 80px; /* Espaço para botões flutuantes se houver */
+  }
+
+  /* Botão Fechar maior para toque */
+  .btn-close {
+    padding: 15px;
+    font-size: 2rem;
+  }
+  
+  /* 
+     10.6. VISUALIZAÇÃO DE LISTA (Dashboard)
+  */
+  .chart-container {
+    height: 160px; /* Gráfico menor */
   }
 }
 
-/* Redução de Movimento (Acessibilidade) */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation: none !important;
-    transition: none !important;
+/* Telas muito pequenas (iPhone SE, etc) */
+@media (max-width: 375px) {
+  .kpi-grid {
+    grid-template-columns: 1fr; /* Empilha tudo */
   }
 }

@@ -641,8 +641,52 @@ window.DashboardController = {
       )
       .join("");
   },
+  // ==========================================================================
+  // 8. MOBILE INFRASTRUCTURE (SDS v5.6)
+  // ==========================================================================
+
+  initMobile: function () {
+    // 1. Injeção do Mobile Header
+    if (window.innerWidth <= 768 && !document.querySelector(".mobile-header")) {
+      const headerHTML = `
+        <div class="mobile-header">
+           <button class="mobile-menu-btn" onclick="window.DashboardController.toggleSidebar()">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+           </button>
+           <img src="assets/img/logo-horizontal-negativa.png" class="mobile-logo-img" alt="Sacristia" />
+           <div class="mobile-avatar" id="mob-avatar-slot">U</div>
+        </div>
+        <div class="sds-overlay" onclick="window.DashboardController.toggleSidebar()"></div>
+      `;
+      document.body.insertAdjacentHTML("afterbegin", headerHTML);
+
+      // Sincroniza Avatar Mobile
+      if (this.meuPerfil) {
+        const letra = (this.meuPerfil.nome || "U").charAt(0).toUpperCase();
+        document.getElementById("mob-avatar-slot").textContent = letra;
+      }
+    }
+  },
+
+  toggleSidebar: function () {
+    const sidebar = document.querySelector(".admin-sidebar");
+    const overlay = document.querySelector(".sds-overlay");
+    const body = document.body;
+
+    sidebar.classList.toggle("active");
+    overlay.classList.toggle("active");
+
+    if (sidebar.classList.contains("active")) {
+      body.classList.add("mobile-overlay-active");
+    } else {
+      body.classList.remove("mobile-overlay-active");
+    }
+  }
 };
 
-document.addEventListener("DOMContentLoaded", () =>
-  window.DashboardController.init()
-);
+document.addEventListener("DOMContentLoaded", () => {
+  window.DashboardController.init();
+  // Garante injecao no load e no resize
+  window.DashboardController.initMobile();
+  window.addEventListener('resize', () => window.DashboardController.initMobile());
+});
