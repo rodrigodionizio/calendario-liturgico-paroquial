@@ -93,8 +93,37 @@
 
       <form id="loginForm">
         <input type="email" id="email" placeholder="Seu E-mail" required />
-        <input type="password" id="senha" placeholder="Sua Senha" required />
+        <input type="password" id="senha" placeholder="Senha" required />
         <button type="submit" id="btnEntrar">ENTRAR</button>
+
+        <div
+          style="
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+          "
+        >
+          <a
+            href="#"
+            onclick="solicitarAcesso()"
+            style="
+              color: var(--cor-vinho);
+              font-size: 0.8rem;
+              text-decoration: none;
+              font-weight: bold;
+            "
+          >
+            ✨ Primeiro Acesso / Criar Senha
+          </a>
+          <a
+            href="#"
+            onclick="esqueciSenha()"
+            style="color: #888; font-size: 0.8rem; text-decoration: none"
+          >
+            Esqueci minha senha
+          </a>
+        </div>
       </form>
 
       <div id="msg" class="msg"></div>
@@ -112,6 +141,53 @@
       const msg = document.getElementById("msg");
       const card = document.getElementById("cardLogin");
       const loader = document.getElementById("loader");
+      async function solicitarAcesso() {
+        const email = document.getElementById("email").value;
+        if (!email) {
+          alert("Por favor, digite seu e-mail no campo acima primeiro.");
+          return;
+        }
+
+        // Lógica SaaS: Avisamos que o e-mail deve ter sido autorizado pelo Admin
+        if (
+          confirm(
+            "Para criar seu acesso, seu e-mail já deve ter sido autorizado pela coordenação no Dashboard. Continuar?"
+          )
+        ) {
+          try {
+            const senhaProvisoria = prompt(
+              "Defina uma senha para seu primeiro acesso:"
+            );
+            if (!senhaProvisoria || senhaProvisoria.length < 6) {
+              alert("A senha deve ter no mínimo 6 caracteres.");
+              return;
+            }
+
+            await window.api.criarContaPrimeiroAcesso(email, senhaProvisoria);
+            alert(
+              "✅ Solicitação enviada! Verifique sua caixa de e-mail para confirmar a conta antes de logar."
+            );
+          } catch (err) {
+            alert("Erro: " + err.message);
+          }
+        }
+      }
+
+      async function esqueciSenha() {
+        const email = document.getElementById("email").value;
+        if (!email) {
+          alert("Digite seu e-mail acima para receber o link de recuperação.");
+          return;
+        }
+        try {
+          await window.api.solicitarNovaSenha(email);
+          alert(
+            "📧 E-mail de recuperação enviado! Verifique sua caixa de entrada."
+          );
+        } catch (err) {
+          alert("Erro ao solicitar: " + err.message);
+        }
+      }
 
       /**
        * Lógica de Inicialização:

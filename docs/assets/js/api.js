@@ -190,4 +190,31 @@ window.api = {
       .order("created_at", { ascending: true });
     return error ? [] : data;
   },
+  // =============================
+  // 8 - INÍCIO: solicitarNovaSenha
+  // =============================
+  // Descrição: Dispara o e-mail oficial do Supabase para o usuário criar/resetar a senha.
+  solicitarNovaSenha: async function (email) {
+    const { data, error } = await _supabaseClient.auth.resetPasswordForEmail(
+      email,
+      {
+        redirectTo: window.location.origin + "/admin.html", // Onde ele volta após clicar no e-mail
+      }
+    );
+    if (error) throw error;
+    return data;
+  },
+
+  // =============================
+  // 9 - INÍCIO: criarContaPrimeiroAcesso
+  // =============================
+  // Descrição: Tenta criar a conta no Auth. O Supabase só deixará logar se o e-mail estiver na Allowlist (via RLS).
+  criarContaPrimeiroAcesso: async function (email, senha) {
+    const { data, error } = await _supabaseClient.auth.signUp({
+      email: email,
+      password: senha,
+    });
+    if (error) throw error;
+    return data;
+  },
 };
