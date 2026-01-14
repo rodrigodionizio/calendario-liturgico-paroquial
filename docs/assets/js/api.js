@@ -1,6 +1,7 @@
 /*
  * ARQUIVO: api.js
- * DESCRIÇÃO: Camada de Conexão com Supabase (Versão 5.0 - SaaS Ready)
+ * DESCRIÇÃO: Camada de Conexão Supabase (Versão 6.0 - Full Sincronizada)
+ * PROJETO: Sacristia Digital 2026
  */
 
 const SUPABASE_URL = "https://gmfmebnodmtozpzhlgvk.supabase.co";
@@ -13,14 +14,13 @@ window.api = {
   client: _supabaseClient,
 
   // =============================
-  // 1 - BUSCA DE EVENTOS (CALENDÁRIO)
+  // 1 - INÍCIO: buscarEventos
   // =============================
   buscarEventos: async function (ano, mes) {
     const mesStr = String(mes).padStart(2, "0");
     const inicio = `${ano}-${mesStr}-01`;
     const ultimoDia = new Date(ano, mes, 0).getDate();
     const fim = `${ano}-${mesStr}-${ultimoDia}`;
-
     const { data, error } = await _supabaseClient
       .from("eventos_base")
       .select(
@@ -29,16 +29,37 @@ window.api = {
       .gte("data", inicio)
       .lte("data", fim)
       .order("data", { ascending: true });
-
     return error ? [] : data;
   },
+  // =============================
+  // 1 - FIM: buscarEventos
+  // =============================
 
   // =============================
-  // 2 - ESTATÍSTICAS (KPIs DASHBOARD)
+  // 2 - INÍCIO: buscarAvisos
+  // =============================
+  // Argumentos: Nenhum
+  // Descrição: Busca eventos em destaque para o mural lateral (Público).
+  buscarAvisos: async function () {
+    const hoje = new Date().toISOString().split("T")[0];
+    const { data, error } = await _supabaseClient
+      .from("eventos_base")
+      .select("id, titulo, data, local, mural_prioridade, hora_inicio")
+      .eq("mural_destaque", true)
+      .gte("data", hoje)
+      .order("data", { ascending: true })
+      .limit(5);
+    return error ? [] : data;
+  },
+  // =============================
+  // 2 - FIM: buscarAvisos
+  // =============================
+
+  // =============================
+  // 3 - INÍCIO: buscarEstatisticasDashboard
   // =============================
   buscarEstatisticasDashboard: async function () {
     const hoje = new Date().toISOString().split("T")[0];
-
     const { count: semana } = await _supabaseClient
       .from("eventos_base")
       .select("*", { count: "exact", head: true })
@@ -50,11 +71,11 @@ window.api = {
     const { count: mural } = await _supabaseClient
       .from("eventos_base")
       .select("*", { count: "exact", head: true })
-      .eq("mural_destaque", true);
+      .eq("mural_destaque", true)
+      .gte("data", hoje);
     const { count: equipes } = await _supabaseClient
       .from("equipes")
       .select("*", { count: "exact", head: true });
-
     return {
       semana: semana || 0,
       pendentes: pendentes || 0,
@@ -62,15 +83,13 @@ window.api = {
       equipes: equipes || 0,
     };
   },
+  // =============================
+  // 3 - FIM: buscarEstatisticasDashboard
+  // =============================
 
-  buscarEventosProximos: async function (dias) {
-    const { data } = await _supabaseClient
-      .from("eventos_base")
-      .select("data")
-      .limit(100);
-    return data || [];
-  },
-
+  // =============================
+  // 4 - INÍCIO: buscarEventosRecentes
+  // =============================
   buscarEventosRecentes: async function (limite) {
     const { data } = await _supabaseClient
       .from("eventos_base")
@@ -79,9 +98,12 @@ window.api = {
       .limit(limite);
     return data || [];
   },
+  // =============================
+  // 4 - FIM: buscarEventosRecentes
+  // =============================
 
   // =============================
-  // 3 - GESTÃO DE EQUIPES
+  // 5 - INÍCIO: Gestão CRUD (Equipes/Users)
   // =============================
   listarEquipes: async function () {
     const { data } = await _supabaseClient
@@ -90,7 +112,6 @@ window.api = {
       .order("nome_equipe");
     return data || [];
   },
-
   salvarEquipe: async function (eq) {
     if (eq.id)
       return await _supabaseClient
@@ -101,14 +122,9 @@ window.api = {
       .from("equipes")
       .insert({ nome_equipe: eq.nome, tipo_atuacao: eq.tipo });
   },
-
   excluirEquipe: async function (id) {
     return await _supabaseClient.from("equipes").delete().eq("id", id);
   },
-
-  // =============================
-  // 4 - GESTÃO DE USUÁRIOS (ALLOWLIST)
-  // =============================
   buscarUsuarios: async function () {
     const { data } = await _supabaseClient
       .from("admins_allowlist")
@@ -116,40 +132,30 @@ window.api = {
       .order("nome");
     return data || [];
   },
-
-  salvarUsuario: async function (user) {
-    const payload = {
-      email: user.email,
-      nome: user.nome,
-      perfil_nivel: parseInt(user.perfil_nivel),
+  salvarUsuario: async function (u) {
+    const p = {
+      email: u.email,
+      nome: u.nome,
+      perfil_nivel: parseInt(u.perfil_nivel),
     };
-    if (user.id)
+    if (u.id)
       return await _supabaseClient
         .from("admins_allowlist")
-        .update(payload)
-        .eq("id", user.id);
-    return await _supabaseClient.from("admins_allowlist").insert(payload);
+        .update(p)
+        .eq("id", u.id);
+    return await _supabaseClient.from("admins_allowlist").insert(p);
   },
-
   excluirUsuario: async function (id) {
     return await _supabaseClient.from("admins_allowlist").delete().eq("id", id);
   },
-
   // =============================
-  // 5 - AUTH E STATUS
+  // 5 - FIM: Gestão CRUD
   // =============================
-  atualizarStatusEvento: async function (id, status) {
-    return await _supabaseClient
-      .from("eventos_base")
-      .update({ status })
-      .eq("id", id);
-  },
 
   checkSession: async function () {
     const { data } = await _supabaseClient.auth.getSession();
     return data.session;
   },
-
   logout: async function () {
     await _supabaseClient.auth.signOut();
     window.location.href = "admin.html";
