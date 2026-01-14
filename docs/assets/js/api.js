@@ -305,4 +305,36 @@ window.api = {
   // =============/================
   // 6 - FIM: buscarEventosRecentes
   // =============/================
+  // =============================
+    // 7 - INÍCIO: buscarUsuarios
+    // =============================
+    buscarUsuarios: async function() {
+        const { data, error } = await _supabaseClient
+            .from("admins_allowlist")
+            .select(`*, equipes(nome_equipe)`)
+            .order("nome");
+        if (error) return [];
+        return data;
+    },
+
+    // =============================
+    // 8 - INÍCIO: salvarUsuario
+    // =============================
+    salvarUsuario: async function(usuario) {
+        const payload = {
+            email: usuario.email,
+            nome: usuario.nome,
+            perfil_nivel: parseInt(usuario.perfil_nivel),
+            equipe_id: usuario.equipe_id || null
+        };
+
+        if (usuario.id) {
+            const { error } = await _supabaseClient.from("admins_allowlist").update(payload).eq("id", usuario.id);
+            if (error) throw error;
+        } else {
+            const { error } = await _supabaseClient.from("admins_allowlist").insert(payload);
+            if (error) throw error;
+        }
+        return true;
+    },
 };

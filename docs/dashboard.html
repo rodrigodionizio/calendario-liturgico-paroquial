@@ -55,6 +55,7 @@
       </div>
       <div class="menu-item" data-tab="agenda-total">📅 Agenda Total</div>
       <div class="menu-item" data-tab="equipes">👥 Equipes</div>
+      <div class="menu-item" data-tab="usuarios" id="menu-usuarios" style="display:none;">👤 Gestão de Acesso </div>
 
       <div
         class="menu-item"
@@ -182,6 +183,18 @@
           <!-- O MOTOR VAI CONSTRUIR O CALENDÁRIO AQUI DENTRO -->
           <div id="admin-calendar-grid" class="calendar-wrapper"></div>
         </div>
+      </section>
+      <!-- Gerenciamento de Acesso -->
+      <section id="tab-usuarios" class="tab-content">
+          <div class="panel">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                  <div class="panel-title">Usuários Autorizados</div>
+                  <button onclick="window.DashboardController.abrirModalUsuario()" class="btn-ver-todas">＋ Novo Usuário</button>
+              </div>
+              <div id="lista-usuarios-container">
+                  <!-- Tabela de usuários injetada via JS -->
+              </div>
+          </div>
       </section>
     </main>
     <!-- ==========================================================================
