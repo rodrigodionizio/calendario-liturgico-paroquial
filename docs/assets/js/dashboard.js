@@ -1,8 +1,7 @@
 /*
  * ARQUIVO: dashboard.js
- * DESCRIÇÃO: Controlador Mestre do Painel Administrativo (SDS Version 8.5)
- * FUNCIONALIDADES: Gestão de Acessos, Agenda Multi-Evento e Confirmações Destrutivas.
- * PADRÃO: System Design Standard (SDS) com OOCSS.
+ * VERSÃO: 9.0 (Full Integration - Integridade Total)
+ * DESCRIÇÃO: Controlador Mestre do Dashboard com suporte a Agenda, Equipes e Acessos.
  */
 
 window.DashboardController = {
@@ -11,13 +10,14 @@ window.DashboardController = {
   meuPerfil: null,
 
   // ==========================================================================
-  // 1. INICIALIZAÇÃO E SEGURANÇA
+  // 1. INICIALIZAÇÃO
   // ==========================================================================
 
   // =============================
   // 1 - INÍCIO: init
   // =============================
   init: async function () {
+    console.log("🛠️ SDS Engine: Sincronizando sistema...");
     try {
       const session = await window.api.checkSession();
       if (!session) {
@@ -45,7 +45,7 @@ window.DashboardController = {
         if (menuUser) menuUser.style.display = "flex";
       }
 
-      // Cache global de equipes para os formulários
+      // Cache de equipes para seletores
       const equipes = await window.api.listarEquipes();
       window.api.cacheEquipesLeitura = equipes.filter(
         (e) => e.tipo_atuacao !== "Canto"
@@ -56,18 +56,82 @@ window.DashboardController = {
 
       await this.atualizarVisaoGeral();
       this.configurarNavegacao();
-    } catch (error) {
-      console.error("Erro SDS Engine:", error);
+      console.log("✅ SDS Engine: Prontidão confirmada.");
+    } catch (e) {
+      console.error("Erro Init:", e);
     }
   },
 
   // ==========================================================================
-  // 2. GERENCIADOR DE AGENDA (FORMULÁRIO PREMIUM)
+  // 2. NAVEGAÇÃO E TABS
   // ==========================================================================
 
-  // =============================
-  // 2 - INÍCIO: abrirGerenciadorAgenda
-  // =============================
+  configurarNavegacao: function () {
+    const menuItems = document.querySelectorAll(".menu-item[data-tab]");
+    menuItems.forEach((item) => {
+      item.addEventListener("click", async () => {
+        const targetTab = item.getAttribute("data-tab");
+        document
+          .querySelectorAll(".menu-item, .tab-content")
+          .forEach((el) => el.classList.remove("active"));
+        item.classList.add("active");
+        const panel = document.getElementById(`tab-${targetTab}`);
+        if (panel) panel.classList.add("active");
+
+        // Chamadas explícitas para garantir integridade
+        if (targetTab === "agenda-total")
+          await window.DashboardController.carregarAgendaTotal();
+        else if (targetTab === "visao-geral")
+          await window.DashboardController.atualizarVisaoGeral();
+        else if (targetTab === "equipes")
+          await window.DashboardController.renderizarAbaEquipes();
+        else if (targetTab === "usuarios")
+          await window.DashboardController.renderizarAbaUsuarios();
+      });
+    });
+  },
+
+  // ==========================================================================
+  // 3. GESTÃO DE AGENDA (CALENDÁRIO)
+  // ==========================================================================
+
+  carregarAgendaTotal: async function () {
+    const nomeMes = new Date(this.agendaAno, this.agendaMes - 1).toLocaleString(
+      "pt-BR",
+      { month: "long" }
+    );
+    const display = document.getElementById("admin-calendar-month");
+    if (display)
+      display.textContent = `${nomeMes} ${this.agendaAno}`.toUpperCase();
+
+    if (window.CalendarEngine) {
+      await window.CalendarEngine.init({
+        selector: "#admin-calendar-grid",
+        isAdmin: true,
+        ano: this.agendaAno,
+        mes: this.agendaMes,
+      });
+    }
+  },
+
+  navegarAgenda: async function (direcao) {
+    if (direcao === 0) {
+      this.agendaAno = new Date().getFullYear();
+      this.agendaMes = new Date().getMonth() + 1;
+    } else {
+      this.agendaMes += direcao;
+      if (this.agendaMes < 1) {
+        this.agendaMes = 12;
+        this.agendaAno--;
+      }
+      if (this.agendaMes > 12) {
+        this.agendaMes = 1;
+        this.agendaAno++;
+      }
+    }
+    await this.carregarAgendaTotal();
+  },
+
   abrirGerenciadorAgenda: async function (dataISO) {
     const eventosDia = await window.api.buscarEventosDia(dataISO);
     const container = document.getElementById("modalContent");
@@ -80,9 +144,8 @@ window.DashboardController = {
             <div class="modal-card o-surface-card" style="max-width: 600px; flex-direction: column;">
                 <div class="modal-body" style="padding: 30px;">
                     <button class="btn-close" onclick="window.DashboardController.fecharModal()">×</button>
-                    <h2 style="font-family:'Neulis'; color:var(--cor-vinho); margin-bottom:5px;">Agenda do Dia</h2>
-                    <p style="font-size:0.85rem; color:#888; margin-bottom:25px; text-transform:uppercase;">${dataFmt}</p>
-                    
+                    <h2 style="font-family:'Neulis'; color:var(--cor-vinho);">Agenda do Dia</h2>
+                    <p style="color:#888; margin-bottom:20px;">${dataFmt}</p>
                     <div id="lista-eventos-dia" style="margin-bottom:25px;">
                         ${
                           eventosDia.length > 0
@@ -99,12 +162,12 @@ window.DashboardController = {
                                     <br><small>${ev.local || "Paróquia"}</small>
                                 </div>
                                 <div style="display:flex; gap:10px;">
-                                    <button class="c-button" onclick="window.DashboardController.renderizarFormulario('${
+                                    <button onclick="window.DashboardController.renderizarFormulario('${
                                       ev.data
                                     }', '${
                                     ev.id
                                   }')" style="background:none; border:none; cursor:pointer; font-size:1.2rem;">✏️</button>
-                                    <button class="c-button" onclick="window.DashboardController.confirmarExclusao('${
+                                    <button onclick="window.DashboardController.confirmarExclusao('${
                                       ev.id
                                     }', '${ev.data}', '${
                                     ev.titulo
@@ -113,19 +176,19 @@ window.DashboardController = {
                             </div>`
                                 )
                                 .join("")
-                            : '<div class="c-alert">Nenhum compromisso para este dia.</div>'
+                            : '<div class="c-alert">Sem compromissos agendados.</div>'
                         }
                     </div>
-
-                    <button onclick="window.DashboardController.renderizarFormulario('${dataISO}')" class="btn-ver-todas c-button" style="width:100%;">＋ ADICIONAR NOVO COMPROMISSO</button>
+                    <button onclick="window.DashboardController.renderizarFormulario('${dataISO}')" class="btn-ver-todas" style="width:100%;">＋ ADICIONAR NOVO COMPROMISSO</button>
                 </div>
             </div>`;
     document.getElementById("modalOverlay").classList.add("active");
   },
 
-  // =============================
-  // 3 - INÍCIO: renderizarFormulario (SDS SLICK DESIGN)
-  // =============================
+  // ==========================================================================
+  // 4. EDITOR DE COMPROMISSO (FORMULÁRIO SDS)
+  // ==========================================================================
+
   renderizarFormulario: async function (dataISO, eventoId = null) {
     let evento = {
       data: dataISO,
@@ -133,7 +196,6 @@ window.DashboardController = {
       titulo: "",
       escalas: [],
     };
-
     if (eventoId && eventoId !== "null") {
       const { data } = await window.api.client
         .from("eventos_base")
@@ -146,14 +208,14 @@ window.DashboardController = {
     const container = document.getElementById("modalContent");
     container.innerHTML = `
             <div class="modal-card o-surface-card" style="max-width: 580px; flex-direction:column;">
-                <div class="modal-body" style="padding: 30px;">
+                <div class="modal-body" style="padding: 30px; overflow-y:auto; max-height:85vh;">
                     <h3 style="font-family:'Neulis'; color:var(--cor-vinho); margin-bottom:20px;">${
                       eventoId ? "Editar" : "Novo"
-                    } Compromisso</h3>
+                    } Atividade</h3>
                     
                     <div class="form-section">
                         <span class="form-section-title">1. Informações Básicas</span>
-                        <select id="edit-tipo" onchange="window.DashboardController.toggleCamposEditor(this.value)" class="o-surface-card" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ddd;">
+                        <select id="edit-tipo" onchange="window.DashboardController.toggleCamposEditor(this.value)" class="o-surface-card" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ddd; font-weight:bold;">
                             <option value="liturgia" ${
                               evento.tipo_compromisso === "liturgia"
                                 ? "selected"
@@ -172,13 +234,13 @@ window.DashboardController = {
                         </select>
                         <input type="text" id="edit-titulo" value="${
                           evento.titulo
-                        }" placeholder="Título do Evento" class="o-surface-card" style="width:100%; padding:12px; border:1px solid #ddd; font-weight:bold;">
+                        }" placeholder="Título/Assunto" class="o-surface-card" style="width:100%; padding:12px; border:1px solid #ddd; font-weight:bold;">
                     </div>
 
                     <div id="campos-liturgia" class="form-section" style="display: ${
                       evento.tipo_compromisso === "liturgia" ? "block" : "none"
                     }">
-                        <span class="form-section-title">2. Escalas Litúrgicas</span>
+                        <span class="form-section-title">2. Detalhes Litúrgicos</span>
                         <select id="edit-cor" class="o-surface-card" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ddd;">
                              <option value="1" ${
                                evento.cor_id == 1 ? "selected" : ""
@@ -196,7 +258,7 @@ window.DashboardController = {
                         <div id="lista-escalas-editor">${this.gerarLinhasEscalaEditor(
                           evento.escalas
                         )}</div>
-                        <button onclick="window.DashboardController.adicionarLinhaEscala()" style="width:100%; background:none; border:1px dashed #ccc; padding:10px; margin-top:10px; cursor:pointer; border-radius:8px;">＋ Horário</button>
+                        <button onclick="window.DashboardController.adicionarLinhaEscala()" style="width:100%; background:none; border:1px dashed #ccc; padding:10px; margin-top:10px; cursor:pointer;">＋ Novo Horário</button>
                     </div>
 
                     <div id="campos-agenda" class="form-section" style="display: ${
@@ -204,30 +266,142 @@ window.DashboardController = {
                     }; grid-template-columns: 1fr 1fr; gap:10px;">
                         <input type="time" id="edit-hora" value="${
                           evento.hora_inicio || "19:00"
-                        }" class="o-surface-card" style="padding:10px; border:1px solid #ddd;">
+                        }" class="o-surface-card" style="padding:10px;">
                         <input type="text" id="edit-local" value="${
                           evento.local || ""
-                        }" placeholder="Local" class="o-surface-card" style="padding:10px; border:1px solid #ddd;">
+                        }" placeholder="Local" class="o-surface-card" style="padding:10px;">
                     </div>
 
                     <div style="display:flex; gap:12px; margin-top:25px;">
                         <button id="btn-save-agenda" onclick="window.DashboardController.salvarFinal('${dataISO}', ${
       eventoId ? `'${eventoId}'` : "null"
-    })" class="btn-ver-todas c-button" style="flex:2; background:var(--sys-color-success);">💾 SALVAR COMPROMISSO</button>
-                        <button onclick="window.DashboardController.abrirGerenciadorAgenda('${dataISO}')" class="btn-ver-todas c-button" style="flex:1; background:#eee; color:#666;">VOLTAR</button>
+    })" class="btn-ver-todas c-button" style="flex:2; background:var(--sys-color-success);">💾 SALVAR NA AGENDA</button>
+                        <button onclick="window.DashboardController.abrirGerenciadorAgenda('${dataISO}')" class="btn-ver-todas" style="flex:1; background:#eee; color:#666; border:none; border-radius:8px; cursor:pointer;">VOLTAR</button>
                     </div>
                 </div>
             </div>`;
   },
 
   // ==========================================================================
-  // 3. GESTÃO DE ACESSOS (CORREÇÃO DE SALVAMENTO)
+  // 5. GESTÃO DE EQUIPES
   // ==========================================================================
 
-  // =============================
-  // 4 - INÍCIO: abrirModalUsuario
-  // =============================
-  abrirModalUsuario: async function (u = null) {
+  renderizarAbaEquipes: async function () {
+    const container = document.getElementById("tab-equipes");
+    if (!container) return;
+    const equipes = await window.api.listarEquipes();
+    container.innerHTML = `
+            <div class="panel">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h3 class="page-title" style="font-size:1.2rem;">Equipes e Pastorais</h3>
+                    <button onclick="window.DashboardController.abrirModalEquipe()" class="btn-ver-todas">＋ Nova Equipe</button>
+                </div>
+                ${equipes
+                  .map(
+                    (eq) => `
+                    <div class="list-item o-surface-card">
+                        <div class="list-content"><strong>${
+                          eq.nome_equipe
+                        }</strong><br><small>${eq.tipo_atuacao}</small></div>
+                        <button onclick='window.DashboardController.abrirModalEquipe(${JSON.stringify(
+                          eq
+                        )})' style="background:none; border:none; cursor:pointer; font-size:1.1rem;">✏️</button>
+                        <button onclick="window.DashboardController.deletarEquipe(${
+                          eq.id
+                        })" style="background:none; border:none; cursor:pointer; font-size:1.1rem; color:red; margin-left:10px;">🗑️</button>
+                    </div>`
+                  )
+                  .join("")}
+            </div>`;
+  },
+
+  abrirModalEquipe: function (eq = null) {
+    const container = document.getElementById("modalContent");
+    container.innerHTML = `
+            <div class="modal-card o-surface-card" style="max-width: 450px; flex-direction:column;">
+                <div class="modal-body" style="padding: 30px;">
+                    <button class="btn-close" onclick="window.DashboardController.fecharModal()">×</button>
+                    <h3 style="font-family:'Neulis'; color:var(--cor-vinho); margin-bottom:20px;">${
+                      eq ? "Editar" : "Nova"
+                    } Equipe</h3>
+                    <div class="form-section">
+                        <input type="text" id="eq-nome" value="${
+                          eq?.nome_equipe || ""
+                        }" placeholder="Nome da Equipe" class="o-surface-card" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ddd;">
+                        <select id="eq-tipo" class="o-surface-card" style="width:100%; padding:12px; border:1px solid #ddd;">
+                            <option value="Leitura" ${
+                              eq?.tipo_atuacao == "Leitura" ? "selected" : ""
+                            }>📖 Leitura</option>
+                            <option value="Canto" ${
+                              eq?.tipo_atuacao == "Canto" ? "selected" : ""
+                            }>🎵 Canto</option>
+                            <option value="Ambos" ${
+                              eq?.tipo_atuacao == "Ambos" ? "selected" : ""
+                            }>🔄 Ambos</option>
+                        </select>
+                    </div>
+                    <button onclick="window.DashboardController.salvarEquipeFinal('${
+                      eq?.id || ""
+                    }')" class="btn-ver-todas" style="width:100%; margin-top:20px;">💾 SALVAR EQUIPE</button>
+                </div>
+            </div>`;
+    document.getElementById("modalOverlay").classList.add("active");
+  },
+
+  salvarEquipeFinal: async function (id) {
+    const payload = {
+      id: id || null,
+      nome: document.getElementById("eq-nome").value,
+      tipo: document.getElementById("eq-tipo").value,
+    };
+    await window.api.salvarEquipe(payload);
+    this.fecharModal();
+    this.renderizarAbaEquipes();
+  },
+
+  deletarEquipe: async function (id) {
+    if (confirm("Excluir equipe permanentemente?")) {
+      await window.api.excluirEquipe(id);
+      this.renderizarAbaEquipes();
+    }
+  },
+
+  // ==========================================================================
+  // 6. GESTÃO DE ACESSOS (USUÁRIOS)
+  // ==========================================================================
+
+  renderizarAbaUsuarios: async function () {
+    const container = document.getElementById("tab-usuarios");
+    if (!container) return;
+    const users = await window.api.buscarUsuarios();
+    container.innerHTML = `
+            <div class="panel">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h3 class="page-title" style="font-size:1.2rem;">Gestão de Acessos</h3>
+                    <button onclick="window.DashboardController.abrirModalUsuario()" class="btn-ver-todas">＋ Novo Usuário</button>
+                </div>
+                ${users
+                  .map(
+                    (u) => `
+                    <div class="list-item o-surface-card">
+                        <div class="list-content"><strong>${
+                          u.nome || "Sem Nome"
+                        }</strong><br><small>${u.email} • Nível ${
+                      u.perfil_nivel
+                    }</small></div>
+                        <button onclick='window.DashboardController.abrirModalUsuario(${JSON.stringify(
+                          u
+                        )})' style="background:none; border:none; cursor:pointer; font-size:1.1rem;">✏️</button>
+                        <button onclick="window.DashboardController.deletarUsuario('${
+                          u.id
+                        }')" style="background:none; border:none; cursor:pointer; font-size:1.1rem; color:red; margin-left:10px;">🗑️</button>
+                    </div>`
+                  )
+                  .join("")}
+            </div>`;
+  },
+
+  abrirModalUsuario: function (u = null) {
     const container = document.getElementById("modalContent");
     container.innerHTML = `
             <div class="modal-card o-surface-card" style="max-width: 480px; flex-direction:column;">
@@ -236,20 +410,14 @@ window.DashboardController = {
                     <h3 style="font-family:'Neulis'; color:var(--cor-vinho); margin-bottom:25px;">${
                       u ? "Editar" : "Novo"
                     } Acesso</h3>
-                    
                     <div class="form-section">
-                        <label class="kpi-label">E-mail Autorizado</label>
                         <input type="email" id="user-email" value="${
                           u?.email || ""
-                        }" class="o-surface-card" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ddd;">
-                        
-                        <label class="kpi-label">Nome do Coordenador</label>
+                        }" placeholder="E-mail" class="o-surface-card" style="width:100%; padding:12px; margin-bottom:15px;">
                         <input type="text" id="user-nome" value="${
                           u?.nome || ""
-                        }" class="o-surface-card" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ddd;">
-                        
-                        <label class="kpi-label">Nível de Permissão</label>
-                        <select id="user-nivel" class="o-surface-card" style="width:100%; padding:12px; border:1px solid #ddd;">
+                        }" placeholder="Nome Completo" class="o-surface-card" style="width:100%; padding:12px; margin-bottom:15px;">
+                        <select id="user-nivel" class="o-surface-card" style="width:100%; padding:12px;">
                             <option value="1" ${
                               u?.perfil_nivel == 1 ? "selected" : ""
                             }>👑 Nível 1 - Master</option>
@@ -261,47 +429,39 @@ window.DashboardController = {
                             }>👥 Nível 3 - Coordenador</option>
                         </select>
                     </div>
-
                     <button id="btn-save-user" onclick="window.DashboardController.salvarUsuarioFinal('${
                       u?.id || ""
-                    }')" class="btn-ver-todas c-button" style="width:100%; background:var(--sys-color-success);">💾 SALVAR ACESSO</button>
+                    }')" class="btn-ver-todas" style="width:100%; background:var(--sys-color-success); margin-top:20px;">💾 SALVAR ACESSO</button>
                 </div>
             </div>`;
     document.getElementById("modalOverlay").classList.add("active");
   },
 
-  // =============/================
-  // 5 - INÍCIO: salvarUsuarioFinal
-  // =============/================
   salvarUsuarioFinal: async function (id) {
     const btn = document.getElementById("btn-save-user");
-    btn.classList.add("c-button--loading");
-
-    const payload = {
+    btn.innerHTML = "Processando...";
+    const p = {
       id: id || null,
       email: document.getElementById("user-email").value,
       nome: document.getElementById("user-nome").value,
       perfil_nivel: document.getElementById("user-nivel").value,
     };
+    await window.api.salvarUsuario(p);
+    this.fecharModal();
+    this.renderizarAbaUsuarios();
+  },
 
-    try {
-      await window.api.salvarUsuario(payload);
-      this.fecharModal();
+  deletarUsuario: async function (id) {
+    if (confirm("Remover este acesso?")) {
+      await window.api.excluirUsuario(id);
       this.renderizarAbaUsuarios();
-    } catch (e) {
-      alert("Erro ao salvar usuário.");
-    } finally {
-      btn.classList.remove("c-button--loading");
     }
   },
 
   // ==========================================================================
-  // 4. CONFIRMAÇÕES DE EXCLUSÃO (SDS ALERT)
+  // 7. CONFIRMAÇÕES E APOIO
   // ==========================================================================
 
-  // =============/================
-  // 6 - INÍCIO: confirmarExclusao
-  // =============/================
   confirmarExclusao: function (id, dataISO, titulo) {
     const container = document.getElementById("modalContent");
     container.innerHTML = `
@@ -311,30 +471,23 @@ window.DashboardController = {
                         <span class="c-alert__icon">⚠️</span>
                         <div class="c-alert__content">
                             <span class="c-alert__title">Ação Irreversível</span>
-                            Você está prestes a excluir permanentemente: <strong>${titulo}</strong>. Deseja continuar?
+                            Deseja excluir permanentemente: <strong>${titulo}</strong>?
                         </div>
                     </div>
                     <div style="display:flex; gap:12px;">
-                        <button id="btn-confirm-del" onclick="window.DashboardController.executarExclusao('${id}', '${dataISO}')" class="btn-ver-todas c-button" style="flex:1; background:var(--cor-cereja);">SIM, EXCLUIR</button>
-                        <button onclick="window.DashboardController.abrirGerenciadorAgenda('${dataISO}')" class="btn-ver-todas c-button" style="flex:1; background:#eee; color:#666;">CANCELAR</button>
+                        <button id="btn-confirm-del" onclick="window.DashboardController.executarExclusao('${id}', '${dataISO}')" class="btn-ver-todas" style="flex:1; background:var(--cor-cereja);">SIM, EXCLUIR</button>
+                        <button onclick="window.DashboardController.abrirGerenciadorAgenda('${dataISO}')" class="btn-ver-todas" style="flex:1; background:#eee; color:#666; border:none; border-radius:8px; cursor:pointer;">CANCELAR</button>
                     </div>
                 </div>
             </div>`;
   },
 
   executarExclusao: async function (id, dataISO) {
-    const btn = document.getElementById("btn-confirm-del");
-    btn.classList.add("c-button--loading");
-    try {
-      await window.api.client.from("eventos_base").delete().eq("id", id);
-      this.abrirGerenciadorAgenda(dataISO);
-      window.CalendarEngine.carregarERenderizar();
-    } catch (e) {
-      alert("Erro ao excluir.");
-    }
+    await window.api.client.from("eventos_base").delete().eq("id", id);
+    this.abrirGerenciadorAgenda(dataISO);
+    window.CalendarEngine.carregarERenderizar();
   },
 
-  // --- MÉTODOS AUXILIARES ---
   fecharModal: function () {
     document.getElementById("modalOverlay").classList.remove("active");
   },
@@ -349,7 +502,6 @@ window.DashboardController = {
   salvarFinal: async function (dataISO, eventoId) {
     const btn = document.getElementById("btn-save-agenda");
     btn.classList.add("c-button--loading");
-
     const tipo = document.getElementById("edit-tipo").value;
     const payload = {
       id: eventoId,
@@ -366,7 +518,6 @@ window.DashboardController = {
           : 1,
       status: "aprovado",
     };
-
     const escalas = [];
     if (tipo === "liturgia") {
       document.querySelectorAll(".row-escala-edit").forEach((row) => {
@@ -377,19 +528,11 @@ window.DashboardController = {
         });
       });
     }
-
-    try {
-      await window.api.salvarEventoCompleto(payload, escalas);
-      this.abrirGerenciadorAgenda(dataISO);
-      window.CalendarEngine.carregarERenderizar();
-    } catch (e) {
-      alert("Erro: " + e.message);
-    } finally {
-      btn.classList.remove("c-button--loading");
-    }
+    await window.api.salvarEventoCompleto(payload, escalas);
+    this.abrirGerenciadorAgenda(dataISO);
+    window.CalendarEngine.carregarERenderizar();
   },
 
-  // Reuso do gerador de escalas (integrado)
   gerarLinhasEscalaEditor: function (escalas = []) {
     const eL = window.api.cacheEquipesLeitura || [];
     const eC = window.api.cacheEquipesCanto || [];
@@ -433,7 +576,6 @@ window.DashboardController = {
     container.appendChild(div.firstElementChild);
   },
 
-  // ... (métodos de navegação, gráfico e lista permanecem integrados) ...
   atualizarVisaoGeral: async function () {
     const stats = await window.api.buscarEstatisticasDashboard();
     const ids = [
@@ -498,76 +640,6 @@ window.DashboardController = {
             </div>`
       )
       .join("");
-  },
-
-  configurarNavegacao: function () {
-    const menuItems = document.querySelectorAll(".menu-item[data-tab]");
-    const ctrl = window.DashboardController;
-    menuItems.forEach((item) => {
-      item.addEventListener("click", async () => {
-        const targetTab = item.getAttribute("data-tab");
-        document
-          .querySelectorAll(".menu-item, .tab-content")
-          .forEach((el) => el.classList.remove("active"));
-        item.classList.add("active");
-        const targetPanel = document.getElementById(`tab-${targetTab}`);
-        if (targetPanel) targetPanel.classList.add("active");
-        if (targetTab === "agenda-total") await ctrl.carregarAgendaTotal();
-        else if (targetTab === "visao-geral") await ctrl.atualizarVisaoGeral();
-        else if (targetTab === "equipes") await ctrl.renderizarAbaEquipes();
-        else if (targetTab === "usuarios") await ctrl.renderizarAbaUsuarios();
-      });
-    });
-  },
-
-  renderizarAbaEquipes: async function () {
-    const container = document.getElementById("tab-equipes");
-    if (!container) return;
-    const equipes = await window.api.listarEquipes();
-    container.innerHTML = `
-            <div class="panel">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                    <h3 class="page-title" style="font-size:1.2rem;">Equipes e Pastorais</h3>
-                    <button onclick="window.DashboardController.abrirModalEquipe()" class="btn-ver-todas">＋ Nova Equipe</button>
-                </div>
-                ${equipes
-                  .map(
-                    (eq) =>
-                      `<div class="list-item o-surface-card"><div class="list-content"><strong>${
-                        eq.nome_equipe
-                      }</strong><br><small>${
-                        eq.tipo_atuacao
-                      }</small></div><button onclick='window.DashboardController.abrirModalEquipe(${JSON.stringify(
-                        eq
-                      )})' style="background:none; border:none; cursor:pointer; font-size:1.1rem;">✏️</button></div>`
-                  )
-                  .join("")}
-            </div>`;
-  },
-
-  renderizarAbaUsuarios: async function () {
-    const container = document.getElementById("tab-usuarios");
-    if (!container) return;
-    const users = await window.api.buscarUsuarios();
-    container.innerHTML = `
-            <div class="panel">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                    <h3 class="page-title" style="font-size:1.2rem;">Gestão de Acessos</h3>
-                    <button onclick="window.DashboardController.abrirModalUsuario()" class="btn-ver-todas">＋ Novo Usuário</button>
-                </div>
-                ${users
-                  .map(
-                    (u) =>
-                      `<div class="list-item o-surface-card"><div class="list-content"><strong>${
-                        u.nome || "Sem Nome"
-                      }</strong><br><small>${u.email} • Nível ${
-                        u.perfil_nivel
-                      }</small></div><button onclick='window.DashboardController.abrirModalUsuario(${JSON.stringify(
-                        u
-                      )})' style="background:none; border:none; cursor:pointer;">✏️</button></div>`
-                  )
-                  .join("")}
-            </div>`;
   },
 };
 
