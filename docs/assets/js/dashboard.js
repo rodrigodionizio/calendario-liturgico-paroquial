@@ -326,11 +326,54 @@ window.DashboardController = {
   },
 
   abrirModalEquipe: function (eq = null) {
-    const n = prompt("Nome da Equipe:", eq ? eq.nome_equipe : "");
-    if (n)
-      window.api
-        .salvarEquipe({ id: eq?.id, nome: n, tipo: "Ambos" })
-        .then(() => this.renderizarAbaEquipes());
+    const container = document.getElementById("modalContent");
+    container.innerHTML = `
+            <div class="modal-card o-surface-card" style="max-width: 450px; flex-direction: column;">
+                <div class="modal-body" style="padding: 30px;">
+                    <button class="btn-close" onclick="DashboardController.fecharModal()">×</button>
+                    <h3 class="page-title" style="margin-bottom: 20px;">${
+                      eq ? "Editar" : "Nova"
+                    } Equipe</h3>
+                    
+                    <div class="form-section">
+                        <label class="kpi-label">Nome da Pastoral/Equipe</label>
+                        <input type="text" id="eq-nome" value="${
+                          eq?.nome_equipe || ""
+                        }" class="o-surface-card" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ddd;">
+                        
+                        <label class="kpi-label">Tipo de Atuação</label>
+                        <select id="eq-tipo" class="o-surface-card" style="width:100%; padding:12px; border:1px solid #ddd;">
+                            <option value="Leitura" ${
+                              eq?.tipo_atuacao == "Leitura" ? "selected" : ""
+                            }>📖 Leitura</option>
+                            <option value="Canto" ${
+                              eq?.tipo_atuacao == "Canto" ? "selected" : ""
+                            }>🎵 Canto</option>
+                            <option value="Ambos" ${
+                              eq?.tipo_atuacao == "Ambos" ? "selected" : ""
+                            }>🔄 Ambos</option>
+                        </select>
+                    </div>
+
+                    <button onclick="window.DashboardController.salvarEquipeFinal('${
+                      eq?.id || ""
+                    }')" class="btn-ver-todas" style="width:100%; margin-top:20px;">
+                        💾 SALVAR EQUIPE
+                    </button>
+                </div>
+            </div>`;
+    document.getElementById("modalOverlay").classList.add("active");
+  },
+
+  salvarEquipeFinal: async function (id) {
+    const payload = {
+      id: id || null,
+      nome: document.getElementById("eq-nome").value,
+      tipo: document.getElementById("eq-tipo").value,
+    };
+    await window.api.salvarEquipe(payload);
+    this.fecharModal();
+    this.renderizarAbaEquipes();
   },
 
   deletarEquipe: async function (id) {
@@ -340,17 +383,51 @@ window.DashboardController = {
     }
   },
 
-  abrirModalUsuario: function (u = null) {
-    const email = prompt("E-mail do novo acesso:", u ? u.email : "");
-    if (email)
-      window.api
-        .salvarUsuario({
-          id: u?.id,
-          email,
-          nome: prompt("Nome:", u?.nome || ""),
-          perfil_nivel: 3,
-        })
-        .then(() => this.renderizarAbaUsuarios());
+  abrirModalUsuario: async function (u = null) {
+    const container = document.getElementById("modalContent");
+    const equipes = await window.api.listarEquipes();
+
+    container.innerHTML = `
+            <div class="modal-card o-surface-card" style="max-width: 500px; flex-direction: column;">
+                <div class="modal-body" style="padding: 30px;">
+                    <button class="btn-close" onclick="DashboardController.fecharModal()">×</button>
+                    <h3 class="page-title" style="margin-bottom: 20px;">${
+                      u ? "Editar" : "Novo"
+                    } Acesso</h3>
+                    
+                    <div class="form-section">
+                        <label class="kpi-label">E-mail do Usuário</label>
+                        <input type="email" id="user-email" value="${
+                          u?.email || ""
+                        }" class="o-surface-card" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ddd;">
+                        
+                        <label class="kpi-label">Nome Completo</label>
+                        <input type="text" id="user-nome" value="${
+                          u?.nome || ""
+                        }" class="o-surface-card" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ddd;">
+                        
+                        <label class="kpi-label">Nível de Autoridade</label>
+                        <select id="user-nivel" class="o-surface-card" style="width:100%; padding:12px; border:1px solid #ddd;">
+                            <option value="1" ${
+                              u?.perfil_nivel == 1 ? "selected" : ""
+                            }>👑 Nível 1 - Master (Padre/Dev)</option>
+                            <option value="2" ${
+                              u?.perfil_nivel == 2 ? "selected" : ""
+                            }>🏢 Nível 2 - Secretaria</option>
+                            <option value="3" ${
+                              u?.perfil_nivel == 3 ? "selected" : ""
+                            }>👥 Nível 3 - Coordenador</option>
+                        </select>
+                    </div>
+
+                    <button onclick="window.DashboardController.salvarUsuarioFinal('${
+                      u?.id || ""
+                    }')" class="btn-ver-todas" style="width:100%; margin-top:20px; background: var(--sys-color-success);">
+                        💾 SALVAR ACESSO
+                    </button>
+                </div>
+            </div>`;
+    document.getElementById("modalOverlay").classList.add("active");
   },
 
   deletarUsuario: async function (id) {

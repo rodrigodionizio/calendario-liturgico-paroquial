@@ -177,4 +177,17 @@ window.api = {
   // =============================
   // 6 - FIM: buscarEventosProximos
   // =============================
+  // =============================
+  // 7 - INÍCIO: buscarEventosDia
+  // =============================
+  buscarEventosDia: async function (dataISO) {
+    const { data, error } = await _supabaseClient
+      .from("eventos_base")
+      .select(
+        `*, liturgia_cores(hex_code), escalas(*, equipe_leitura:equipes!equipe_leitura_id(nome_equipe), equipe_canto:equipes!equipe_canto_id(nome_equipe))`
+      )
+      .eq("data", dataISO)
+      .order("created_at", { ascending: true });
+    return error ? [] : data;
+  },
 };
