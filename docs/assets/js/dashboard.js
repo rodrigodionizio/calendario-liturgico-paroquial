@@ -232,9 +232,9 @@ window.DashboardController = {
                                 <label for="edit-mural" style="cursor:pointer; font-size:0.9rem;">No Mural?</label>
                             </div>
                             <select id="edit-prioridade" style="padding:5px; border-radius:4px; flex:1;">
-                                <option value="normal" ${!evento.mural_prioridade || evento.mural_prioridade === 'normal' ? 'selected' : ''}>Prioridade Normal</option>
-                                <option value="alta" ${evento.mural_prioridade === 'alta' ? 'selected' : ''}>🔥 Alta Prioridade</option>
-                                <option value="baixa" ${evento.mural_prioridade === 'baixa' ? 'selected' : ''}>❄️ Baixa Prioridade</option>
+                                <option value="2" ${!evento.mural_prioridade || evento.mural_prioridade == 2 ? 'selected' : ''}>Prioridade Normal</option>
+                                <option value="3" ${evento.mural_prioridade == 3 ? 'selected' : ''}>🔥 Alta Prioridade</option>
+                                <option value="1" ${evento.mural_prioridade == 1 ? 'selected' : ''}>❄️ Baixa Prioridade</option>
                             </select>
                         </div>
                     </div>
@@ -494,7 +494,7 @@ window.DashboardController = {
       status: "aprovado",
       // NEW FIELDS
       mural_destaque: document.getElementById("edit-mural").checked,
-      mural_prioridade: document.getElementById("edit-prioridade").value
+      mural_prioridade: parseInt(document.getElementById("edit-prioridade").value) || 2
     };
     const escalas = [];
     if (tipo === "liturgia") {
