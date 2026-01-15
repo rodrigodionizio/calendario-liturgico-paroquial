@@ -177,6 +177,61 @@ window.api = {
   // =============================
   // 6 - FIM: buscarEventosProximos
   // =============================
+
+  // =============================
+  // NEW: salvarEventoCompleto (Fix solicitado)
+  // =============================
+  salvarEventoCompleto: async function (eventoPayload, escalasPayload) {
+    // 1. Salva/Atualiza o Evento Base
+    let eventoId = eventoPayload.id;
+
+    // Remove ID null/undefined para o insert criar novo
+    if (!eventoId || eventoId === "null") {
+      delete eventoPayload.id;
+      const { data, error } = await _supabaseClient
+        .from("eventos_base")
+        .insert(eventoPayload)
+        .select()
+        .single();
+      if (error) throw error;
+      eventoId = data.id;
+    } else {
+      const { error } = await _supabaseClient
+        .from("eventos_base")
+        .update(eventoPayload)
+        .eq("id", eventoId);
+      if (error) throw error;
+    }
+
+    // 2. Gerencia as Escalas (Remove antigas e cria novas)
+    // Primeiro limpamos as escalas anteriores desse evento
+    if (escalasPayload && escalasPayload.length > 0) {
+      // Nota: Assumindo que a tabela de escalas tem uma coluna 'evento_id' foreign key
+      // Se o schema usar 'liturgia_id', ajuste conforme sua estrutura real.
+      // O padrão do projeto parece ser conectar via id.
+
+      // Delete previous scales
+      await _supabaseClient
+        .from("escalas")
+        .delete()
+        .eq("evento_id", eventoId);
+
+      // Prepare new scales
+      const scalesToInsert = escalasPayload.map(s => ({
+        evento_id: eventoId,
+        hora_celebracao: s.hora_celebracao,
+        equipe_leitura_id: s.equipe_leitura_id,
+        equipe_canto_id: s.equipe_canto_id
+      }));
+
+      const { error: errScales } = await _supabaseClient
+        .from("escalas")
+        .insert(scalesToInsert);
+
+      if (errScales) console.error("Erro ao salvar escalas:", errScales);
+    }
+  },
+
   // =============================
   // 7 - INÍCIO: buscarEventosDia
   // =============================
