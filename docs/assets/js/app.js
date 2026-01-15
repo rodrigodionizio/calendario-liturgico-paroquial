@@ -361,12 +361,10 @@ window.abrirModal = function (dataISO) {
     conteudoHTML = `
             <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:10px;">
                 <p><strong>🕒 Horário:</strong> ${horaShow}</p>
-                <p><strong>📍 Local:</strong> ${
-                  evento.local || "Não informado"
-                }</p>
-                <p><strong>👤 Responsável:</strong> ${
-                  evento.responsavel || "Não informado"
-                }</p>
+                <p><strong>📍 Local:</strong> ${evento.local || "Não informado"
+      }</p>
+                <p><strong>👤 Responsável:</strong> ${evento.responsavel || "Não informado"
+      }</p>
             </div>`;
   } else {
     conteudoHTML = gerarHTMLLeitura(evento);
@@ -448,18 +446,14 @@ function ativarModoEdicao(evento) {
         <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #e0e0e0; margin-bottom:15px;">
             <label for="editTipoComp" style="font-size:0.7rem; font-weight:bold; color:#888;">TIPO DE COMPROMISSO</label>
             <select id="editTipoComp" onchange="window.toggleCamposEditor()" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; margin-bottom:10px; font-weight:bold; background:#f9f9f9;">
-                <option value="liturgia" ${
-                  tipoComp === "liturgia" ? "selected" : ""
-                }>✝️ Liturgia / Missa</option>
-                <option value="reuniao" ${
-                  tipoComp === "reuniao" ? "selected" : ""
-                }>👥 Reunião / Pastoral</option>
-                <option value="evento" ${
-                  tipoComp === "evento" ? "selected" : ""
-                }>🎉 Evento / Festa</option>
-                <option value="atendimento" ${
-                  tipoComp === "atendimento" ? "selected" : ""
-                }>🗣️ Atendimento Padre</option>
+                <option value="liturgia" ${tipoComp === "liturgia" ? "selected" : ""
+    }>✝️ Liturgia / Missa</option>
+                <option value="reuniao" ${tipoComp === "reuniao" ? "selected" : ""
+    }>👥 Reunião / Pastoral</option>
+                <option value="evento" ${tipoComp === "evento" ? "selected" : ""
+    }>🎉 Evento / Festa</option>
+                <option value="atendimento" ${tipoComp === "atendimento" ? "selected" : ""
+    }>🗣️ Atendimento Padre</option>
             </select>
 
             <label for="editTitulo" style="font-size:0.7rem; font-weight:bold; color:#888;">TÍTULO</label>
@@ -490,23 +484,19 @@ function ativarModoEdicao(evento) {
         <!-- Mural -->
         <div style="background:#fff9e6; padding:10px; border-radius:8px; border:1px solid #eee; margin-bottom:15px;">
             <div style="display:flex; align-items:center; gap:10px;">
-                <input type="checkbox" id="checkMural" onchange="window.toggleMuralPrio()" ${
-                  isMural ? "checked" : ""
-                } style="width:18px; height:18px;">
+                <input type="checkbox" id="checkMural" onchange="window.toggleMuralPrio()" ${isMural ? "checked" : ""
+    } style="width:18px; height:18px;">
                 <label for="checkMural" style="font-weight:bold; font-size:0.9rem; color:#d97706;">Destacar no Mural?</label>
             </div>
             <div id="area-prio" style="margin-top:10px; display:none; padding-left:28px;">
                 <label for="editPrio" style="font-size:0.7rem; font-weight:bold; color:#888;">PRIORIDADE</label>
                 <select id="editPrio" style="padding:5px; border:1px solid #ccc; border-radius:4px;">
-                    <option value="1" ${
-                      prioMural == 1 ? "selected" : ""
-                    }>🔴 Urgente</option>
-                    <option value="2" ${
-                      prioMural == 2 ? "selected" : ""
-                    }>🟡 Atenção</option>
-                    <option value="3" ${
-                      prioMural == 3 ? "selected" : ""
-                    }>🔵 Info</option>
+                    <option value="1" ${prioMural == 1 ? "selected" : ""
+    }>🔴 Urgente</option>
+                    <option value="2" ${prioMural == 2 ? "selected" : ""
+    }>🟡 Atenção</option>
+                    <option value="3" ${prioMural == 3 ? "selected" : ""
+    }>🔵 Info</option>
                 </select>
             </div>
         </div>
@@ -563,27 +553,22 @@ function gerarCamposLiturgia(evento, tempoVal, corAtualId) {
         <div style="flex:1;">
             <label for="editTipo" style="font-size:0.7rem; font-weight:bold; color:#888;">TIPO</label>
             <select id="editTipo" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
-                <option value="comum" ${
-                  !evento.is_solenidade ? "selected" : ""
-                }>Comum</option>
-                <option value="solenidade" ${
-                  evento.is_solenidade ? "selected" : ""
-                }>Solenidade</option>
+                <option value="comum" ${!evento.is_solenidade ? "selected" : ""
+    }>Comum</option>
+                <option value="solenidade" ${evento.is_solenidade ? "selected" : ""
+    }>Solenidade</option>
             </select>
         </div>
     </div>
     <div>
         <label for="editCor" style="font-size:0.7rem; font-weight:bold; color:#888;">COR</label>
         <select id="editCor" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
-            <option value="1" ${
-              corAtualId == 1 ? "selected" : ""
-            }>Verde</option>
-            <option value="2" ${
-              corAtualId == 2 ? "selected" : ""
-            }>Branco</option>
-            <option value="3" ${
-              corAtualId == 3 ? "selected" : ""
-            }>Vermelho</option>
+            <option value="1" ${corAtualId == 1 ? "selected" : ""
+    }>Verde</option>
+            <option value="2" ${corAtualId == 2 ? "selected" : ""
+    }>Branco</option>
+            <option value="3" ${corAtualId == 3 ? "selected" : ""
+    }>Vermelho</option>
             <option value="4" ${corAtualId == 4 ? "selected" : ""}>Roxo</option>
             <option value="5" ${corAtualId == 5 ? "selected" : ""}>Rosa</option>
         </select>
@@ -796,8 +781,8 @@ window.prepararImpressao = function () {
      */
     const subEventos =
       evento.tipo_compromisso === "liturgia" &&
-      evento.escalas &&
-      evento.escalas.length > 0
+        evento.escalas &&
+        evento.escalas.length > 0
         ? evento.escalas
         : [null];
 
@@ -826,8 +811,8 @@ window.prepararImpressao = function () {
       const horaShow = escala
         ? escala.hora_celebracao.substring(0, 5)
         : evento.hora_inicio
-        ? evento.hora_inicio.substring(0, 5)
-        : "--:--";
+          ? evento.hora_inicio.substring(0, 5)
+          : "--:--";
       tdHora.innerHTML = `<strong>${horaShow}</strong>`;
       tr.appendChild(tdHora);
 
@@ -839,36 +824,36 @@ window.prepararImpressao = function () {
         : evento.tipo_compromisso || "Evento";
       tdEvento.innerHTML = `
                 <div class="print-titulo">${evento.titulo}</div>
-                <span class="print-tipo ${
-                  evento.is_solenidade ? "tipo-solenidade" : ""
-                }">${labelTipo}</span>
+                <span class="print-tipo ${evento.is_solenidade ? "tipo-solenidade" : ""
+        }">${labelTipo}</span>
             `;
       tr.appendChild(tdEvento);
 
-      // --- COLUNA 4: DETALHES / EQUIPES ---
+      // --- COLUNA 4: DETALHES / EQUIPES (REFINADO - SDS v5.6) ---
       const tdDetalhes = document.createElement("td");
       tdDetalhes.className = "col-detalhes";
 
       if (escala) {
-        // Layout para Missas (Leitura e Canto com ícones simulados)
+        // Ajuste de espaçamento entre ícones e nomes
         tdDetalhes.innerHTML = `
-                    <div class="print-escala-row">📖 <strong>${
-                      escala.equipe_leitura?.nome_equipe || "A definir"
-                    }</strong></div>
-                    <div class="print-escala-row">🎵 <strong>${
-                      escala.equipe_canto?.nome_equipe || "A definir"
-                    }</strong></div>
-                `;
+          <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 14pt;">📖</span> 
+              <span style="font-family: 'AntennaCond';"><strong>${escala.equipe_leitura?.nome_equipe || "A definir"
+          }</strong></span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 14pt;">🎵</span> 
+              <span style="font-family: 'AntennaCond';"><strong>${escala.equipe_canto?.nome_equipe || "A definir"
+          }</strong></span>
+          </div>
+        `;
       } else {
-        // Layout para Reuniões e Outros (Local e Responsável)
+        // Layout para Reuniões (Mantido)
         tdDetalhes.innerHTML = `
-                    <div class="print-escala-row">📍 ${
-                      evento.local || "Não informado"
-                    }</div>
-                    <div class="print-escala-row">👤 ${
-                      evento.responsavel || "Paróquia"
-                    }</div>
-                `;
+          <div style="margin-bottom: 4px;">📍 ${evento.local || "Não informado"
+          }</div>
+          <div>👤 ${evento.responsavel || "Paróquia"}</div>
+        `;
       }
       tr.appendChild(tdDetalhes);
 
