@@ -242,6 +242,14 @@ window.DashboardController = {
                     <div id="campos-liturgia" class="form-section" style="display: ${evento.tipo_compromisso === "liturgia" ? "block" : "none"
       }">
                         <span class="form-section-title">2. Detalhes Litúrgicos</span>
+                        <!-- NEW: Tempo Litúrgico -->
+                        <select id="edit-tempo" class="o-surface-card" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd;">
+                             <option value="Tempo Comum" ${!evento.tempo_liturgico || evento.tempo_liturgico === 'Tempo Comum' ? 'selected' : ''}>🌿 Tempo Comum</option>
+                             <option value="Advento" ${evento.tempo_liturgico === 'Advento' ? 'selected' : ''}>🕯️ Advento</option>
+                             <option value="Natal" ${evento.tempo_liturgico === 'Natal' ? 'selected' : ''}>🌟 Natal</option>
+                             <option value="Quaresma" ${evento.tempo_liturgico === 'Quaresma' ? 'selected' : ''}>🌵 Quaresma</option>
+                             <option value="Páscoa" ${evento.tempo_liturgico === 'Páscoa' ? 'selected' : ''}>🔥 Páscoa</option>
+                        </select>
                         <select id="edit-cor" class="o-surface-card" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ddd;">
                              <option value="1" ${evento.cor_id == 1 ? "selected" : ""
       }>🟢 Verde</option>
@@ -491,6 +499,8 @@ window.DashboardController = {
         tipo === "liturgia"
           ? parseInt(document.getElementById("edit-cor").value)
           : 1,
+      // NEW FIELD
+      tempo_liturgico: tipo === "liturgia" ? document.getElementById("edit-tempo").value : "Tempo Comum",
       status: "aprovado",
       // NEW FIELDS
       mural_destaque: document.getElementById("edit-mural").checked,
