@@ -1194,13 +1194,15 @@ header {
   }
 
   /* 5. CABEÇALHO DO PDF (SDS v6.0 - Novo Shell) */
+  /* 5. CABEÇALHO DO PDF (SDS v6.0 - Novo Shell Refined) */
   .print-header {
     display: grid !important;
-    grid-template-columns: 100px 1fr 180px !important;
+    grid-template-columns: 80px 1fr 200px !important;
+    /* Grid Fix: 80px Logo | 1fr Title | 200px Period */
     align-items: center !important;
-    border-bottom: 3px solid var(--cor-vinho) !important;
+    border-bottom: 2px solid var(--cor-vinho) !important;
     padding-bottom: 20px !important;
-    margin-bottom: 30px !important;
+    margin-bottom: 20px !important;
   }
 
   .print-header__logo {
@@ -1209,7 +1211,6 @@ header {
     align-items: center !important;
   }
 
-  /* Mantendo estilo da imagem mas resetando margens antigas se necessário */
   .print-logo-circ {
     width: 80px !important;
     height: 80px !important;
@@ -1217,7 +1218,6 @@ header {
     flex-shrink: 0 !important;
     display: block !important;
     margin: 0 !important;
-    /* Reset de margem antiga */
   }
 
   .print-header__info {
@@ -1246,6 +1246,9 @@ header {
 
   .print-header__period {
     text-align: right !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
     border-left: 1px solid #ddd !important;
     padding-left: 15px !important;
   }
@@ -1300,6 +1303,20 @@ header {
     font-size: 10pt !important;
   }
 
+  /* Destaque para Domingos e Solenidades */
+  .row-domingo {
+    background-color: #fff9e6 !important;
+    /* Bege/Dourado claríssimo */
+    border-left: 6px solid var(--cor-dourado) !important;
+    -webkit-print-color-adjust: exact;
+    /* Força a cor no PDF */
+  }
+
+  .row-domingo .dia-grande {
+    color: var(--cor-vinho) !important;
+    font-weight: 900 !important;
+  }
+
   /* Estilização das Colunas */
   .col-data {
     width: 12% !important;
@@ -1332,27 +1349,27 @@ header {
     text-transform: uppercase !important;
   }
 
-  /* Verticalização da Coluna de Detalhes (SDS v6.0) */
+  /* Verticalização da Coluna de Detalhes (SDS v6.0 Refined) */
   .print-escala-container {
     display: flex !important;
     flex-direction: column !important;
-    gap: 8px !important;
+    gap: 4px !important;
   }
 
   .print-escala-row {
     display: flex !important;
-    align-items: flex-start !important;
-    gap: 10px !important;
+    align-items: center !important;
+    gap: 8px !important;
+    line-height: 1.2 !important;
     margin-bottom: 0 !important;
-    /* Reset */
   }
 
   .print-escala-icon {
-    font-size: 13pt !important;
+    font-size: 12pt !important;
     line-height: 1 !important;
-    width: 20px !important;
-    /* Alinhamento fixo */
+    width: 16px !important;
     text-align: center !important;
+    flex-shrink: 0 !important;
   }
 
   .print-escala-content {
@@ -1374,11 +1391,6 @@ header {
     font-size: 10.5pt !important;
   }
 
-  /* Mantendo suporte para hora na coluna de detalhes se necessário, ou classes antigas */
-  .print-hora {
-    font-weight: bold !important;
-  }
-
   /* 7. RODAPÉ DO PAPEL */
   .print-footer {
     position: fixed;
@@ -1392,11 +1404,17 @@ header {
     justify-content: space-between !important;
   }
 
+  /* Força cada mês a começar em folha nova */
+  tr {
+    page-break-inside: avoid;
+  }
+
   @page {
     size: A4;
-    margin: 1.5cm !important;
+    margin: 1.5cm 1cm 2cm 1cm !important;
   }
 }
+
 
 /* ==========================================================================
    12. COMPONENTES DE SINCRONIZAÇÃO (PÚBLICO E ADMIN)

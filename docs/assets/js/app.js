@@ -870,8 +870,21 @@ window.gerarRelatorio = async function (tipo) {
           mesAtualProcessamento = mesEv;
         }
 
-        // Renderiza Linha do Evento (Reutilizando lógica, mas simplificada)
-        tbody.innerHTML += gerarHTMLLinhaImpressao(ev);
+        // Lógica de Destaque para Domingo ou Solenidade
+        const diaSemana = dataObj.getDay(); // 0 = Domingo
+        const isDomingo = diaSemana === 0;
+        const isSolenidade = ev.is_solenidade === true;
+
+        // Gera o HTML da linha
+        let htmlRow = gerarHTMLLinhaImpressao(ev);
+
+        // Se for destaque, injeta a classe CSS na tag <tr>
+        if (isDomingo || isSolenidade) {
+          htmlRow = htmlRow.replace('<tr>', '<tr class="row-domingo">');
+        }
+
+        // Renderiza Linha do Evento
+        tbody.innerHTML += htmlRow;
       });
     }
 
