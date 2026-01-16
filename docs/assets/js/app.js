@@ -870,17 +870,33 @@ window.gerarRelatorio = async function (tipo) {
           mesAtualProcessamento = mesEv;
         }
 
-        // Lógica de Destaque para Domingo ou Solenidade
+        // Lógica de Destaque para Domingo, Solenidade ou Categoria
         const diaSemana = dataObj.getDay(); // 0 = Domingo
         const isDomingo = diaSemana === 0;
         const isSolenidade = ev.is_solenidade === true;
+
+        let classeCategoria = "";
+        // Prioridade: Categorias Específicas > Domingo/Solenidade
+        switch (ev.tipo_compromisso) {
+          case 'atendimento':
+            classeCategoria = "cat-padre";
+            break;
+          case 'reuniao':
+            classeCategoria = "cat-reuniao";
+            break;
+          case 'evento':
+            classeCategoria = "cat-festa";
+            break;
+          default: // Liturgia
+            if (isDomingo || isSolenidade) classeCategoria = "row-domingo";
+        }
 
         // Gera o HTML da linha
         let htmlRow = gerarHTMLLinhaImpressao(ev);
 
         // Se for destaque, injeta a classe CSS na tag <tr>
-        if (isDomingo || isSolenidade) {
-          htmlRow = htmlRow.replace('<tr>', '<tr class="row-domingo">');
+        if (classeCategoria) {
+          htmlRow = htmlRow.replace('<tr>', `<tr class="${classeCategoria}">`);
         }
 
         // Renderiza Linha do Evento

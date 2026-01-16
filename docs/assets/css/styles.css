@@ -473,6 +473,63 @@ header {
 }
 
 /* ==========================================================================
+   10. MODAL DE EDIÇÃO E FORMULÁRIOS
+   ========================================================================== */
+
+/* --- PILLS POR CATEGORIA (GRID CALENDÁRIO - SDS v6.6) --- */
+
+/* Base da Pílula (Atomic Component) */
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  margin-bottom: 2px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: var(--font-texto);
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  /* UX: Indica clicável */
+  transition: transform 0.1s;
+}
+
+.pill:hover {
+  transform: scale(1.02);
+}
+
+/* 1. PADRE (Vinho) */
+.pill--padre {
+  border-left: 4px solid var(--cor-vinho) !important;
+  background-color: #fdf2f4;
+  color: var(--cor-vinho);
+}
+
+/* 2. REUNIÃO (Slate Blue) */
+.pill--reuniao {
+  border-left: 4px solid #475569 !important;
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+/* 3. FESTA (Dourado) */
+.pill--festa {
+  border-left: 4px solid var(--cor-dourado) !important;
+  background-color: #fffdf5;
+  color: #a67c00;
+}
+
+/* 4. LITURGIA (Mantém a cor litúrgica dinâmica como borda) */
+.pill--liturgia {
+  background-color: #f8f9fa;
+  color: var(--text-main);
+}
+
+/* ==========================================================================
    6. MURAL DE AVISOS (NOVA FEATURE)
    ========================================================================== */
 .mural-container {
@@ -1310,11 +1367,38 @@ header {
     border-left: 6px solid var(--cor-dourado) !important;
     -webkit-print-color-adjust: exact;
     /* Força a cor no PDF */
+    print-color-adjust: exact;
   }
 
   .row-domingo .dia-grande {
     color: var(--cor-vinho) !important;
     font-weight: 900 !important;
+  }
+
+  /* --- NOVOS DESTAQUES POR CATEGORIA (Padre, Reunião, Festa) --- */
+  .cat-padre {
+    background-color: rgba(164, 29, 49, 0.05) !important;
+    /* Vinho bem suave */
+    border-left: 6px solid var(--cor-vinho) !important;
+    /* Borda Vinho de Hierarquia */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .cat-reuniao {
+    background-color: rgba(0, 0, 0, 0.03) !important;
+    /* Cinza claro */
+    border-left: 6px solid #666 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .cat-festa {
+    background-color: rgba(251, 181, 88, 0.1) !important;
+    /* Dourado suave */
+    border-left: 6px solid var(--cor-dourado) !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   /* Estilização das Colunas */
