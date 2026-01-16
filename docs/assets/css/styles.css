@@ -1193,108 +1193,83 @@ header {
     margin: 0 !important;
   }
 
-  /* 5. CABEÇALHO DO PDF (Preview Estilo Oficial) */
+  /* 5. CABEÇALHO DO PDF (SDS v6.0 - Novo Shell) */
   .print-header {
-    display: flex !important;
-    justify-content: space-between !important;
-    /* Distribui os 3 elementos (logo, info, mês) */
+    display: grid !important;
+    grid-template-columns: 100px 1fr 180px !important;
     align-items: center !important;
-    width: 100% !important;
-    border-bottom: 3px solid #fbb558 !important;
-    padding-bottom: 15px !important;
-    margin-bottom: 25px !important;
-    box-sizing: border-box !important;
-    background-color: white !important;
-    /* Fix: Garante fundo branco para evitar conflitos */
+    border-bottom: 3px solid var(--cor-vinho) !important;
+    padding-bottom: 20px !important;
+    margin-bottom: 30px !important;
   }
 
-  /* Limita o tamanho do logo para não cobrir a página */
-  /* Define o tamanho proporcional da logo */
+  .print-header__logo {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  /* Mantendo estilo da imagem mas resetando margens antigas se necessário */
   .print-logo-circ {
     width: 80px !important;
-    /* Valor exato do layout aprovado */
     height: 80px !important;
-    /* Valor exato do layout aprovado */
     object-fit: contain;
-    /* Garante que a imagem não distorça */
     flex-shrink: 0 !important;
-    /* Impede que a logo diminua */
-    margin-right: 15px !important;
     display: block !important;
-    border: none !important;
-    /* Remove qualquer borda visual */
-    border-style: none !important;
-    outline: none !important;
-    background: transparent !important;
-    /* Garante que o fundo seja transparente e não branco/cinza */
-    background-color: transparent !important;
-    box-shadow: none !important;
-    /* Remove sombras que podem parecer bordas borradas */
-    /* border-radius: 50%; */
-    /* Opcional: use se a imagem não for circular e você quiser arredondar */
+    margin: 0 !important;
+    /* Reset de margem antiga */
   }
 
-  .print-logo {
-    height: 70px !important;
-    width: auto !important;
-    margin-right: 20px !important;
-    display: block !important;
+  .print-header__info {
+    padding-left: 20px !important;
   }
 
-  .print-info h1 {
-    flex-grow: 1 !important;
-    /* Ocupa o espaço central */
-    padding: 0 10px !important;
-    text-align: left !important;
-    overflow: hidden !important;
-    /* Impede que o texto empurre o vizinho */
-    font-size: 18pt !important;
-    color: #a41d31 !important;
-    /* Vinho */
+  .print-header__title {
+    font-family: "Neulis", "Roboto", "Helvetica", "Arial", sans-serif !important;
+    font-size: 20pt !important;
+    color: var(--cor-vinho) !important;
+    margin: 0 !important;
     text-transform: uppercase !important;
     font-weight: 900 !important;
-    line-height: 1.1;
+    line-height: 1.1 !important;
   }
 
-  .print-info h2 {
-    margin: 5px 0 0 0 !important;
-    font-size: 12pt !important;
+  .print-header__subtitle {
+    font-family: "AntennaCond", "Segoe UI", "Roboto", "Arial", sans-serif !important;
+    font-size: 11pt !important;
     color: #666 !important;
+    margin-top: 5px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1.5px !important;
     font-weight: normal !important;
   }
 
-  /* --- ESTILO DO BLOCO DE MÊS/ANO NO RELATÓRIO (LAYOUT APROVADO) --- */
-  .print-mes {
-    display: block !important;
-    flex-shrink: 0 !important;
-    /* GARANTE que o bloco do mês não seja esmagado */
+  .print-header__period {
     text-align: right !important;
-    min-width: 150px !important;
-    /* Reserva espaço para o nome do mês */
-    padding-right: 5px !important;
-    /* Pequena folga da borda do papel */
+    border-left: 1px solid #ddd !important;
+    padding-left: 15px !important;
   }
 
-  .print-mes h3#print-month-name {
-    margin: 0 !important;
-    font-size: 18pt !important;
-    color: #a41d31 !important;
-    /* Cor Vinho Oficial */
+  .print-header__label {
+    font-size: 8pt !important;
     text-transform: uppercase !important;
-    line-height: 1 !important;
-    font-family: "Neulis", "Roboto", "Helvetica", "Arial", sans-serif !important;
-    white-space: nowrap !important;
-    /* Impede quebra de linha no mês */
+    color: #666 !important;
+    display: block !important;
+    font-family: "AntennaCond", sans-serif !important;
   }
 
-  .print-mes span#print-year-val {
+  .print-header__month {
+    font-size: 22pt !important;
+    color: var(--cor-vinho) !important;
+    line-height: 1 !important;
     margin: 0 !important;
-    font-size: 14pt !important;
-    color: #fbb558 !important;
-    /* Cor Dourada Oficial */
+    font-family: "Neulis", "Roboto", "Arial", sans-serif !important;
+  }
+
+  .print-header__year {
+    font-size: 12pt !important;
+    color: var(--cor-dourado) !important;
     font-weight: bold !important;
-    display: block !important;
-    line-height: 1.2 !important;
     font-family: "AntennaCond", sans-serif !important;
   }
 
@@ -1325,7 +1300,7 @@ header {
     font-size: 10pt !important;
   }
 
-  /* Estilização das Colunas (Conforme o JS injeta) */
+  /* Estilização das Colunas */
   .col-data {
     width: 12% !important;
     text-align: center !important;
@@ -1348,6 +1323,7 @@ header {
   .print-titulo {
     font-weight: bold !important;
     margin-bottom: 2px !important;
+    font-size: 11pt !important;
   }
 
   .print-liturgia {
@@ -1356,14 +1332,51 @@ header {
     text-transform: uppercase !important;
   }
 
-  .print-escala-row {
-    margin-bottom: 4px !important;
-    display: block !important;
+  /* Verticalização da Coluna de Detalhes (SDS v6.0) */
+  .print-escala-container {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
   }
 
+  .print-escala-row {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    margin-bottom: 0 !important;
+    /* Reset */
+  }
+
+  .print-escala-icon {
+    font-size: 13pt !important;
+    line-height: 1 !important;
+    width: 20px !important;
+    /* Alinhamento fixo */
+    text-align: center !important;
+  }
+
+  .print-escala-content {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .print-escala-label {
+    font-size: 7pt !important;
+    color: #666 !important;
+    text-transform: uppercase !important;
+    font-weight: bold !important;
+    margin-bottom: 1px !important;
+  }
+
+  .print-escala-value {
+    font-weight: bold !important;
+    color: var(--text-main) !important;
+    font-size: 10.5pt !important;
+  }
+
+  /* Mantendo suporte para hora na coluna de detalhes se necessário, ou classes antigas */
   .print-hora {
     font-weight: bold !important;
-    margin-right: 5px !important;
   }
 
   /* 7. RODAPÉ DO PAPEL */
