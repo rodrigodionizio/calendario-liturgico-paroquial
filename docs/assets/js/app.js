@@ -366,11 +366,32 @@ window.abrirModal = function (dataISO) {
     .replace(".", "");
   const diaSemana = dataObj.toLocaleString("pt-BR", { weekday: "long" });
 
-  let corHex = evento.liturgia_cores?.hex_code || "#ccc";
-  let corTxt = corHex;
-  if (corHex.toLowerCase() === "#ffffff") {
-    corHex = "#ccc";
-    corTxt = "#666";
+  // Cores Padronizadas por Categoria (SDS v6.6 - Consistência Visual)
+  let corHex = "#2e7d32"; // Default: Verde Litúrgico
+  let corTxt = "#2e7d32";
+
+  switch (evento.tipo_compromisso) {
+    case 'atendimento':
+      corHex = "#a41d31"; // Vinho (Padre)
+      corTxt = "#a41d31";
+      break;
+    case 'reuniao':
+      corHex = "#475569"; // Slate Blue (Reunião)
+      corTxt = "#475569";
+      break;
+    case 'evento':
+      corHex = "#bfa15f"; // Dourado Escuro (Festa)
+      corTxt = "#a67c00";
+      break;
+    case 'liturgia':
+    default:
+      // Mantém a cor litúrgica dinâmica para celebrações
+      corHex = evento.liturgia_cores?.hex_code || "#2e7d32";
+      corTxt = corHex;
+      if (corHex.toLowerCase() === "#ffffff") {
+        corHex = "#ccc";
+        corTxt = "#666";
+      }
   }
 
   // HTML diferente para Reunião vs Liturgia
