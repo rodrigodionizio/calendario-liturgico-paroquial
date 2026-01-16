@@ -747,147 +747,218 @@ window.salvarEdicoes = async function () {
  * DESCRIÇÃO: Converte os dados do calendário em uma lista cronológica elegante
  * para impressão em papel A4, seguindo a identidade visual oficial.
  */
-window.prepararImpressao = function () {
-  // 1. Captura de Elementos do DOM do Relatório Oculto
-  const tbody = document.getElementById("print-table-body");
-  const monthName = document.getElementById("print-month-name");
-  const yearVal = document.getElementById("print-year-val");
-  const footerDate = document.getElementById("print-footer-date");
+// ==========================================================================
+// 7. SUBSISTEMA DE IMPRESSÃO (RELATÓRIOS V2.0)
+// ==========================================================================
 
-  if (!tbody) {
-    console.error("Erro: Container de impressão não encontrado.");
-    return;
+/**
+ * Abre o Modal de Opções de Impressão
+ */
+window.abrirOpcoesImpressao = function () {
+  const modalContent = document.getElementById("modalContent");
+  const modalOverlay = document.getElementById("modalOverlay");
+  const anoAtual = new Date().getFullYear();
+
+  modalContent.innerHTML = `
+    <div class="modal-card" style="max-width: 450px;">
+        <button class="btn-close" onclick="fecharModalForce()" aria-label="Fechar">×</button>
+        <div class="modal-sidebar-color" style="background-color: var(--cor-vinho)"></div>
+        <div class="modal-body">
+            <h3 style="color:var(--cor-vinho); margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+                🖨️ Central de Relatórios
+            </h3>
+            <p style="color:#666; font-size:0.9rem; margin-bottom:20px;">
+                Selecione o período que deseja imprimir. O relatório será gerado em formato A4 otimizado.
+            </p>
+
+            <div style="display:grid; gap:10px;">
+                <button onclick="window.gerarRelatorio('mes_atual')" class="c-sync-button" style="justify-content:flex-start; padding:15px;">
+                    <span style="font-size:1.2rem;">📅</span> 
+                    <div>
+                        <strong>Mês Atual</strong><br>
+                        <small style="color:#888;">Apenas o mês visível na tela</small>
+                    </div>
+                </button>
+
+                <button onclick="window.gerarRelatorio('trimestre')" class="c-sync-button" style="justify-content:flex-start; padding:15px;">
+                    <span style="font-size:1.2rem;">🗓️</span> 
+                    <div>
+                        <strong>Próximos 3 Meses</strong><br>
+                        <small style="color:#888;">Do mês atual + 2 meses seguintes</small>
+                    </div>
+                </button>
+
+                <button onclick="window.gerarRelatorio('ano_completo')" class="c-sync-button" style="justify-content:flex-start; padding:15px;">
+                    <span style="font-size:1.2rem;">📚</span> 
+                    <div>
+                        <strong>Ano Litúrgico Completo (${anoAtual})</strong><br>
+                        <small style="color:#888;">Gera o relatório de todo o ano</small>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>`;
+
+  modalOverlay.classList.add("active");
+};
+
+/**
+ * Motor de Geração de Relatório
+ */
+window.gerarRelatorio = async function (tipo) {
+  // Feedback visual
+  const modalBody = document.querySelector("#modalContent .modal-body");
+  if (modalBody) modalBody.innerHTML = '<div style="text-align:center; padding:40px;"><p>🔄 Gerando documento...</p><small>Isso pode levar alguns segundos.</small></div>';
+
+  let dataInicio, dataFim, tituloRelatorio;
+  const ano = ESTADO.anoAtual;
+  const mes = ESTADO.mesAtual;
+
+  // Definição das Datas
+  if (tipo === 'mes_atual') {
+    const ultimoDia = new Date(ano, mes, 0).getDate();
+    dataInicio = `${ano}-${String(mes).padStart(2, '0')}-01`;
+    dataFim = `${ano}-${String(mes).padStart(2, '0')}-${ultimoDia}`;
+    tituloRelatorio = new Date(ano, mes - 1).toLocaleString('pt-BR', { month: 'long' }).toUpperCase();
+  }
+  else if (tipo === 'trimestre') {
+    // Começa dia 1 do mês atual
+    dataInicio = `${ano}-${String(mes).padStart(2, '0')}-01`;
+    // Pega o último dia do mês + 2
+    const dataFimDate = new Date(ano, mes + 2, 0); // O dia 0 do mês seguinte é o último do anterior
+    dataFim = dataFimDate.toISOString().split('T')[0];
+    tituloRelatorio = "RELATÓRIO TRIMESTRAL";
+  }
+  else if (tipo === 'ano_completo') {
+    dataInicio = `${ano}-01-01`;
+    dataFim = `${ano}-12-31`;
+    tituloRelatorio = `ANO DE ${ano}`;
   }
 
-  // 2. Configurações de Cabeçalho e Rodapé do Relatório
-  // Pega o nome do mês e ano do ESTADO global do app
-  const dataRef = new Date(ESTADO.anoAtual, ESTADO.mesAtual - 1);
-  monthName.textContent = dataRef
-    .toLocaleString("pt-BR", { month: "long" })
-    .toUpperCase();
-  yearVal.textContent = ESTADO.anoAtual;
+  try {
+    const eventos = await window.api.buscarEventosRange(dataInicio, dataFim);
 
-  // Data da geração do documento (no rodapé)
-  footerDate.textContent = new Date().toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+    // Atualiza cabeçalho do PDF
+    document.getElementById("print-month-name").textContent = tituloRelatorio;
+    document.getElementById("print-year-val").textContent = ano;
+    document.getElementById("print-footer-date").textContent = new Date().toLocaleString('pt-BR');
 
-  // 3. Limpeza de dados antigos e Ordenação Cronológica
-  tbody.innerHTML = "";
-  const listaEventos = Object.values(ESTADO.dadosEventos).sort((a, b) =>
-    a.data.localeCompare(b.data)
-  );
+    // Renderização da Tabela
+    const tbody = document.getElementById("print-table-body");
+    tbody.innerHTML = "";
 
-  // 4. Processamento dos Eventos
-  listaEventos.forEach((evento) => {
-    // Ignora dias vazios ou sem título
-    if (!evento.titulo) return;
+    if (eventos.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">Nenhum evento encontrado neste período.</td></tr>';
+    } else {
+      let mesAtualProcessamento = -1;
 
-    const dataObj = new Date(evento.data + "T12:00:00");
-    const diaNum = dataObj.getDate().toString().padStart(2, "0");
-    const diaSem = dataObj
-      .toLocaleString("pt-BR", { weekday: "short" })
-      .toUpperCase()
-      .replace(".", "");
+      eventos.forEach(ev => {
+        const dataObj = new Date(ev.data + "T12:00:00");
+        const mesEv = dataObj.getMonth();
 
-    /**
-     * LÓGICA DE ESCALAS:
-     * Se for Liturgia, verificamos as 'escalas' (múltiplos horários).
-     * Se for Reunião/Evento, criamos uma escala fake para manter o padrão de loop.
-     */
-    const subEventos =
-      evento.tipo_compromisso === "liturgia" &&
-        evento.escalas &&
-        evento.escalas.length > 0
-        ? evento.escalas
-        : [null];
+        // Inserção de Separador de Mês (Se mudou o mês e não é mês único)
+        if (tipo !== 'mes_atual' && mesEv !== mesAtualProcessamento) {
+          const nomeMesSep = dataObj.toLocaleString('pt-BR', { month: 'long' }).toUpperCase();
+          const anoSep = dataObj.getFullYear();
 
-    subEventos.forEach((escala, index) => {
-      const tr = document.createElement("tr");
+          const trSep = document.createElement('tr');
+          trSep.innerHTML = `
+                    <td colspan="4" style="background-color:#eee; color:#333; font-weight:bold; text-transform:uppercase; font-size:0.9rem; padding:8px 10px; border-bottom:2px solid #ccc;">
+                        ${nomeMesSep} DE ${anoSep}
+                    </td>`;
+          tbody.appendChild(trSep);
+          mesAtualProcessamento = mesEv;
+        }
 
-      // Aplica classe especial se for Solenidade (destaque amarelado do preview)
-      if (evento.is_solenidade) tr.className = "row-solenidade";
+        // Renderiza Linha do Evento (Reutilizando lógica, mas simplificada)
+        tbody.innerHTML += gerarHTMLLinhaImpressao(ev);
+      });
+    }
 
-      // --- COLUNA 1: DATA ---
-      // Só exibe a data no primeiro horário do dia para não poluir visualmente
-      const tdData = document.createElement("td");
-      tdData.className = "col-data";
-      if (index === 0) {
-        tdData.innerHTML = `
-                    <span class="dia-grande">${diaNum}</span>
-                    <span class="dia-sem">${diaSem}</span>
-                `;
-      }
-      tr.appendChild(tdData);
+    // Finaliza e Imprime
+    window.fecharModalForce();
+    setTimeout(() => {
+      window.print();
+    }, 500); // Pequeno delay para renderizar o DOM
 
-      // --- COLUNA 2: HORA ---
-      const tdHora = document.createElement("td");
-      tdHora.className = "col-hora";
-      // Pega hora da escala ou do campo hora_inicio (agenda total)
-      const horaShow = escala
-        ? escala.hora_celebracao.substring(0, 5)
-        : evento.hora_inicio
-          ? evento.hora_inicio.substring(0, 5)
-          : "--:--";
-      tdHora.innerHTML = `<strong>${horaShow}</strong>`;
-      tr.appendChild(tdHora);
-
-      // --- COLUNA 3: EVENTO ---
-      const tdEvento = document.createElement("td");
-      tdEvento.className = "col-evento";
-      const labelTipo = evento.is_solenidade
-        ? "Solenidade"
-        : evento.tipo_compromisso || "Evento";
-      tdEvento.innerHTML = `
-                <div class="print-titulo">${evento.titulo}</div>
-                <span class="print-tipo ${evento.is_solenidade ? "tipo-solenidade" : ""
-        }">${labelTipo}</span>
-            `;
-      tr.appendChild(tdEvento);
-
-      // --- COLUNA 4: DETALHES / EQUIPES (REFINADO - SDS v5.6) ---
-      const tdDetalhes = document.createElement("td");
-      tdDetalhes.className = "col-detalhes";
-
-      if (escala) {
-        // Ajuste de espaçamento entre ícones e nomes
-        tdDetalhes.innerHTML = `
-          <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 14pt;">📖</span> 
-              <span style="font-family: 'AntennaCond';"><strong>${escala.equipe_leitura?.nome_equipe || "A definir"
-          }</strong></span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 14pt;">🎵</span> 
-              <span style="font-family: 'AntennaCond';"><strong>${escala.equipe_canto?.nome_equipe || "A definir"
-          }</strong></span>
-          </div>
-        `;
-      } else {
-        // Layout para Reuniões (Mantido)
-        tdDetalhes.innerHTML = `
-          <div style="margin-bottom: 4px;">📍 ${evento.local || "Não informado"
-          }</div>
-          <div>👤 ${evento.responsavel || "Paróquia"}</div>
-        `;
-      }
-      tr.appendChild(tdDetalhes);
-
-      // Adiciona a linha construída à tabela
-      tbody.appendChild(tr);
-    });
-  });
-
-  // 5. Acionamento da Impressão
-  // O timeout de 500ms é vital para que o navegador processe o HTML injetado antes de abrir o PDF
-  setTimeout(() => {
-    window.print();
-  }, 500);
+  } catch (error) {
+    console.error(error);
+    alert("Erro ao gerar relatório: " + error.message);
+    window.fecharModalForce();
+  }
 };
+
+/**
+ * Gera o HTML de uma linha da tabela de impressão
+ */
+function gerarHTMLLinhaImpressao(evento) {
+  if (!evento.titulo) return "";
+
+  const dataObj = new Date(evento.data + "T12:00:00");
+  const diaNum = dataObj.getDate().toString().padStart(2, "0");
+  const diaSem = dataObj.toLocaleString("pt-BR", { weekday: "short" }).toUpperCase().replace(".", "");
+
+  let htmlEscalas = "";
+
+  if (evento.tipo_compromisso === "liturgia" && evento.escalas && evento.escalas.length > 0) {
+    evento.escalas.forEach(esc => {
+      const hora = esc.hora_celebracao.substring(0, 5);
+      const leit = esc.equipe_leitura?.nome_equipe || "-";
+      const cant = esc.equipe_canto?.nome_equipe || "-";
+
+      htmlEscalas += `
+            <div class="print-escala-row">
+                <span class="print-hora">${hora}</span>
+                <span class="print-equipes">📖 ${leit} &nbsp; 🎵 ${cant}</span>
+            </div>`;
+    });
+  } else {
+    // Evento Comum / Reunião
+    const hora = evento.hora_inicio ? evento.hora_inicio.substring(0, 5) : "--:--";
+    const local = evento.local ? `(${evento.local})` : "";
+
+    htmlEscalas = `
+        <div class="print-escala-row">
+            <span class="print-hora">${hora}</span>
+            <span class="print-equipes">${local}</span>
+        </div>`;
+  }
+
+  // Cor Litúrgica para o nome do dia (Visual Detail)
+  let corDia = "#a41d31"; // Default Vinho
+  // Se quiser usar a cor litúrgica no dia, descomente abaixo:
+  // if (evento.liturgia_cores?.hex_code) corDia = evento.liturgia_cores.hex_code;
+
+  return `
+    <tr>
+        <td class="col-data">
+            <span class="dia-grande" style="color:${corDia}">${diaNum}</span>
+            <span class="dia-sem">${diaSem}</span>
+        </td>
+        <td style="vertical-align:top; padding-top:12px; font-weight:bold; color:#555;">
+             <!-- A hora é exibida na coluna de detalhes para alinhar com escalas, 
+                  mas se nao tiver escalas multiplas, poderia ser aqui. 
+                  Mantendo vazio ou ícone para limpeza visual -->
+             ${evento.tipo_compromisso === 'liturgia' ? '✝️' : '📅'}
+        </td>
+        <td>
+            <div class="print-titulo">${evento.titulo}</div>
+            <div class="print-liturgia">${evento.tempo_liturgico || evento.tipo_compromisso}</div>
+        </td>
+        <td>
+            ${htmlEscalas}
+        </td>
+    </tr>`;
+}
+
+// ==========================================================================
+// UTILITÁRIOS GLOBAIS
+// ==========================================================================
+
+window.fecharModalForce = function () {
+  document.getElementById("modalOverlay").classList.remove("active");
+};
+
 
 // ==========================================================================
 // 8. UTILS

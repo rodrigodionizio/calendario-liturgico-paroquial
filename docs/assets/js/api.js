@@ -36,6 +36,24 @@ window.api = {
   // =============================
 
   // =============================
+  // 1.1 - INÍCIO: buscarEventosRange (Novo - Impressão Personalizada)
+  // =============================
+  buscarEventosRange: async function (dataInicio, dataFim) {
+    const { data, error } = await _supabaseClient
+      .from("eventos_base")
+      .select(
+        `*, liturgia_cores(hex_code), escalas(*, equipe_leitura:equipes!equipe_leitura_id(nome_equipe), equipe_canto:equipes!equipe_canto_id(nome_equipe))`
+      )
+      .gte("data", dataInicio)
+      .lte("data", dataFim)
+      .order("data", { ascending: true });
+    return error ? [] : data;
+  },
+  // =============================
+  // 1.1 - FIM: buscarEventosRange
+  // =============================
+
+  // =============================
   // 2 - INÍCIO: buscarAvisos
   // =============================
   // Argumentos: Nenhum
@@ -281,8 +299,8 @@ window.api = {
   replicarEventoPadrao: async function (evento, escalas, meses = 3) {
     const datas = this.calcularProximasDatas(evento.data, meses);
     for (const d of datas) {
-        const novoEvento = { ...evento, id: undefined, data: d };
-        await this.salvarEventoCompleto(novoEvento, escalas);
+      const novoEvento = { ...evento, id: undefined, data: d };
+      await this.salvarEventoCompleto(novoEvento, escalas);
     }
     return true;
   },
@@ -297,14 +315,14 @@ window.api = {
     const resultados = [];
 
     for (let i = 1; i <= meses; i++) {
-        let busca = new Date(d.getFullYear(), d.getMonth() + i, 1);
-        let offset = (7 + diaSemana - busca.getDay()) % 7;
-        let diaAlvo = 1 + offset + ((ordemNoMes - 1) * 7);
-        let dataFinal = new Date(busca.getFullYear(), busca.getMonth(), diaAlvo);
-        
-        if (dataFinal.getMonth() === busca.getMonth()) {
-            resultados.push(dataFinal.toISOString().split('T')[0]);
-        }
+      let busca = new Date(d.getFullYear(), d.getMonth() + i, 1);
+      let offset = (7 + diaSemana - busca.getDay()) % 7;
+      let diaAlvo = 1 + offset + ((ordemNoMes - 1) * 7);
+      let dataFinal = new Date(busca.getFullYear(), busca.getMonth(), diaAlvo);
+
+      if (dataFinal.getMonth() === busca.getMonth()) {
+        resultados.push(dataFinal.toISOString().split('T')[0]);
+      }
     }
     return resultados;
   },
