@@ -1396,7 +1396,7 @@ header {
   }
 
   .print-header__month {
-    font-size: 22pt !important;
+    font-size: 18pt !important;
     color: var(--cor-vinho) !important;
     line-height: 1 !important;
     margin: 0 !important;
