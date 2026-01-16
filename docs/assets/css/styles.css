@@ -1204,6 +1204,8 @@ header {
     padding-bottom: 15px !important;
     margin-bottom: 25px !important;
     box-sizing: border-box !important;
+    background-color: white !important;
+    /* Fix: Garante fundo branco para evitar conflitos */
   }
 
   /* Limita o tamanho do logo para não cobrir a página */
