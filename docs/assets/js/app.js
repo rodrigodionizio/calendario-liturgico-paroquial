@@ -388,6 +388,26 @@ window.abrirModal = function (dataISO) {
                 <div class="modal-liturgia" style="color:${corTxt}">${evento.tempo_liturgico}</div>
                 <div class="modal-titulo">${evento.titulo}</div>
                 <div class="escala-list">${conteudoHTML}</div>
+            
+            <!-- ZONA DE CONVENIÊNCIA DO FIEL -->
+            <div style="margin-top: 20px; border-top: 1px dashed #eee; padding-top: 15px;">
+                <p style="font-size: 0.7rem; font-weight: 800; color: #aaa; text-transform: uppercase; text-align: center; margin-bottom: 10px;">
+                    Notificar-me deste compromisso:
+                </p>
+                <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 15px;">
+                    <select id="public-reminder-time" class="o-surface-card" style="padding: 5px 10px; font-size: 0.8rem;">
+                        <option value="10080">7 dias antes</option>
+                        <option value="4320">3 dias antes</option>
+                        <option value="1440" selected>1 dia antes</option>
+                        <option value="180">3 horas antes</option>
+                    </select>
+                </div>
+                <div class="c-sync-group">
+                    <button onclick="CalendarEngine.syncGoogle('${evento.titulo}', '${evento.data}', '${evento.hora_inicio}')" class="c-sync-button">📅 Google</button>
+                    <button onclick="CalendarEngine.syncApple('${evento.titulo}', '${evento.data}', '${evento.hora_inicio}')" class="c-sync-button">🍎 iPhone</button>
+                </div>
+            </div>
+
             </div>
             ${btnAdmin}
         </div>

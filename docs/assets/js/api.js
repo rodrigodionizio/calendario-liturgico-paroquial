@@ -272,4 +272,40 @@ window.api = {
     if (error) throw error;
     return data;
   },
+
+  // =============================
+  // 16 - INÍCIO: replicarEventoPadrao
+  // =============================
+  // Argumentos: eventoPayload (Obj), escalasPayload (Array), mesesLimite (Int)
+  // Descrição: Identifica o padrão do dia (ex: 1º Domingo) e replica para os meses futuros.
+  replicarEventoPadrao: async function (evento, escalas, meses = 3) {
+    const datas = this.calcularProximasDatas(evento.data, meses);
+    for (const d of datas) {
+        const novoEvento = { ...evento, id: undefined, data: d };
+        await this.salvarEventoCompleto(novoEvento, escalas);
+    }
+    return true;
+  },
+
+  // =============================
+  // 17 - INÍCIO: calcularProximasDatas
+  // =============================
+  calcularProximasDatas: function (dataInicio, meses) {
+    const d = new Date(dataInicio + "T12:00:00");
+    const diaSemana = d.getDay();
+    const ordemNoMes = Math.ceil(d.getDate() / 7);
+    const resultados = [];
+
+    for (let i = 1; i <= meses; i++) {
+        let busca = new Date(d.getFullYear(), d.getMonth() + i, 1);
+        let offset = (7 + diaSemana - busca.getDay()) % 7;
+        let diaAlvo = 1 + offset + ((ordemNoMes - 1) * 7);
+        let dataFinal = new Date(busca.getFullYear(), busca.getMonth(), diaAlvo);
+        
+        if (dataFinal.getMonth() === busca.getMonth()) {
+            resultados.push(dataFinal.toISOString().split('T')[0]);
+        }
+    }
+    return resultados;
+  },
 };

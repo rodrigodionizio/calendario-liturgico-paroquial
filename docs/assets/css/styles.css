@@ -26,7 +26,8 @@
 
   /* Liturgia Textos (Contraste Acessível) */
   --txt-verde: #2e7d32;
-  --txt-branco: #666666; /* Cinza Escuro para ler no fundo claro */
+  --txt-branco: #666666;
+  /* Cinza Escuro para ler no fundo claro */
   --txt-dourado: #a67c00;
   --txt-roxo: #6a1b9a;
   --txt-vermelho: #d32f2f;
@@ -59,6 +60,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Neulis";
   src: url("../fonts/Neulis-BlackItalic.otf") format("opentype");
@@ -66,6 +68,7 @@
   font-style: italic;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Neulis";
   src: url("../fonts/Neulis-Bold.otf") format("opentype");
@@ -73,6 +76,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Neulis";
   src: url("../fonts/Neulis-BoldItalic.otf") format("opentype");
@@ -80,6 +84,7 @@
   font-style: italic;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Neulis";
   src: url("../fonts/Neulis-ExtraBold.otf") format("opentype");
@@ -87,6 +92,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Neulis";
   src: url("../fonts/Neulis-ExtraBoldItalic.otf") format("opentype");
@@ -94,6 +100,7 @@
   font-style: italic;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Neulis";
   src: url("../fonts/Neulis-ExtraLight.otf") format("opentype");
@@ -101,6 +108,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Neulis";
   src: url("../fonts/Neulis-ExtraLightItalic.otf") format("opentype");
@@ -108,6 +116,7 @@
   font-style: italic;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Neulis";
   src: url("../fonts/Neulis-Italic.otf") format("opentype");
@@ -115,6 +124,7 @@
   font-style: italic;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Neulis";
   src: url("../fonts/Neulis-Light.otf") format("opentype");
@@ -122,6 +132,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Neulis";
   src: url("../fonts/Neulis-LightItalic.otf") format("opentype");
@@ -129,6 +140,7 @@
   font-style: italic;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Neulis";
   src: url("../fonts/Neulis-Medium.otf") format("opentype");
@@ -136,6 +148,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Neulis";
   src: url("../fonts/Neulis-MediumItalic.otf") format("opentype");
@@ -143,6 +156,7 @@
   font-style: italic;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Neulis";
   src: url("../fonts/Neulis-Regular.otf") format("opentype");
@@ -150,6 +164,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Neulis";
   src: url("../fonts/Neulis-SemiBold.otf") format("opentype");
@@ -157,6 +172,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Neulis";
   src: url("../fonts/Neulis-SemiBoldItalic.otf") format("opentype");
@@ -164,6 +180,7 @@
   font-style: italic;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Neulis";
   src: url("../fonts/Neulis-Thin.otf") format("opentype");
@@ -171,6 +188,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "Neulis";
   src: url("../fonts/Neulis-ThinItalic.otf") format("opentype");
@@ -187,6 +205,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "AntennaCond";
   src: url("../fonts/antennacond-blackitalic.otf") format("opentype");
@@ -194,6 +213,7 @@
   font-style: italic;
   font-display: swap;
 }
+
 @font-face {
   font-family: "AntennaCond";
   src: url("../fonts/antennacond-bold-italic.otf") format("opentype");
@@ -201,6 +221,7 @@
   font-style: italic;
   font-display: swap;
 }
+
 @font-face {
   font-family: "AntennaCond";
   src: url("../fonts/antennacond-bold.otf") format("opentype");
@@ -208,6 +229,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "AntennaCond";
   src: url("../fonts/antennacond-extra-light-italic.otf") format("opentype");
@@ -215,6 +237,7 @@
   font-style: italic;
   font-display: swap;
 }
+
 @font-face {
   font-family: "AntennaCond";
   src: url("../fonts/antennacond-extralight.otf") format("opentype");
@@ -222,6 +245,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "AntennaCond";
   src: url("../fonts/antennacond-italic.otf") format("opentype");
@@ -229,6 +253,7 @@
   font-style: italic;
   font-display: swap;
 }
+
 @font-face {
   font-family: "AntennaCond";
   src: url("../fonts/antennacond-light-italic.otf") format("opentype");
@@ -236,6 +261,7 @@
   font-style: italic;
   font-display: swap;
 }
+
 @font-face {
   font-family: "AntennaCond";
   src: url("../fonts/antennacond-light.otf") format("opentype");
@@ -243,6 +269,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "AntennaCond";
   src: url("../fonts/antennacond-medium-italic.otf") format("opentype");
@@ -250,6 +277,7 @@
   font-style: italic;
   font-display: swap;
 }
+
 @font-face {
   font-family: "AntennaCond";
   src: url("../fonts/antennacond-medium.otf") format("opentype");
@@ -257,6 +285,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "AntennaCond";
   src: url("../fonts/antennacond-thin-italiclic.otf") format("opentype");
@@ -264,6 +293,7 @@
   font-style: italic;
   font-display: swap;
 }
+
 @font-face {
   font-family: "AntennaCond";
   src: url("../fonts/antennacond-thin.otf") format("opentype");
@@ -271,6 +301,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "AntennaCond";
   src: url("../fonts/antennacond.otf") format("opentype");
@@ -278,6 +309,7 @@
   font-style: normal;
   font-display: swap;
 }
+
 @font-face {
   font-family: "AntennaCond";
   src: url("../fonts/antennacond_.otf") format("opentype");
@@ -298,7 +330,8 @@ body {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* App-like feel, impede scroll no body */
+  overflow: hidden;
+  /* App-like feel, impede scroll no body */
 }
 
 /* ==========================================================================
@@ -315,7 +348,8 @@ header {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   z-index: 10;
   border-bottom: 4px solid var(--cor-dourado);
-  position: relative; /* Para posicionar o botão mobile */
+  position: relative;
+  /* Para posicionar o botão mobile */
 }
 
 .header-logo-container {
@@ -323,6 +357,7 @@ header {
   display: flex;
   align-items: center;
 }
+
 .header-logo-img {
   height: 100%;
   width: auto;
@@ -338,7 +373,8 @@ header {
   cursor: pointer;
   padding: 5px;
   position: absolute;
-  left: 15px; /* Fica na esquerda no mobile */
+  left: 15px;
+  /* Fica na esquerda no mobile */
 }
 
 /* ==========================================================================
@@ -377,12 +413,15 @@ header {
 
 /* Filtros */
 .filter-group h3 {
-  font-family: "Neulis", sans-serif; /* ALTERADO: Fonte segura para acentos */
-  font-size: 0.85rem; /* Levemente maior pois a Neulis é mais larga */
+  font-family: "Neulis", sans-serif;
+  /* ALTERADO: Fonte segura para acentos */
+  font-size: 0.85rem;
+  /* Levemente maior pois a Neulis é mais larga */
   text-transform: uppercase;
   color: var(--cor-vinho);
   margin-bottom: 10px;
-  opacity: 1; /* Removida opacidade para ficar mais nítido */
+  opacity: 1;
+  /* Removida opacidade para ficar mais nítido */
   font-weight: 700;
   letter-spacing: 0.5px;
 }
@@ -404,6 +443,7 @@ header {
   border-radius: 4px;
   display: inline-block;
 }
+
 .checkbox-custom.checked {
   background-color: var(--cor-vinho);
 }
@@ -411,7 +451,8 @@ header {
 /* Scroll na lista de equipes se for muito grande */
 #filtro-equipes {
   overflow-y: auto;
-  flex: 1; /* Ocupa o espaço disponível */
+  flex: 1;
+  /* Ocupa o espaço disponível */
   padding-right: 5px;
   scrollbar-width: thin;
   scrollbar-color: var(--cor-vinho) #eee;
@@ -420,10 +461,12 @@ header {
 #filtro-equipes::-webkit-scrollbar {
   width: 6px;
 }
+
 #filtro-equipes::-webkit-scrollbar-track {
   background: #eee;
   border-radius: 3px;
 }
+
 #filtro-equipes::-webkit-scrollbar-thumb {
   background-color: var(--cor-vinho);
   border-radius: 3px;
@@ -449,7 +492,8 @@ header {
 }
 
 .mural-title {
-  font-family: "Neulis", sans-serif; /* ALTERADO */
+  font-family: "Neulis", sans-serif;
+  /* ALTERADO */
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--cor-vinho);
@@ -475,6 +519,7 @@ header {
   transition: transform 0.2s;
   cursor: default;
 }
+
 .aviso-card:hover {
   transform: translateX(3px);
 }
@@ -483,17 +528,24 @@ header {
 .prio-1 {
   border-left-color: var(--cor-cereja);
   background-color: #fff5f5;
-} /* Urgente */
+}
+
+/* Urgente */
 .prio-2 {
   border-left-color: var(--cor-dourado);
-} /* Atenção */
+}
+
+/* Atenção */
 .prio-3 {
   border-left-color: #2196f3;
-} /* Info */
+}
+
+/* Info */
 
 /* Tipografia do Aviso */
 .aviso-tag {
-  font-family: "Neulis", sans-serif; /* ALTERADO: Para ler melhor "AMANHÃ" */
+  font-family: "Neulis", sans-serif;
+  /* ALTERADO: Para ler melhor "AMANHÃ" */
   font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -504,6 +556,7 @@ header {
   background-color: #eee;
   color: #555;
 }
+
 .tag-urgente {
   background-color: var(--cor-cereja);
   color: white;
@@ -511,7 +564,8 @@ header {
 }
 
 .aviso-titulo {
-  font-family: "Neulis", sans-serif; /* ALTERADO */
+  font-family: "Neulis", sans-serif;
+  /* ALTERADO */
   font-weight: 700;
   font-size: 0.95rem;
   color: #333;
@@ -531,9 +585,11 @@ header {
   0% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.7;
   }
+
   100% {
     opacity: 1;
   }
@@ -563,6 +619,7 @@ header {
   align-items: center;
   margin-bottom: 15px;
 }
+
 .month-name {
   font-size: 1.8rem;
   font-weight: 900;
@@ -574,6 +631,7 @@ header {
   display: flex;
   gap: 10px;
 }
+
 .btn-nav {
   border: 1px solid #ccc;
   background: transparent;
@@ -583,6 +641,7 @@ header {
   font-weight: 600;
   transition: background 0.2s;
 }
+
 .btn-nav:hover {
   background: rgba(0, 0, 0, 0.05);
 }
@@ -618,6 +677,7 @@ header {
   transition: background 0.2s;
   position: relative;
 }
+
 .day-cell:hover {
   background-color: #fafafa;
 }
@@ -629,6 +689,7 @@ header {
   margin-bottom: 5px;
   display: block;
 }
+
 .other-month {
   background-color: #f4f4f4;
   opacity: 0.5;
@@ -641,6 +702,7 @@ header {
   pointer-events: none;
   filter: grayscale(100%);
 }
+
 .highlight-filter {
   background-color: #fff9e6;
   border: 2px solid var(--cor-dourado);
@@ -659,6 +721,7 @@ header {
   color: #fff;
   border-left: 3px solid var(--cor-dourado);
 }
+
 .pill.solenidade {
   background-color: var(--cor-dourado);
   color: var(--cor-vinho);
@@ -689,6 +752,7 @@ header {
   margin-bottom: 15px;
   opacity: 0.9;
 }
+
 .footer-heading {
   color: var(--cor-dourado);
   font-size: 1.1rem;
@@ -698,10 +762,12 @@ header {
   font-weight: 800;
   text-transform: uppercase;
 }
+
 .footer-col p {
   margin: 5px 0;
   font-size: 0.95rem;
 }
+
 .footer-subtitle {
   font-style: italic;
   font-size: 0.9rem;
@@ -712,6 +778,7 @@ header {
   color: var(--cor-dourado) !important;
   font-weight: bold;
 }
+
 .destaque-atendimento span {
   font-weight: normal;
   color: var(--cor-bege);
@@ -732,6 +799,7 @@ header {
   font-size: 0.9rem;
   transition: 0.3s;
 }
+
 .btn-whatsapp:hover {
   background-color: #25d366;
   border-color: #25d366;
@@ -743,10 +811,12 @@ header {
   gap: 15px;
   margin-top: 10px;
 }
+
 .social-links a {
   color: var(--cor-bege);
   transition: transform 0.2s;
 }
+
 .social-links a:hover {
   color: var(--cor-dourado);
   transform: scale(1.1);
@@ -777,6 +847,7 @@ header {
   align-items: center;
   z-index: 1000;
 }
+
 .modal-overlay.active {
   display: flex;
   animation: fadeIn 0.2s ease;
@@ -799,6 +870,7 @@ header {
   width: 10px;
   flex-shrink: 0;
 }
+
 .modal-body {
   padding: 20px;
   flex: 1;
@@ -812,18 +884,21 @@ header {
   border-bottom: 1px solid #f0f0f0;
   padding-bottom: 10px;
 }
+
 .modal-day {
   font-size: 2rem;
   font-weight: 900;
   line-height: 1;
   color: var(--text-main);
 }
+
 .modal-month {
   font-size: 0.9rem;
   font-weight: 700;
   text-transform: uppercase;
   color: var(--cor-vinho);
 }
+
 .modal-weekday {
   font-size: 0.75rem;
   color: #888;
@@ -837,6 +912,7 @@ header {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+
 .modal-titulo {
   font-size: 1.1rem;
   font-weight: 800;
@@ -853,6 +929,7 @@ header {
   padding-bottom: 8px;
   margin-bottom: 12px;
 }
+
 .escala-hora {
   background: #f5f5f5;
   padding: 4px 8px;
@@ -862,12 +939,14 @@ header {
   margin-right: 10px;
   color: #555;
 }
+
 .equipe-row {
   display: flex;
   align-items: center;
   margin-bottom: 5px;
   flex-wrap: nowrap;
 }
+
 .equipe-icon {
   width: 16px;
   height: 16px;
@@ -875,6 +954,7 @@ header {
   opacity: 0.8;
   flex-shrink: 0;
 }
+
 .equipe-label {
   font-size: 0.7rem;
   text-transform: uppercase;
@@ -884,6 +964,7 @@ header {
   width: 55px;
   flex-shrink: 0;
 }
+
 .equipe-val {
   font-weight: 700;
   color: var(--text-main);
@@ -928,6 +1009,7 @@ header {
   gap: 10px;
   transition: background 0.2s;
 }
+
 .btn-admin-action:hover {
   background-color: var(--cor-cereja);
 }
@@ -948,6 +1030,7 @@ header {
   z-index: 99;
   backdrop-filter: blur(2px);
 }
+
 #sidebar-overlay.active {
   display: block;
 }
@@ -958,6 +1041,7 @@ header {
     height: 60px;
     margin: 0;
   }
+
   header {
     justify-content: space-between;
   }
@@ -966,15 +1050,19 @@ header {
     width: 600px;
     max-width: 600px;
   }
+
   .modal-body {
     padding: 35px;
   }
+
   .modal-day {
     font-size: 2.8rem;
   }
+
   .modal-titulo {
     font-size: 1.5rem;
   }
+
   .modal-sidebar-color {
     width: 15px;
   }
@@ -982,6 +1070,7 @@ header {
 
 /* MOBILE (Celulares menores que 768px) */
 @media (max-width: 768px) {
+
   /* Mostra botão de menu */
   #btn-mobile-menu {
     display: block;
@@ -990,13 +1079,15 @@ header {
   header {
     justify-content: center;
   }
+
   .header-logo-img {
     max-height: 40px;
   }
 
   /* SIDEBAR VIRA GAVETA */
   .sidebar {
-    display: flex !important; /* Força exibir para animação */
+    display: flex !important;
+    /* Força exibir para animação */
     position: fixed;
     top: 0;
     left: 0;
@@ -1005,17 +1096,22 @@ header {
     max-width: 300px;
     background: #fff;
     z-index: 100;
-    transform: translateX(-100%); /* Esconde na esquerda */
+    transform: translateX(-100%);
+    /* Esconde na esquerda */
     transition: transform 0.3s ease;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
   }
+
   .sidebar.active {
     transform: translateX(0);
-  } /* Desliza para dentro */
+  }
+
+  /* Desliza para dentro */
 
   .month-name {
     font-size: 1.4rem;
   }
+
   .day-header {
     font-size: 0.65rem;
     padding: 5px 0;
@@ -1046,12 +1142,15 @@ header {
   .footer-container {
     text-align: center;
   }
+
   .footer-col {
     align-items: center;
   }
+
   .btn-whatsapp {
     margin: 0 auto 15px auto;
   }
+
   .social-links {
     justify-content: center;
   }
@@ -1069,6 +1168,7 @@ header {
 }
 
 @media print {
+
   /* 2. "Reseta" o corpo da página para impressão */
   html,
   body {
@@ -1080,7 +1180,7 @@ header {
   }
 
   /* 3. ESCONDE TUDO (Header, Sidebar, App, Modais, etc.) */
-  body > *:not(#relatorio-impressao) {
+  body>*:not(#relatorio-impressao) {
     display: none !important;
   }
 
@@ -1096,7 +1196,8 @@ header {
   /* 5. CABEÇALHO DO PDF (Preview Estilo Oficial) */
   .print-header {
     display: flex !important;
-    justify-content: space-between !important; /* Distribui os 3 elementos (logo, info, mês) */
+    justify-content: space-between !important;
+    /* Distribui os 3 elementos (logo, info, mês) */
     align-items: center !important;
     width: 100% !important;
     border-bottom: 3px solid #fbb558 !important;
@@ -1108,20 +1209,29 @@ header {
   /* Limita o tamanho do logo para não cobrir a página */
   /* Define o tamanho proporcional da logo */
   .print-logo-circ {
-    width: 80px !important; /* Valor exato do layout aprovado */
-    height: 80px !important; /* Valor exato do layout aprovado */
-    object-fit: contain; /* Garante que a imagem não distorça */
-    flex-shrink: 0 !important; /* Impede que a logo diminua */
+    width: 80px !important;
+    /* Valor exato do layout aprovado */
+    height: 80px !important;
+    /* Valor exato do layout aprovado */
+    object-fit: contain;
+    /* Garante que a imagem não distorça */
+    flex-shrink: 0 !important;
+    /* Impede que a logo diminua */
     margin-right: 15px !important;
     display: block !important;
-    border: none !important; /* Remove qualquer borda visual */
+    border: none !important;
+    /* Remove qualquer borda visual */
     border-style: none !important;
     outline: none !important;
-    background: transparent !important;/* Garante que o fundo seja transparente e não branco/cinza */
+    background: transparent !important;
+    /* Garante que o fundo seja transparente e não branco/cinza */
     background-color: transparent !important;
-    box-shadow: none !important;/* Remove sombras que podem parecer bordas borradas */
-    /* border-radius: 50%; */ /* Opcional: use se a imagem não for circular e você quiser arredondar */
+    box-shadow: none !important;
+    /* Remove sombras que podem parecer bordas borradas */
+    /* border-radius: 50%; */
+    /* Opcional: use se a imagem não for circular e você quiser arredondar */
   }
+
   .print-logo {
     height: 70px !important;
     width: auto !important;
@@ -1130,12 +1240,15 @@ header {
   }
 
   .print-info h1 {
-    flex-grow: 1 !important; /* Ocupa o espaço central */
+    flex-grow: 1 !important;
+    /* Ocupa o espaço central */
     padding: 0 10px !important;
     text-align: left !important;
-    overflow: hidden !important; /* Impede que o texto empurre o vizinho */
+    overflow: hidden !important;
+    /* Impede que o texto empurre o vizinho */
     font-size: 18pt !important;
-    color: #a41d31 !important; /* Vinho */
+    color: #a41d31 !important;
+    /* Vinho */
     text-transform: uppercase !important;
     font-weight: 900 !important;
     line-height: 1.1;
@@ -1151,26 +1264,32 @@ header {
   /* --- ESTILO DO BLOCO DE MÊS/ANO NO RELATÓRIO (LAYOUT APROVADO) --- */
   .print-mes {
     display: block !important;
-    flex-shrink: 0 !important; /* GARANTE que o bloco do mês não seja esmagado */
+    flex-shrink: 0 !important;
+    /* GARANTE que o bloco do mês não seja esmagado */
     text-align: right !important;
-    min-width: 150px !important; /* Reserva espaço para o nome do mês */
-    padding-right: 5px !important; /* Pequena folga da borda do papel */
+    min-width: 150px !important;
+    /* Reserva espaço para o nome do mês */
+    padding-right: 5px !important;
+    /* Pequena folga da borda do papel */
   }
 
   .print-mes h3#print-month-name {
     margin: 0 !important;
     font-size: 26pt !important;
-    color: #a41d31 !important; /* Cor Vinho Oficial */
+    color: #a41d31 !important;
+    /* Cor Vinho Oficial */
     text-transform: uppercase !important;
     line-height: 1 !important;
     font-family: "Neulis", sans-serif !important;
-    white-space: nowrap !important; /* Impede quebra de linha no mês */
+    white-space: nowrap !important;
+    /* Impede quebra de linha no mês */
   }
 
   .print-mes span#print-year-val {
     margin: 0 !important;
     font-size: 14pt !important;
-    color: #fbb558 !important; /* Cor Dourada Oficial */
+    color: #fbb558 !important;
+    /* Cor Dourada Oficial */
     font-weight: bold !important;
     display: block !important;
     line-height: 1.2 !important;
@@ -1194,6 +1313,7 @@ header {
     text-transform: uppercase !important;
     border-bottom: 3px solid #fbb558 !important;
     -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   .print-table td {
@@ -1209,12 +1329,14 @@ header {
     text-align: center !important;
     border-right: 1px solid #eee !important;
   }
+
   .dia-grande {
     font-size: 16pt !important;
     font-weight: bold !important;
     color: #a41d31 !important;
     display: block !important;
   }
+
   .dia-sem {
     font-size: 8pt !important;
     text-transform: uppercase !important;
@@ -1225,6 +1347,7 @@ header {
     font-weight: bold !important;
     margin-bottom: 2px !important;
   }
+
   .print-liturgia {
     font-size: 8pt !important;
     color: #666 !important;
@@ -1235,6 +1358,7 @@ header {
     margin-bottom: 4px !important;
     display: block !important;
   }
+
   .print-hora {
     font-weight: bold !important;
     margin-right: 5px !important;
@@ -1255,6 +1379,52 @@ header {
 
   @page {
     size: A4;
-    margin: 1.5cm !important; /
+    margin: 1.5cm !important;
   }
+}
+
+/* ==========================================================================
+   12. COMPONENTES DE SINCRONIZAÇÃO (PÚBLICO E ADMIN)
+   ========================================================================== */
+
+.c-sync-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.c-sync-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  font-family: 'AntennaCond', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.c-sync-button:hover {
+  border-color: var(--cor-dourado);
+  background: #fdfaf3;
+  transform: translateY(-2px);
+}
+
+/* Bell de Lembrete SDS */
+.c-alert-bell {
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: #cbd5e1;
+  transition: all 0.3s;
+}
+
+.c-alert-bell.is-active {
+  color: var(--cor-dourado);
+  filter: drop-shadow(0 0 5px rgba(251, 181, 88, 0.4));
 }

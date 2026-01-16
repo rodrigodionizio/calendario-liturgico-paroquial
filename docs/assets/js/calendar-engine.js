@@ -195,4 +195,49 @@ window.CalendarEngine = {
   // =============================
   // 4 - FIM: gerarPilulas
   // =============================
+
+  // =============================
+  // 5 - INÍCIO: Sync Functions (Público)
+  // =============================
+  syncGoogle: function (titulo, data, hora) {
+    const el = document.getElementById("public-reminder-time");
+    const minutes = el ? el.value : 1440; // Default 1 dia
+
+    const start = new Date(data + "T" + (hora || "12:00"));
+    const end = new Date(start.getTime() + (60 * 60 * 1000)); // 1 hora duração
+
+    const fmt = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, "");
+
+    let details = `Lembrete configurado via Sacristia Digital.`;
+    if (minutes == 10080) details = "Lembrete: 7 dias antes.";
+    if (minutes == 4320) details = "Lembrete: 3 dias antes.";
+    if (minutes == 1440) details = "Lembrete: 1 dia antes.";
+    if (minutes == 180) details = "Lembrete: 3 horas antes.";
+
+    const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(titulo)}&dates=${fmt(start)}/${fmt(end)}&details=${encodeURIComponent(details)}&sf=true&output=xml`;
+    window.open(url, '_blank');
+  },
+
+  syncApple: function (titulo, data, hora) {
+    const start = new Date(data + "T" + (hora || "12:00"));
+    const icsMsg = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Sacristia Digital//SDS v3.9//PT
+BEGIN:VEVENT
+UID:${Date.now()}@sacristiadigital.com
+DTSTAMP:${start.toISOString().replace(/-|:|\.\d\d\d/g, "")}
+DTSTART:${start.toISOString().replace(/-|:|\.\d\d\d/g, "")}
+SUMMARY:${titulo}
+DESCRIPTION:Event synced from Sacristia Digital
+END:VEVENT
+END:VCALENDAR`;
+
+    const blob = new Blob([icsMsg], { type: 'text/calendar;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.setAttribute('download', 'evento.ics');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 };

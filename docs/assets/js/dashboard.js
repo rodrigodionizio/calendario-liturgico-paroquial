@@ -274,6 +274,25 @@ window.DashboardController = {
       }" placeholder="Local" class="o-surface-card" style="padding:10px;">
                     </div>
 
+                    <!-- MÓDULO REPLICADOR (EXCLUSIVO ADMIN) -->
+                    <div class="form-section" style="border-top: 2px solid var(--cor-dourado);">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span class="form-section-title" style="margin:0;">🔄 Replicar Padrão Mensal</span>
+                            <label class="c-switch">
+                                <input type="checkbox" id="check-recorrencia" onchange="window.DashboardController.toggleRecorrenciaUI()">
+                                <span class="c-switch__slider"></span>
+                            </label>
+                        </div>
+                        <div id="recorrencia-options" style="display:none; margin-top:15px;">
+                            <p style="font-size:0.75rem; color:#666; margin-bottom:10px;">O sistema replicará este compromisso (e escalas) para os meses seguintes no mesmo padrão (ex: Todo 1º Domingo).</p>
+                            <select id="recorrencia-meses" class="o-surface-card" style="width:100%; padding:10px;">
+                                <option value="3">Replicar por 3 meses</option>
+                                <option value="6">Replicar por 6 meses</option>
+                                <option value="12">Replicar por 12 meses (Plano Anual)</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div style="display:flex; gap:12px; margin-top:25px;">
                         <button id="btn-save-agenda" onclick="window.DashboardController.salvarFinal('${dataISO}', ${eventoId ? `'${eventoId}'` : "null"
       })" class="btn-ver-todas c-button" style="flex:2; background:var(--sys-color-success);">💾 SALVAR NA AGENDA</button>
@@ -482,6 +501,14 @@ window.DashboardController = {
       tipo !== "liturgia" ? "grid" : "none";
   },
 
+  toggleRecorrenciaUI: function () {
+    const chk = document.getElementById("check-recorrencia");
+    const area = document.getElementById("recorrencia-options");
+    if (chk && area) {
+      area.style.display = chk.checked ? "block" : "none";
+    }
+  },
+
   salvarFinal: async function (dataISO, eventoId) {
     const btn = document.getElementById("btn-save-agenda");
     btn.classList.add("c-button--loading");
@@ -517,6 +544,14 @@ window.DashboardController = {
       });
     }
     await window.api.salvarEventoCompleto(payload, escalas);
+
+    // Sincronização de Salvamento (Replicador)
+    const checkRecorrencia = document.getElementById("check-recorrencia");
+    if (checkRecorrencia && checkRecorrencia.checked) {
+      const meses = parseInt(document.getElementById("recorrencia-meses").value) || 3;
+      await window.api.replicarEventoPadrao(payload, escalas, meses);
+    }
+
     this.abrirGerenciadorAgenda(dataISO);
     window.CalendarEngine.carregarERenderizar();
   },
