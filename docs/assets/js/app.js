@@ -513,13 +513,13 @@ function ativarModoEdicao(evento) {
             <label for="editTipoComp" style="font-size:0.7rem; font-weight:bold; color:#888;">TIPO DE COMPROMISSO</label>
             <select id="editTipoComp" onchange="window.toggleCamposEditor()" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; margin-bottom:10px; font-weight:bold; background:#f9f9f9;">
                 <option value="liturgia" ${tipoComp === "liturgia" ? "selected" : ""
-    }>✝️ Liturgia / Missa</option>
+    }>Liturgia / Missa</option>
                 <option value="reuniao" ${tipoComp === "reuniao" ? "selected" : ""
-    }>👥 Reunião / Pastoral</option>
+    }>Reunião / Pastoral</option>
                 <option value="evento" ${tipoComp === "evento" ? "selected" : ""
-    }>🎉 Evento / Festa</option>
+    }>Evento / Festa</option>
                 <option value="atendimento" ${tipoComp === "atendimento" ? "selected" : ""
-    }>🗣️ Atendimento Padre</option>
+    }>Atendimento Padre</option>
             </select>
 
             <label for="editTitulo" style="font-size:0.7rem; font-weight:bold; color:#888;">TÍTULO</label>

@@ -38,40 +38,6 @@
   /* Tipografia */
   --font-titulo: "Neulis", "Roboto", "Helvetica", "Arial", sans-serif;
   --font-texto: "AntennaCond", "Segoe UI", "Roboto", "Arial", sans-serif;
-
-  /* ========================================
-     EXTENSÃO: Variações HSL (SDS v6.8)
-     Compatível com sistema atual
-     ======================================== */
-
-  /* Conversão das cores institucionais para HSL */
-  --vinho-hsl: 351 70% 38%;
-  /* Equivalente a #a41d31 */
-  --dourado-hsl: 41 95% 66%;
-  /* Equivalente a #fbb558 */
-
-  /* Variações de Vinho (para sutilezas) */
-  --vinho-profundo: 351 75% 15%;
-  /* Vinho muito escuro */
-  --vinho-medio: 351 70% 38%;
-  /* Vinho base (atual) */
-  --vinho-claro: 351 50% 60%;
-  /* Vinho médio */
-  --vinho-suave: 351 40% 95%;
-  /* Vinho quase branco */
-
-  /* Variações de Dourado (para destaques) */
-  --dourado-escuro: 41 60% 35%;
-  /* Dourado profundo */
-  --dourado-medio: 41 95% 66%;
-  /* Dourado base (atual) */
-  --dourado-claro: 41 95% 85%;
-  /* Dourado suave */
-
-  /* Efeitos Modernos */
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(164, 29, 49, 0.1);
-  --shadow-solene: 0 10px 30px -10px rgba(164, 29, 49, 0.15);
 }
 
 /* ==========================================================================
@@ -366,11 +332,6 @@ body {
   flex-direction: column;
   overflow: hidden;
   /* App-like feel, impede scroll no body */
-
-  /* NOVO: Background Radial Sutil (SDS v6.8) */
-  background-image:
-    radial-gradient(at 0% 0%, rgba(251, 181, 88, 0.05) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(164, 29, 49, 0.03) 0px, transparent 50%);
 }
 
 /* ==========================================================================
@@ -428,8 +389,6 @@ header {
 .sidebar {
   width: 260px;
   background-color: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border-right: 1px solid rgba(0, 0, 0, 0.05);
   padding: 20px;
   display: flex;
@@ -847,14 +806,6 @@ header {
   border-left: 3px solid var(--cor-dourado);
 }
 
-.pill--glass {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(164, 29, 49, 0.15);
-  color: var(--text-main);
-}
-
 .pill.solenidade {
   background-color: var(--cor-dourado);
   color: var(--cor-vinho);
@@ -975,7 +926,6 @@ header {
   height: 100%;
   background: rgba(44, 14, 18, 0.5);
   backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
   display: none;
   justify-content: center;
   align-items: center;
@@ -1648,78 +1598,4 @@ header {
     transform: translateX(400px);
     opacity: 0;
   }
-}
-
-/* ==========================================================================
-   14. UTILITÁRIOS MODERNOS "SOLENE" (SDS v6.8)
-   Efeitos visuais opcionais - Não afetam componentes existentes
-   ========================================================================== */
-
-/* Glassmorphism Card (Efeito Vidro Fosco) */
-.glass-card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  /* Safari */
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--shadow-solene);
-}
-
-/* Variante: Glass com fundo vinho */
-.glass-card--vinho {
-  background: rgba(164, 29, 49, 0.05);
-  border: 1px solid rgba(164, 29, 49, 0.15);
-}
-
-/* Variante: Glass com fundo dourado */
-.glass-card--dourado {
-  background: rgba(251, 181, 88, 0.05);
-  border: 1px solid rgba(251, 181, 88, 0.15);
-}
-
-/* Gradiente de Texto Vinho */
-.text-gradient-vinho {
-  background: linear-gradient(135deg, #a41d31, #5a0f1a);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: #a41d31;
-  /* Fallback para navegadores antigos */
-}
-
-/* Gradiente de Texto Dourado */
-.text-gradient-dourado {
-  background: linear-gradient(135deg, #fbb558, #d97706);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: #fbb558;
-  /* Fallback */
-}
-
-/* Sombra Solene (Mais Suave) */
-.shadow-solene {
-  box-shadow: var(--shadow-solene);
-}
-
-/* Sombra Solene Forte */
-.shadow-solene-strong {
-  box-shadow: 0 20px 50px -15px rgba(164, 29, 49, 0.25);
-}
-
-/* Hover: Elevação Suave */
-.hover-elevate {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.hover-elevate:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 15px 40px -12px rgba(164, 29, 49, 0.2);
-}
-
-/* Background Radial Sutil (Opcional para body) */
-.bg-radial-solene {
-  background-image:
-    radial-gradient(at 0% 0%, rgba(251, 181, 88, 0.05) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(164, 29, 49, 0.03) 0px, transparent 50%);
 }

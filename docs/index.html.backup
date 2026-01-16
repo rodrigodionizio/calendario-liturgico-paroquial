@@ -6,17 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Calendário Litúrgico e Paroquial 2026 - Paróquia Senhor Bom Jesus" />
   <title>Calendário Paroquial 2026 | Paróquia Sr. Bom Jesus</title>
-
-  <!-- Open Graph / Meta Tags para Redes Sociais (SDS v6.8) -->
-  <meta property="og:title" content="Sacristia Digital - Paróquia Senhor Bom Jesus" />
-  <meta property="og:description"
-    content="Sistema de gestão pastoral, agenda litúrgica e controle de equipes paroquiais. Itabirinha/MG." />
-  <meta property="og:type" content="website" />
-  <meta property="og:locale" content="pt_BR" />
-
-  <!-- Preconnect para CDNs (Performance) -->
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
-
   <!-- Supabase JS (CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
