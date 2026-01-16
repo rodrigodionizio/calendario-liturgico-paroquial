@@ -35,9 +35,13 @@ window.DashboardController = {
       this.meuPerfil = perfil;
 
       if (document.getElementById("user-name")) {
-        document.getElementById("user-name").textContent = (
-          perfil?.nome || session.user.email.split("@")[0]
-        ).toUpperCase();
+        const nome = perfil?.nome || session.user.email.split("@")[0];
+        document.getElementById("user-name").textContent = nome;
+
+        if (document.getElementById("user-avatar")) {
+          const iniciais = nome.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
+          document.getElementById("user-avatar").textContent = iniciais;
+        }
       }
 
       if (this.meuPerfil?.perfil_nivel <= 2) {
@@ -641,22 +645,57 @@ window.DashboardController = {
   },
 
   renderizarListaRecentes: async function () {
-    const container =
-      document.getElementById("admin-event-list") ||
-      document.getElementById("lista-pendentes-resumo");
+    const container = document.getElementById("admin-event-list");
     if (!container) return;
+
     const eventos = await window.api.buscarEventosRecentes(6);
-    container.innerHTML = eventos
-      .map(
-        (ev) => `
-            <div class="list-item o-surface-card">
-                <div class="list-content"><strong>${ev.titulo
-          }</strong><br><small>${ev.tipo_compromisso.toUpperCase()}</small></div>
-                <div class="status-dot ${ev.status === "pendente" ? "status-wait" : "status-ok"
-          }"></div>
-            </div>`
-      )
-      .join("");
+
+    container.innerHTML = eventos.map(ev => {
+      const dataObj = new Date(ev.data + "T12:00:00");
+      const dia = dataObj.getDate().toString().padStart(2, '0');
+      const mes = dataObj.toLocaleString("pt-BR", { month: "short" }).toUpperCase();
+
+      // Determina a cor do indicador lateral
+      let corIndicador = "var(--cor-vinho)"; // Atendimento
+      let tagClass = "u-bg-vinho";
+
+      if (ev.tipo_compromisso === 'liturgia') {
+        corIndicador = "var(--sys-color-success)";
+        tagClass = "u-bg-verde";
+      } else if (ev.tipo_compromisso === 'reuniao') {
+        corIndicador = "var(--cor-slate)";
+        tagClass = "u-bg-slate";
+      }
+
+      return `
+            <div class="c-card-event" onclick="window.DashboardController.abrirGerenciadorAgenda('${ev.data}')">
+                <div class="c-card-event__indicator" style="background: ${corIndicador}"></div>
+                
+                <div class="c-card-event__date">
+                    <span class="c-card-event__day">${dia}</span>
+                    <span class="c-card-event__month">${mes}</span>
+                </div>
+
+                <div class="c-card-event__content">
+                    <div style="font-size: 9px; font-weight: 900; text-transform: uppercase; color: #999; margin-bottom: 4px;">
+                        ${ev.tipo_compromisso}
+                    </div>
+                    <h4 class="c-card-event__title">${ev.titulo}</h4>
+                    <div class="c-card-event__meta">
+                        <span>🕒 ${ev.hora_inicio?.substring(0, 5) || '--:--'}</span>
+                        <span>📍 ${ev.local || 'Paróquia'}</span>
+                    </div>
+                </div>
+
+                <div style="padding: 15px; display: flex; align-items: center; color: #eee;">
+                    <i data-lucide="chevron-right"></i>
+                </div>
+            </div>
+        `;
+    }).join("");
+
+    // Vital: Re-inicializa os ícones após injetar o HTML
+    if (window.lucide) lucide.createIcons();
   },
   // ==========================================================================
   // 8. MOBILE INFRASTRUCTURE (SDS v5.6)

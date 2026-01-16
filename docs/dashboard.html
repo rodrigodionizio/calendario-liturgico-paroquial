@@ -1,213 +1,202 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sacristia Digital | Painel de Gestão</title>
 
-    <!-- Supabase JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sacristia Digital | Painel de Gestão</title>
 
-    <!-- Design System: Principal + Dashboard -->
-    <link rel="stylesheet" href="assets/css/styles.css" />
-    <link rel="stylesheet" href="assets/css/dashboard.css" />
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Favicon Padrão -->
-    <link rel="icon" type="image/x-icon" href="favicon.ico" />
-    <!-- Favicon em Alta Resolução -->
-    <link rel="icon" type="image/png" href="assets/img/favicon.ico" />
+  <!-- Design System: Principal + Dashboard -->
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="stylesheet" href="assets/css/dashboard.css" />
 
-    <style>
-      /* Bloqueio de visibilidade pré-auth (Segurança UX) */
-      body {
+  <!-- Favicon Padrão -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <!-- Favicon em Alta Resolução -->
+  <link rel="icon" type="image/png" href="assets/img/favicon.ico" />
+
+  <style>
+    /* Bloqueio de visibilidade pré-auth (Segurança UX) */
+    body {
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    body.auth-ok {
+      opacity: 1;
+    }
+
+    /* Controle de Abas */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
         opacity: 0;
-        transition: opacity 0.4s ease;
+        transform: translateY(5px);
       }
-      body.auth-ok {
+
+      to {
         opacity: 1;
+        transform: translateY(0);
       }
+    }
+  </style>
+</head>
 
-      /* Controle de Abas */
-      .tab-content {
-        display: none;
-      }
-      .tab-content.active {
-        display: block;
-        animation: fadeIn 0.3s ease;
-      }
+<body class="admin-body">
+  <!-- SIDEBAR: NAVEGAÇÃO MESTRE -->
+  <nav class="admin-sidebar">
+    <div class="admin-logo">
+      <img src="assets/img/logo-horizontal-negativa.png" alt="Sacristia Digital" style="width: 180px" />
+    </div>
 
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(5px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-    </style>
-  </head>
-  <body class="admin-body">
-    <!-- SIDEBAR: NAVEGAÇÃO MESTRE -->
-    <nav class="admin-sidebar">
-      <div class="admin-logo">
-        <img
-          src="assets/img/logo-horizontal-negativa.png"
-          alt="Sacristia Digital"
-          style="width: 180px"
-        />
-      </div>
+    <div class="menu-item active" data-tab="visao-geral">
+      <i data-lucide="layout-dashboard"></i> Visão Geral
+    </div>
+    <div class="menu-item" data-tab="agenda-total">
+      <i data-lucide="calendar"></i> Agenda Paroquial
+    </div>
+    <div class="menu-item" data-tab="equipes">
+      <i data-lucide="users"></i> Gerenciar Equipes
+    </div>
 
-      <div class="menu-item active" data-tab="visao-geral">📊 Visão Geral</div>
-      <div class="menu-item" data-tab="agenda-total">📅 Agenda Total</div>
-      <div class="menu-item" data-tab="equipes">👥 Gerenciar Equipes</div>
+    <!-- Este menu só aparecerá via JS para Admins Nível 1 e 2 -->
+    <div class="menu-item" data-tab="usuarios" id="menu-usuarios" style="display: none">
+      <i data-lucide="shield-check"></i> Gestão de Acessos
+    </div>
 
-      <!-- Este menu só aparecerá via JS para Admins Nível 1 e 2 -->
-      <div
-        class="menu-item"
-        data-tab="usuarios"
-        id="menu-usuarios"
-        style="display: none"
-      >
-        🔐 Gestão de Acessos
-      </div>
-
-      <a
-        href="index.html"
-        class="menu-item"
-        style="
+    <a href="index.html" class="menu-item" style="
           border-top: 1px solid rgba(255, 255, 255, 0.1);
           margin-top: 20px;
           opacity: 0.6;
-        "
-      >
-        🌐 Ver Site Público
-      </a>
+        ">
+      <i data-lucide="globe"></i> Ver Site Público
+    </a>
 
-      <div
-        class="menu-item"
-        onclick="window.api.logout()"
-        style="margin-top: auto; color: #ff9999"
-      >
-        🚪 Sair do Sistema
+    <div class="menu-item" onclick="window.api.logout()" style="margin-top: auto; color: #ff9999">
+      <i data-lucide="log-out"></i> Sair do Sistema
+    </div>
+  </nav>
+
+  <!-- ÁREA DE CONTEÚDO DINÂMICO -->
+  <main class="admin-main">
+    <!-- HEADER COM PERFIL -->
+    <div class="page-header">
+      <h1 class="page-title" id="tab-title-display">Painel de Controle</h1>
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <div style="text-align: right;">
+          <p id="user-name" style="font-weight: 800; font-size: 0.85rem; margin: 0;">Rodrigo Dionízio</p>
+          <p style="font-size: 0.7rem; color: var(--cor-sub); font-weight: 700; margin: 0;">Administrador</p>
+        </div>
+        <div class="avatar" id="user-avatar"
+          style="width: 45px; height: 45px; border-radius: 50%; background: #eee; border: 2px solid var(--cor-vinho); display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--cor-vinho);">
+          RD</div>
       </div>
-    </nav>
+    </div>
 
-    <!-- ÁREA DE CONTEÚDO DINÂMICO -->
-    <main class="admin-main">
-      <!-- HEADER COM PERFIL -->
-      <div class="page-header">
-        <h1 class="page-title" id="tab-title-display">Painel de Controle</h1>
-        <div class="user-profile">
-          Olá, <span id="user-name">Carregando...</span>
-          <div class="avatar"></div>
+    <!-- ABA 1: VISÃO GERAL (Métricas e Gráficos) -->
+    <section id="tab-visao-geral" class="tab-content active">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-value" id="kpi-semana">0</div>
+          <div class="kpi-label">Eventos na Semana</div>
+        </div>
+        <div class="kpi-card" style="border-left-color: var(--cor-cereja)">
+          <div class="kpi-value" id="kpi-pendentes">0</div>
+          <div class="kpi-label">Aguardando Aprovação</div>
+        </div>
+        <div class="kpi-card" style="border-left-color: #2e7d32">
+          <div class="kpi-value" id="kpi-mural">0</div>
+          <div class="kpi-label">Avisos no Mural</div>
+        </div>
+        <div class="kpi-card" style="border-left-color: #2196f3">
+          <div class="kpi-value" id="kpi-equipes">0</div>
+          <div class="kpi-label">Equipes Ativas</div>
         </div>
       </div>
 
-      <!-- ABA 1: VISÃO GERAL (Métricas e Gráficos) -->
-      <section id="tab-visao-geral" class="tab-content active">
-        <div class="kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-value" id="kpi-semana">0</div>
-            <div class="kpi-label">Eventos na Semana</div>
-          </div>
-          <div class="kpi-card" style="border-left-color: var(--cor-cereja)">
-            <div class="kpi-value" id="kpi-pendentes">0</div>
-            <div class="kpi-label">Aguardando Aprovação</div>
-          </div>
-          <div class="kpi-card" style="border-left-color: #2e7d32">
-            <div class="kpi-value" id="kpi-mural">0</div>
-            <div class="kpi-label">Avisos no Mural</div>
-          </div>
-          <div class="kpi-card" style="border-left-color: #2196f3">
-            <div class="kpi-value" id="kpi-equipes">0</div>
-            <div class="kpi-label">Equipes Ativas</div>
-          </div>
-        </div>
-
-        <div class="dashboard-split">
-          <div class="panel">
-            <div class="panel-title">Volume de Atividades (Carga)</div>
-            <div class="chart-container" id="chart-week"></div>
-          </div>
-          <div class="panel">
-            <div class="panel-title">Atividades Recentes</div>
-            <div id="admin-event-list">
-              <!-- Injetado por DashboardController.renderizarListaRecentes -->
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ABA 2: AGENDA TOTAL (O Calendário de Gestão) -->
-      <section id="tab-agenda-total" class="tab-content">
+      <div class="dashboard-split">
         <div class="panel">
-          <div
-            style="
+          <div class="panel-title">Volume de Atividades (Carga)</div>
+          <div class="chart-container" id="chart-week"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Atividades Recentes</div>
+          <div id="admin-event-list">
+            <!-- Injetado por DashboardController.renderizarListaRecentes -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABA 2: AGENDA TOTAL (O Calendário de Gestão) -->
+    <section id="tab-agenda-total" class="tab-content">
+      <div class="panel">
+        <div style="
               display: flex;
               justify-content: space-between;
               align-items: center;
               margin-bottom: 20px;
-            "
-          >
-            <h2
-              id="admin-calendar-month"
-              class="month-name"
-              style="color: var(--cor-vinho); margin: 0"
-            >
-              ...
-            </h2>
-            <div class="nav-buttons">
-              <button
-                class="btn-nav"
-                onclick="window.DashboardController.navegarAgenda(-1)"
-              >
-                &lt;
-              </button>
-              <button
-                class="btn-nav"
-                onclick="window.DashboardController.navegarAgenda(0)"
-              >
-                Hoje
-              </button>
-              <button
-                class="btn-nav"
-                onclick="window.DashboardController.navegarAgenda(1)"
-              >
-                &gt;
-              </button>
-            </div>
-          </div>
-          <div class="calendar-wrapper" id="admin-calendar-grid">
-            <!-- Motor calendar-engine.js atuando aqui -->
+            ">
+          <h2 id="admin-calendar-month" class="month-name" style="color: var(--cor-vinho); margin: 0">
+            ...
+          </h2>
+          <div class="nav-buttons">
+            <button class="btn-nav" onclick="window.DashboardController.navegarAgenda(-1)">
+              &lt;
+            </button>
+            <button class="btn-nav" onclick="window.DashboardController.navegarAgenda(0)">
+              Hoje
+            </button>
+            <button class="btn-nav" onclick="window.DashboardController.navegarAgenda(1)">
+              &gt;
+            </button>
           </div>
         </div>
-      </section>
+        <div class="calendar-wrapper" id="admin-calendar-grid">
+          <!-- Motor calendar-engine.js atuando aqui -->
+        </div>
+      </div>
+    </section>
 
-      <!-- ABA 3: EQUIPES (CRUD de Pastorais) -->
-      <section id="tab-equipes" class="tab-content">
-        <!-- Injetado por DashboardController.renderizarAbaEquipes -->
-      </section>
+    <!-- ABA 3: EQUIPES (CRUD de Pastorais) -->
+    <section id="tab-equipes" class="tab-content">
+      <!-- Injetado por DashboardController.renderizarAbaEquipes -->
+    </section>
 
-      <!-- ABA 4: USUÁRIOS (Controle de Acesso) -->
-      <section id="tab-usuarios" class="tab-content">
-        <!-- Injetado por DashboardController.renderizarAbaUsuarios -->
-      </section>
-    </main>
+    <!-- ABA 4: USUÁRIOS (Controle de Acesso) -->
+    <section id="tab-usuarios" class="tab-content">
+      <!-- Injetado por DashboardController.renderizarAbaUsuarios -->
+    </section>
+  </main>
 
-    <!-- MODAL DE EDIÇÃO / GESTÃO -->
-    <div
-      class="modal-overlay"
-      id="modalOverlay"
-      onclick="if(event.target == this) this.classList.remove('active')"
-    >
-      <div id="modalContent"></div>
-    </div>
+  <!-- MODAL DE EDIÇÃO / GESTÃO -->
+  <div class="modal-overlay" id="modalOverlay" onclick="if(event.target == this) this.classList.remove('active')">
+    <div id="modalContent"></div>
+  </div>
 
-    <!-- SCRIPTS MESTRES (Ordem Crítica) -->
-    <script src="assets/js/api.js"></script>
-    <script src="assets/js/calendar-engine.js"></script>
-    <script src="assets/js/dashboard.js"></script>
-  </body>
+  <!-- SCRIPTS MESTRES (Ordem Crítica) -->
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/calendar-engine.js"></script>
+  <script src="assets/js/dashboard.js"></script>
+  <script>
+    // Ativa os ícones após tudo carregar
+    document.addEventListener("DOMContentLoaded", () => {
+      if (window.lucide) lucide.createIcons();
+    });
+  </script>
+</body>
+
 </html>

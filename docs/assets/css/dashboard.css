@@ -44,6 +44,97 @@
   /* Nosso Vinho como tom escuro */
   --sys-alert-danger-border: #c82038;
   /* Nosso Cereja como borda */
+
+  --inter-font: 'Inter', -apple-system, sans-serif;
+  --cor-borda: rgba(0, 0, 0, 0.05);
+  --cor-sub: #64748b;
+  --cor-slate: #475569;
+}
+
+/* EXTENSÃO DO DESIGN SYSTEM: UI PREMIUM */
+
+/* Novo Formato de Card para Atividades Recentes */
+.c-card-event {
+  background: var(--sys-surface);
+  border-radius: var(--sys-radius-md);
+  border: 1px solid var(--cor-borda);
+  display: flex;
+  margin-bottom: 15px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: var(--sys-shadow-sm);
+}
+
+.c-card-event:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sys-shadow-md);
+  border-color: var(--cor-dourado);
+}
+
+.c-card-event__indicator {
+  width: 6px;
+  flex-shrink: 0;
+}
+
+.c-card-event__date {
+  padding: 15px;
+  min-width: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  border-right: 1px solid #f0f0f0;
+}
+
+.c-card-event__day {
+  font-family: "Neulis";
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--cor-vinho);
+  line-height: 1;
+}
+
+.c-card-event__month {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.c-card-event__content {
+  padding: 15px;
+  flex: 1;
+}
+
+.c-card-event__title {
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--cor-vinho);
+  margin-bottom: 4px;
+}
+
+.c-card-event__meta {
+  font-size: 0.8rem;
+  color: #64748b;
+  display: flex;
+  gap: 12px;
+}
+
+.u-bg-verde {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.u-bg-vinho {
+  background: #fdf2f4;
+  color: var(--cor-vinho);
+}
+
+.u-bg-slate {
+  background: #f1f5f9;
+  color: #475569;
 }
 
 /* ==========================================================================
