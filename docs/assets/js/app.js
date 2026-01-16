@@ -193,22 +193,22 @@ function renderizarGrid(ano, mes, gridElement, headersHTML) {
     if (evento) {
       // Lógica de Categoria (SDS v6.6 - Consistência Visual)
       let classeCategoria = "pill--liturgia";
-      let icone = "✝️";
+      let icone = "";
       let corLiturgica = evento.liturgia_cores?.hex_code || "#2e7d32";
 
       // Define a classe e o ícone baseado no tipo
       switch (evento.tipo_compromisso) {
         case 'atendimento':
           classeCategoria = "pill--padre";
-          icone = "👤";
+          icone = "";
           break;
         case 'reuniao':
           classeCategoria = "pill--reuniao";
-          icone = "👥";
+          icone = "";
           break;
         case 'evento':
           classeCategoria = "pill--festa";
-          icone = "🎉";
+          icone = "";
           break;
       }
 
@@ -406,10 +406,10 @@ window.abrirModal = function (dataISO) {
       : "--:--";
     conteudoHTML = `
             <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:10px;">
-                <p><strong>🕒 Horário:</strong> ${horaShow}</p>
-                <p><strong>📍 Local:</strong> ${evento.local || "Não informado"
+                <p><strong>Horário:</strong> ${horaShow}</p>
+                <p><strong>Local:</strong> ${evento.local || "Não informado"
       }</p>
-                <p><strong>👤 Responsável:</strong> ${evento.responsavel || "Não informado"
+                <p><strong>Responsável:</strong> ${evento.responsavel || "Não informado"
       }</p>
             </div>`;
   } else {

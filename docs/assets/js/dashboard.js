@@ -212,15 +212,15 @@ window.DashboardController = {
                             <option value="liturgia" ${evento.tipo_compromisso === "liturgia"
         ? "selected"
         : ""
-      }>✝️ Liturgia / Missa</option>
+      }>Liturgia / Missa</option>
                             <option value="reuniao" ${evento.tipo_compromisso === "reuniao"
         ? "selected"
         : ""
-      }>👥 Reunião / Pastoral</option>
+      }>Reunião / Pastoral</option>
                             <option value="atendimento" ${evento.tipo_compromisso === "atendimento"
         ? "selected"
         : ""
-      }>🗣️ Agenda do Padre</option>
+      }>Agenda do Padre</option>
                         </select>
                         <input type="text" id="edit-titulo" value="${evento.titulo
       }" placeholder="Título/Assunto" class="o-surface-card" style="width:100%; padding:12px; border:1px solid #ddd; font-weight:bold;">

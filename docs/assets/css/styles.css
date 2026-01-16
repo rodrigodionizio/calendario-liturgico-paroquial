@@ -543,11 +543,11 @@ header {
   transform: scale(1.02);
 }
 
-/* 1. PADRE (Vinho) */
+/* 1. PADRE (Dark Charcoal - Novo Cor) */
 .pill--padre {
-  border-left: 4px solid var(--cor-vinho) !important;
-  background-color: #fdf2f4;
-  color: var(--cor-vinho);
+  border-left: 4px solid #2B332D !important;
+  background-color: #f6f7f6;
+  color: #2B332D;
 }
 
 /* 2. REUNIÃO (Slate Blue) */
