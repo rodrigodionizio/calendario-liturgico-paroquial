@@ -545,9 +545,9 @@ header {
 
 /* 1. PADRE (Dark Charcoal - Novo Cor) */
 .pill--padre {
-  border-left: 4px solid #2B332D !important;
+  border-left: 4px solid #963b96 !important;
   background-color: #f6f7f6;
-  color: #2B332D;
+  color: #691e74;
 }
 
 /* 2. REUNIÃO (Slate Blue) */
@@ -1360,11 +1360,11 @@ header {
 
   .print-header__title {
     font-family: "Neulis", "Roboto", "Helvetica", "Arial", sans-serif !important;
-    font-size: 20pt !important;
+    font-size: 16pt !important;
     color: var(--cor-vinho) !important;
     margin: 0 !important;
     text-transform: uppercase !important;
-    font-weight: 900 !important;
+    font-weight: 700 !important;
     line-height: 1.1 !important;
   }
 
