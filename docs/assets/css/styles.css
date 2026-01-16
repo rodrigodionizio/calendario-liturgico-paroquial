@@ -36,8 +36,8 @@
   --radius-main: 16px;
 
   /* Tipografia */
-  --font-titulo: "Neulis", sans-serif;
-  --font-texto: "AntennaCond", sans-serif;
+  --font-titulo: "Neulis", "Roboto", "Helvetica", "Arial", sans-serif;
+  --font-texto: "AntennaCond", "Segoe UI", "Roboto", "Arial", sans-serif;
 }
 
 /* ==========================================================================
@@ -1277,12 +1277,12 @@ header {
 
   .print-mes h3#print-month-name {
     margin: 0 !important;
-    font-size: 26pt !important;
+    font-size: 18pt !important;
     color: #a41d31 !important;
     /* Cor Vinho Oficial */
     text-transform: uppercase !important;
     line-height: 1 !important;
-    font-family: "Neulis", sans-serif !important;
+    font-family: "Neulis", "Roboto", "Helvetica", "Arial", sans-serif !important;
     white-space: nowrap !important;
     /* Impede quebra de linha no mês */
   }
