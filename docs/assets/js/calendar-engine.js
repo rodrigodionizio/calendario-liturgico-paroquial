@@ -152,7 +152,7 @@ window.CalendarEngine = {
           : "#64748b";
 
         // Ajuste de cores para dots baseados nas categorias novas
-        if (ev.tipo_compromisso === 'atendimento') cor = "#a41d31"; // Vinho
+        if (ev.tipo_compromisso === 'atendimento') cor = "#2B332D"; // Vinho
         if (ev.tipo_compromisso === 'reuniao') cor = "#475569"; // Slate
         if (ev.tipo_compromisso === 'evento') cor = "#bfa15f"; // Dourado Escuro
 
@@ -163,22 +163,22 @@ window.CalendarEngine = {
 
     return listaEventos.map((evento) => {
       let classeCategoria = "pill--liturgia";
-      let icone = "✝️";
+      let icone = "";
       let corLiturgica = evento.liturgia_cores?.hex_code || "#2e7d32";
 
       // Define a classe e o ícone baseado no tipo
       switch (evento.tipo_compromisso) {
         case 'atendimento':
           classeCategoria = "pill--padre";
-          icone = "👤";
+          icone = "";
           break;
         case 'reuniao':
           classeCategoria = "pill--reuniao";
-          icone = "👥";
+          icone = "";
           break;
         case 'evento':
           classeCategoria = "pill--festa";
-          icone = "🎉";
+          icone = "";
           break;
       }
 
