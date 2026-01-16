@@ -58,6 +58,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   renderizarMural();
   carregarMes(ESTADO.anoAtual, ESTADO.mesAtual);
   configurarBotoesNavegacao();
+
+  // 1.4. Auto-Refresh com Supabase Realtime (Performance Otimizada)
+  inicializarAutoRefresh();
 });
 
 // ==========================================================================
