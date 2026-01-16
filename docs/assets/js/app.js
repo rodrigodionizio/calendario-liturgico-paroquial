@@ -188,27 +188,49 @@ function renderizarGrid(ano, mes, gridElement, headersHTML) {
     let clickAttr = `onclick="abrirModal('${dataISO}')"`;
 
     if (evento) {
-      let corHex = evento.liturgia_cores?.hex_code || "#2E7D32";
-      if (corHex.toLowerCase() === "#ffffff") corHex = "#cccccc";
-      if (evento.tipo_compromisso && evento.tipo_compromisso !== "liturgia")
-        corHex = "#64748b";
+      // Lógica de Categoria (SDS v6.6 - Consistência Visual)
+      let classeCategoria = "pill--liturgia";
+      let icone = "✝️";
+      let corLiturgica = evento.liturgia_cores?.hex_code || "#2e7d32";
+
+      // Define a classe e o ícone baseado no tipo
+      switch (evento.tipo_compromisso) {
+        case 'atendimento':
+          classeCategoria = "pill--padre";
+          icone = "👤";
+          break;
+        case 'reuniao':
+          classeCategoria = "pill--reuniao";
+          icone = "👥";
+          break;
+        case 'evento':
+          classeCategoria = "pill--festa";
+          icone = "🎉";
+          break;
+      }
+
+      // Captura o horário
+      let horaShow = evento.hora_inicio ? evento.hora_inicio.substring(0, 5) :
+        (evento.escalas?.[0]?.hora_celebracao?.substring(0, 5) || "");
+
+      // Para Liturgia, a borda é a cor litúrgica. Para outros, a classe CSS resolve.
+      let estiloAdicional = (evento.tipo_compromisso === 'liturgia') ?
+        `style="border-left: 4px solid ${corLiturgica} !important;"` : "";
 
       const classeSolenidade = evento.is_solenidade ? "solenidade" : "";
-      const estiloPill = `border-left: 3px solid ${corHex}; background-color: var(--cor-vinho);`;
 
-      conteudoHTML = `<div class="pill ${classeSolenidade}" style="${estiloPill}">${evento.titulo}</div>`;
+      conteudoHTML = `
+        <div class="pill ${classeCategoria} ${classeSolenidade}" ${estiloAdicional} title="${evento.titulo}">
+            ${horaShow ? `<span style="font-size: 0.65rem; opacity: 0.8;">${horaShow}</span>` : ''}
+            <span>${icone} ${evento.titulo}</span>
+        </div>`;
 
-      // Exibe Hora na Pílula
-      if (evento.escalas && evento.escalas.length > 0) {
-        evento.escalas.forEach((esc) => {
+      // Exibe Escalas Adicionais (Múltiplas Missas)
+      if (evento.escalas && evento.escalas.length > 1) {
+        evento.escalas.slice(1).forEach((esc) => {
           const hora = esc.hora_celebracao.substring(0, 5);
-          conteudoHTML += `<div class="pill" style="background-color:#f0f0f0; color:#333; border-left:3px solid #ccc">${hora} Missa</div>`;
+          conteudoHTML += `<div class="pill pill--liturgia" style="border-left: 4px solid ${corLiturgica} !important; font-size: 0.7rem;">${hora} Missa</div>`;
         });
-      } else if (evento.tipo_compromisso !== "liturgia") {
-        const horaShow = evento.hora_inicio
-          ? evento.hora_inicio.substring(0, 5)
-          : "";
-        conteudoHTML += `<div class="pill" style="background-color:#f0f0f0; color:#555; border-left:3px solid #ccc">${horaShow} Evento</div>`;
       }
     }
     html += `<div class="day-cell" data-iso="${dataISO}" ${clickAttr}><span class="day-number">${dia}</span>${conteudoHTML}</div>`;
