@@ -1,260 +1,261 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Acesso Coordenador | Sacristia Digital</title>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Acesso Coordenador | Sacristia Digital</title>
+    <!-- Design System Principal -->
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <!-- Favicon Padrão -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <!-- Favicon em Alta Resolução -->
+    <link rel="icon" type="image/png" href="assets/img/favicon.ico" />
 
-  <!-- Design System Principal -->
-  <link rel="stylesheet" href="assets/css/global.css" />
-  <link rel="stylesheet" href="assets/css/styles.css" />
-  <!-- Favicon Padrão -->
-  <link rel="icon" type="image/x-icon" href="favicon.ico" />
-  <!-- Favicon em Alta Resolução -->
-  <link rel="icon" type="image/png" href="assets/img/favicon.ico" />
-
-  <style>
-    /* Estilo Específico de Login - Mantendo o layout aprovado */
-    body {
-      display: flex;
-      /* Garante o alinhamento central */
-      align-items: center;
-      justify-content: center;
-      background-color: var(--cor-vinho);
-      height: 100vh;
-      margin: 0;
-    }
-
-    .login-card {
-      background: #fff;
-      padding: 40px;
-      border-radius: 12px;
-      width: 100%;
-      max-width: 400px;
-      text-align: center;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    }
-
-    .login-logo {
-      max-width: 150px;
-      margin-bottom: 20px;
-    }
-
-    input {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 15px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      box-sizing: border-box;
-      font-family: "AntennaCond", sans-serif;
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      background: var(--cor-cereja);
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.3s;
-      font-family: "Neulis", sans-serif;
-      text-transform: uppercase;
-    }
-
-    button:hover {
-      background: #a41d31;
-      transform: translateY(-2px);
-    }
-
-    .msg {
-      margin-top: 15px;
-      font-size: 0.9rem;
-      min-height: 20px;
-    }
-
-    .loading-overlay {
-      display: none;
-      color: white;
-      font-family: "Neulis", sans-serif;
-    }
-
-    /* Responsividade Mobile - Login */
-    @media (max-width: 480px) {
+    <style>
+      /* Estilo Específico de Login - Mantendo o layout aprovado */
       body {
-        padding: 20px;
-        height: auto;
-        min-height: 100vh;
+        display: flex; /* Garante o alinhamento central */
+        align-items: center;
+        justify-content: center;
+        background-color: var(--cor-vinho);
+        height: 100vh;
+        margin: 0;
       }
-
       .login-card {
-        padding: 30px 20px;
-        box-shadow: none;
-        /* Mais limpo no mobile */
+        background: #fff;
+        padding: 40px;
+        border-radius: 12px;
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+      .login-logo {
+        max-width: 150px;
+        margin-bottom: 20px;
+      }
+      input {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        box-sizing: border-box;
+        font-family: "AntennaCond", sans-serif;
+      }
+      button {
+        width: 100%;
+        padding: 12px;
+        background: var(--cor-cereja);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+        font-family: "Neulis", sans-serif;
+        text-transform: uppercase;
+      }
+      button:hover {
+        background: #a41d31;
+        transform: translateY(-2px);
+      }
+      .msg {
+        margin-top: 15px;
+        font-size: 0.9rem;
+        min-height: 20px;
+      }
+      .loading-overlay {
+        display: none;
+        color: white;
+        font-family: "Neulis", sans-serif;
       }
 
-      h2 {
-        font-size: 1.5rem;
+      /* Responsividade Mobile - Login */
+      @media (max-width: 480px) {
+        body {
+          padding: 20px;
+          height: auto;
+          min-height: 100vh;
+        }
+        .login-card {
+           padding: 30px 20px;
+           box-shadow: none; /* Mais limpo no mobile */
+        }
+        h2 {
+           font-size: 1.5rem;
+        }
       }
-    }
-  </style>
-</head>
-
-<body>
-  <!-- Card de Login -->
-  <div class="login-card" id="cardLogin">
-    <img src="assets/img/logo-paroquia-colorida.png" alt="Logo" class="login-logo" />
-    <h2 style="
+    </style>
+  </head>
+  <body>
+    <!-- Card de Login -->
+    <div class="login-card" id="cardLogin">
+      <img
+        src="assets/img/logo-paroquia-colorida.png"
+        alt="Logo"
+        class="login-logo"
+      />
+      <h2
+        style="
           color: var(--cor-vinho);
           margin-bottom: 20px;
           font-family: 'Neulis', sans-serif;
-        ">
-      Acesso Coordenador
-    </h2>
+        "
+      >
+        Acesso Coordenador
+      </h2>
 
-    <form id="loginForm">
-      <input type="email" id="email" placeholder="Seu E-mail" required />
-      <input type="password" id="senha" placeholder="Senha" required />
-      <button type="submit" id="btnEntrar">ENTRAR</button>
+      <form id="loginForm">
+        <input type="email" id="email" placeholder="Seu E-mail" required />
+        <input type="password" id="senha" placeholder="Senha" required />
+        <button type="submit" id="btnEntrar">ENTRAR</button>
 
-      <div style="
+        <div
+          style="
             margin-top: 20px;
             display: flex;
             flex-direction: column;
             gap: 10px;
-          ">
-        <a href="#" onclick="solicitarAcesso()" style="
+          "
+        >
+          <a
+            href="#"
+            onclick="solicitarAcesso()"
+            style="
               color: var(--cor-vinho);
               font-size: 0.8rem;
               text-decoration: none;
               font-weight: bold;
-            ">
-          ✨ Primeiro Acesso / Criar Senha
-        </a>
-        <a href="#" onclick="esqueciSenha()" style="color: #888; font-size: 0.8rem; text-decoration: none">
-          Esqueci minha senha
-        </a>
-      </div>
-    </form>
+            "
+          >
+            ✨ Primeiro Acesso / Criar Senha
+          </a>
+          <a
+            href="#"
+            onclick="esqueciSenha()"
+            style="color: #888; font-size: 0.8rem; text-decoration: none"
+          >
+            Esqueci minha senha
+          </a>
+        </div>
+      </form>
 
-    <div id="msg" class="msg"></div>
-  </div>
+      <div id="msg" class="msg"></div>
+    </div>
 
-  <!-- Mensagem de carregamento (caso já esteja logado) -->
-  <div id="loader" class="loading-overlay">Verificando sessão...</div>
+    <!-- Mensagem de carregamento (caso já esteja logado) -->
+    <div id="loader" class="loading-overlay">Verificando sessão...</div>
 
-  <!-- Bibliotecas e API -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/js/api.js"></script>
+    <!-- Bibliotecas e API -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/api.js"></script>
 
-  <script>
-    const form = document.getElementById("loginForm");
-    const msg = document.getElementById("msg");
-    const card = document.getElementById("cardLogin");
-    const loader = document.getElementById("loader");
-    async function solicitarAcesso() {
-      const email = document.getElementById("email").value;
-      if (!email) {
-        alert("Por favor, digite seu e-mail no campo acima primeiro.");
-        return;
+    <script>
+      const form = document.getElementById("loginForm");
+      const msg = document.getElementById("msg");
+      const card = document.getElementById("cardLogin");
+      const loader = document.getElementById("loader");
+      async function solicitarAcesso() {
+        const email = document.getElementById("email").value;
+        if (!email) {
+          alert("Por favor, digite seu e-mail no campo acima primeiro.");
+          return;
+        }
+
+        // Lógica SaaS: Avisamos que o e-mail deve ter sido autorizado pelo Admin
+        if (
+          confirm(
+            "Para criar seu acesso, seu e-mail já deve ter sido autorizado pela coordenação no Dashboard. Continuar?"
+          )
+        ) {
+          try {
+            const senhaProvisoria = prompt(
+              "Defina uma senha para seu primeiro acesso:"
+            );
+            if (!senhaProvisoria || senhaProvisoria.length < 6) {
+              alert("A senha deve ter no mínimo 6 caracteres.");
+              return;
+            }
+
+            await window.api.criarContaPrimeiroAcesso(email, senhaProvisoria);
+            alert(
+              "✅ Solicitação enviada! Verifique sua caixa de e-mail para confirmar a conta antes de logar."
+            );
+          } catch (err) {
+            alert("Erro: " + err.message);
+          }
+        }
       }
 
-      // Lógica SaaS: Avisamos que o e-mail deve ter sido autorizado pelo Admin
-      if (
-        confirm(
-          "Para criar seu acesso, seu e-mail já deve ter sido autorizado pela coordenação no Dashboard. Continuar?"
-        )
-      ) {
+      async function esqueciSenha() {
+        const email = document.getElementById("email").value;
+        if (!email) {
+          alert("Digite seu e-mail acima para receber o link de recuperação.");
+          return;
+        }
         try {
-          const senhaProvisoria = prompt(
-            "Defina uma senha para seu primeiro acesso:"
-          );
-          if (!senhaProvisoria || senhaProvisoria.length < 6) {
-            alert("A senha deve ter no mínimo 6 caracteres.");
-            return;
-          }
-
-          await window.api.criarContaPrimeiroAcesso(email, senhaProvisoria);
+          await window.api.solicitarNovaSenha(email);
           alert(
-            "✅ Solicitação enviada! Verifique sua caixa de e-mail para confirmar a conta antes de logar."
+            "📧 E-mail de recuperação enviado! Verifique sua caixa de entrada."
           );
         } catch (err) {
-          alert("Erro: " + err.message);
+          alert("Erro ao solicitar: " + err.message);
         }
       }
-    }
 
-    async function esqueciSenha() {
-      const email = document.getElementById("email").value;
-      if (!email) {
-        alert("Digite seu e-mail acima para receber o link de recuperação.");
-        return;
-      }
-      try {
-        await window.api.solicitarNovaSenha(email);
-        alert(
-          "📧 E-mail de recuperação enviado! Verifique sua caixa de entrada."
-        );
-      } catch (err) {
-        alert("Erro ao solicitar: " + err.message);
-      }
-    }
-
-    /**
-     * Lógica de Inicialização:
-     * Se o usuário já tiver uma sessão ativa, pula o login.
-     */
-    window.addEventListener("DOMContentLoaded", async () => {
-      const session = await window.api.checkSession();
-      if (session) {
-        card.style.display = "none";
-        loader.style.display = "block";
-        window.location.href = "dashboard.html";
-      }
-    });
-
-    /**
-     * Lógica de Submissão do Formulário
-     */
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const btn = document.getElementById("btnEntrar");
-      btn.disabled = true;
-      btn.textContent = "VERIFICANDO...";
-      msg.style.color = "#666";
-      msg.textContent = "Aguarde um momento...";
-
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("senha").value;
-
-      // Executa o login via Camada API (Supabase)
-      const { data, error } = await window.api.client.auth.signInWithPassword(
-        {
-          email: email,
-          password: password,
-        }
-      );
-
-      if (error) {
-        msg.style.color = "red";
-        msg.textContent = "Erro: " + error.message;
-        btn.disabled = false;
-        btn.textContent = "ENTRAR";
-      } else {
-        msg.style.color = "green";
-        msg.textContent = "Sucesso! Entrando no painel...";
-
-        // Redirecionamento para o Dashboard
-        setTimeout(() => {
+      /**
+       * Lógica de Inicialização:
+       * Se o usuário já tiver uma sessão ativa, pula o login.
+       */
+      window.addEventListener("DOMContentLoaded", async () => {
+        const session = await window.api.checkSession();
+        if (session) {
+          card.style.display = "none";
+          loader.style.display = "block";
           window.location.href = "dashboard.html";
-        }, 800);
-      }
-    });
-  </script>
-</body>
+        }
+      });
 
+      /**
+       * Lógica de Submissão do Formulário
+       */
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const btn = document.getElementById("btnEntrar");
+        btn.disabled = true;
+        btn.textContent = "VERIFICANDO...";
+        msg.style.color = "#666";
+        msg.textContent = "Aguarde um momento...";
+
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("senha").value;
+
+        // Executa o login via Camada API (Supabase)
+        const { data, error } = await window.api.client.auth.signInWithPassword(
+          {
+            email: email,
+            password: password,
+          }
+        );
+
+        if (error) {
+          msg.style.color = "red";
+          msg.textContent = "Erro: " + error.message;
+          btn.disabled = false;
+          btn.textContent = "ENTRAR";
+        } else {
+          msg.style.color = "green";
+          msg.textContent = "Sucesso! Entrando no painel...";
+
+          // Redirecionamento para o Dashboard
+          setTimeout(() => {
+            window.location.href = "dashboard.html";
+          }, 800);
+        }
+      });
+    </script>
+  </body>
 </html>
