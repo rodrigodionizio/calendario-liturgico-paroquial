@@ -216,9 +216,14 @@ function renderizarGrid(ano, mes, gridElement, headersHTML) {
       let horaShow = evento.hora_inicio ? evento.hora_inicio.substring(0, 5) :
         (evento.escalas?.[0]?.hora_celebracao?.substring(0, 5) || "");
 
-      // Para Liturgia, a borda é a cor litúrgica. Para outros, a classe CSS resolve.
-      let estiloAdicional = (evento.tipo_compromisso === 'liturgia') ?
-        `style="border-left: 4px solid ${corLiturgica} !important;"` : "";
+      // Para Liturgia, a borda é a cor litúrgica. Para Outros, a classe CSS resolve.
+      // EXCLUSIVO: Atendimento recebe box colorido sólido (v6.8)
+      let estiloAdicional = "";
+      if (evento.tipo_compromisso === 'liturgia') {
+        estiloAdicional = `style="border-left: 4px solid ${corLiturgica} !important;"`;
+      } else if (evento.tipo_compromisso === 'atendimento') {
+        estiloAdicional = `style="background-color: #2B332D !important; color: white !important; border: none !important;"`;
+      }
 
       const classeSolenidade = evento.is_solenidade ? "solenidade" : "";
 
