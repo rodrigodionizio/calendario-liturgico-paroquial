@@ -380,8 +380,8 @@ window.abrirModal = function (dataISO) {
 
   switch (evento.tipo_compromisso) {
     case 'atendimento':
-      corHex = "#2B332D"; // Vinho (Padre)
-      corTxt = "#2B332D";
+      corHex = "#2e3fd1ff"; // Blue (Padre)
+      corTxt = "#2e3fd1ff";
       break;
     case 'reuniao':
       corHex = "#475569"; // Slate Blue (Reunião)

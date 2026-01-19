@@ -545,9 +545,9 @@ header {
 
 /* 1. PADRE (Dark Charcoal - Novo Cor) */
 .pill--padre {
-  border-left: 4px solid #963b96 !important;
+  border-left: 4px solid #2e3fd1ff !important;
   background-color: #f6f7f6;
-  color: #691e74;
+  color: #2e3fd1ff;
 }
 
 /* 2. REUNIÃO (Slate Blue) */
@@ -908,7 +908,7 @@ header {
 }
 
 .destaque-atendimento {
-  color: var(--cor-dourado) !important;
+  color: #2e3fd1ff !important;
   font-weight: bold;
 }
 

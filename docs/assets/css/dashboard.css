@@ -132,6 +132,11 @@
   color: var(--cor-vinho);
 }
 
+.u-bg-azul {
+  background: #eef2ff;
+  color: #2e3fd1ff;
+}
+
 .u-bg-slate {
   background: #f1f5f9;
   color: #475569;

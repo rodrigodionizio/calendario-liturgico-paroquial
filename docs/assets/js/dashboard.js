@@ -656,8 +656,8 @@ window.DashboardController = {
       const mes = dataObj.toLocaleString("pt-BR", { month: "short" }).toUpperCase();
 
       // Determina a cor do indicador lateral
-      let corIndicador = "var(--cor-vinho)"; // Atendimento
-      let tagClass = "u-bg-vinho";
+      let corIndicador = "#2e3fd1ff"; // Atendimento
+      let tagClass = "u-bg-azul";
 
       if (ev.tipo_compromisso === 'liturgia') {
         corIndicador = "var(--sys-color-success)";

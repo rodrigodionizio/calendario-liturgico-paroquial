@@ -152,7 +152,7 @@ window.CalendarEngine = {
           : "#64748b";
 
         // Ajuste de cores para dots baseados nas categorias novas
-        if (ev.tipo_compromisso === 'atendimento') cor = "#2B332D"; // Vinho
+        if (ev.tipo_compromisso === 'atendimento') cor = "#2e3fd1ff"; // Blue
         if (ev.tipo_compromisso === 'reuniao') cor = "#475569"; // Slate
         if (ev.tipo_compromisso === 'evento') cor = "#bfa15f"; // Dourado Escuro
 
