@@ -908,7 +908,7 @@ header {
 }
 
 .destaque-atendimento {
-  color: #2e3fd1ff !important;
+  color: var(--cor-dourado) !important;
   font-weight: bold;
 }
 
