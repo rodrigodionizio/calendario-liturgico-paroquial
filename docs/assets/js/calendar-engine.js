@@ -192,7 +192,7 @@ window.CalendarEngine = {
       if (evento.tipo_compromisso === 'liturgia') {
         estiloAdicional = `style="border-left: 4px solid ${corLiturgica} !important;"`;
       } else if (evento.tipo_compromisso === 'atendimento') {
-        estiloAdicional = `style="background-color: #2B332D !important; color: white !important; border: none !important;"`;
+        estiloAdicional = `style="background-color: #2e3fd1ff !important; color: white !important; border: none !important;"`;
       }
 
       return `
