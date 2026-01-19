@@ -568,7 +568,7 @@ header {
 .pill--liturgia {
   background-color: #f8f9fa;
   color: var(--text-main);
-  font-weight: 600;
+  font-weight: 300;
   /* Hierarquia Visual: Mais destaque */
 }
 
