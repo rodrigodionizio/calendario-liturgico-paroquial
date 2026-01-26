@@ -57,6 +57,9 @@ window.DashboardController = {
       window.api.cacheEquipesCanto = equipes.filter(
         (e) => e.tipo_atuacao !== "Leitura"
       );
+      window.api.cacheEquipesMEP = equipes.filter(
+        (e) => e.tipo_atuacao === "MEP"
+      );
 
       await this.atualizarVisaoGeral();
       this.configurarNavegacao();
@@ -264,8 +267,24 @@ window.DashboardController = {
                              <option value="4" ${evento.cor_id == 4 ? "selected" : ""
       }>🟣 Roxo</option>
                         </select>
+                        
+                        <!-- NEW: Tipo de Celebração -->
+                        <div style="margin-bottom: 15px;">
+                            <label style="font-size: 0.85rem; font-weight: 700; color: #666; display: block; margin-bottom: 5px;">
+                                Tipo de Celebração
+                            </label>
+                            <select id="edit-tipo-celebracao" onchange="window.DashboardController.atualizarCamposEscala()" class="o-surface-card" style="width:100%; padding:12px; border:1px solid #ddd;">
+                                <option value="missa" ${!evento.tipo_celebracao || evento.tipo_celebracao === 'missa' ? 'selected' : ''}>
+                                    ✝️ Santa Missa (com Celebrante e MESCE)
+                                </option>
+                                <option value="celebracao_palavra" ${evento.tipo_celebracao === 'celebracao_palavra' ? 'selected' : ''}>
+                                    📖 Celebração da Palavra (com MEP)
+                                </option>
+                            </select>
+                        </div>
+                        
                         <div id="lista-escalas-editor">${this.gerarLinhasEscalaEditor(
-        evento.escalas
+        evento.escalas, evento.tipo_celebracao || 'missa'
       )}</div>
                         <button onclick="window.DashboardController.adicionarLinhaEscala()" style="width:100%; background:none; border:1px dashed #ccc; padding:10px; margin-top:10px; cursor:pointer;">＋ Novo Horário</button>
                     </div>
@@ -355,6 +374,14 @@ window.DashboardController = {
       }>🎵 Canto</option>
                             <option value="Ambos" ${eq?.tipo_atuacao == "Ambos" ? "selected" : ""
       }>🔄 Ambos</option>
+                            <option value="MESCE" ${eq?.tipo_atuacao == "MESCE" ? "selected" : ""
+      }>✨ MESCE (Ministros da Comunhão)</option>
+                            <option value="MEP" ${eq?.tipo_atuacao == "MEP" ? "selected" : ""
+      }>📜 MEP (Ministros da Palavra)</option>
+                            <option value="Coroinhas" ${eq?.tipo_atuacao == "Coroinhas" ? "selected" : ""
+      }>🕯️ Coroinhas</option>
+                            <option value="Celebrante" ${eq?.tipo_atuacao == "Celebrante" ? "selected" : ""
+      }>🐑 Celebrante</option>
                         </select>
                     </div>
                     <button onclick="window.DashboardController.salvarEquipeFinal('${eq?.id || ""
@@ -517,11 +544,14 @@ window.DashboardController = {
     const btn = document.getElementById("btn-save-agenda");
     btn.classList.add("c-button--loading");
     const tipo = document.getElementById("edit-tipo").value;
+    const tipoCelebracao = tipo === 'liturgia' ? (document.getElementById("edit-tipo-celebracao")?.value || 'missa') : null;
+
     const payload = {
       id: eventoId,
       data: dataISO,
       titulo: document.getElementById("edit-titulo").value,
       tipo_compromisso: tipo,
+      tipo_celebracao: tipoCelebracao,
       hora_inicio:
         tipo !== "liturgia" ? document.getElementById("edit-hora").value : null,
       local:
@@ -539,11 +569,22 @@ window.DashboardController = {
     };
     const escalas = [];
     if (tipo === "liturgia") {
-      document.querySelectorAll(".row-escala-edit").forEach((row) => {
+      document.querySelectorAll(".row-escala-edit").forEach((row, index) => {
+        // Capturar listas MESCE e Coroinhas
+        const mesceInput = document.querySelectorAll(".esc-mesce-lista")[index];
+        const coroinhasInput = document.querySelectorAll(".esc-coroinhas-lista")[index];
+
+        const listaMesce = mesceInput ? mesceInput.value.split(',').map(n => n.trim()).filter(n => n) : [];
+        const listaCoroinhas = coroinhasInput ? coroinhasInput.value.split(',').map(n => n.trim()).filter(n => n) : [];
+
         escalas.push({
           hora_celebracao: row.querySelector(".esc-hora").value,
           equipe_leitura_id: row.querySelector(".esc-leitura").value || null,
           equipe_canto_id: row.querySelector(".esc-canto").value || null,
+          equipe_mep_id: tipoCelebracao === 'celebracao_palavra' ? (row.querySelector(".esc-mep")?.value || null) : null,
+          celebrante_nome: tipoCelebracao === 'missa' ? (row.querySelector(".esc-celebrante")?.value || null) : null,
+          lista_mesce: listaMesce,
+          lista_coroinhas: listaCoroinhas
         });
       });
     }
@@ -560,9 +601,11 @@ window.DashboardController = {
     window.CalendarEngine.carregarERenderizar();
   },
 
-  gerarLinhasEscalaEditor: function (escalas = []) {
+  gerarLinhasEscalaEditor: function (escalas = [], tipoCelebracao = 'missa') {
     const eL = window.api.cacheEquipesLeitura || [];
     const eC = window.api.cacheEquipesCanto || [];
+    const eM = window.api.cacheEquipesMEP || [];
+
     const build = (l, s) =>
       `<option value="">--</option>` +
       l
@@ -577,7 +620,7 @@ window.DashboardController = {
     return escalas
       .map(
         (esc) => `
-            <div class="row-escala-edit" style="display: grid; grid-template-columns: 85px 1fr 1fr 30px; gap:8px; margin-bottom:8px; background:#f9f9f9; padding:8px; border-radius:8px; border:1px solid #eee;">
+            <div class="row-escala-edit" style="display: grid; grid-template-columns: 85px 1fr 1fr ${tipoCelebracao === 'missa' ? '1fr' : '1fr'} 30px; gap:8px; margin-bottom:8px; background:#f9f9f9; padding:8px; border-radius:8px; border:1px solid #eee;">
                 <input type="time" class="esc-hora" value="${esc.hora_celebracao?.substring(0, 5) || "19:00"
           }" style="border:none; background:none; font-weight:bold;">
                 <select class="esc-leitura" style="width:100%; border:none; background:none; font-size:0.8rem;">${build(
@@ -588,17 +631,64 @@ window.DashboardController = {
             eC,
             esc.equipe_canto_id || esc.equipe_canto?.id
           )}</select>
+                
+                ${tipoCelebracao === 'missa' ? `
+                    <input type="text" class="esc-celebrante" value="${esc.celebrante_nome || ''}" placeholder="Nome do Padre" style="width:100%; border:none; background:none; font-size:0.8rem; padding: 4px;">
+                ` : `
+                    <select class="esc-mep" style="width:100%; border:none; background:none; font-size:0.8rem;">${build(eM, esc.equipe_mep_id || esc.equipe_mep?.id)}</select>
+                `}
+                
                 <button onclick="this.parentElement.remove()" style="background:none; border:none; color:red; cursor:pointer;">×</button>
-            </div>`
+            </div>
+            
+            <!-- Campos MESCE e Coroinhas (sempre visíveis) -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; padding: 8px; background: #f0f0f0; border-radius: 8px;">
+                <div>
+                    <label style="font-size: 0.7rem; font-weight: 700; color: #666; display: block; margin-bottom: 4px;">✨ MESCE (separar por vírgula)</label>
+                    <input type="text" class="esc-mesce-lista" value="${Array.isArray(esc.lista_mesce) ? esc.lista_mesce.join(', ') : ''}" placeholder="Maria, José, Pedro" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.75rem;">
+                </div>
+                <div>
+                    <label style="font-size: 0.7rem; font-weight: 700; color: #666; display: block; margin-bottom: 4px;">🕯️ Coroinhas (separar por vírgula)</label>
+                    <input type="text" class="esc-coroinhas-lista" value="${Array.isArray(esc.lista_coroinhas) ? esc.lista_coroinhas.join(', ') : ''}" placeholder="Ana, Lucas, Miguel" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.75rem;">
+                </div>
+            </div>
+        `
       )
       .join("");
   },
 
   adicionarLinhaEscala: function () {
     const container = document.getElementById("lista-escalas-editor");
+    const tipoCelebracao = document.getElementById("edit-tipo-celebracao")?.value || 'missa';
     const div = document.createElement("div");
-    div.innerHTML = this.gerarLinhasEscalaEditor([{}]);
+    div.innerHTML = this.gerarLinhasEscalaEditor([{}], tipoCelebracao);
     container.appendChild(div.firstElementChild);
+    container.appendChild(div.lastElementChild); // Adiciona também o bloco MESCE/Coroinhas
+  },
+
+  atualizarCamposEscala: function () {
+    const tipoCelebracao = document.getElementById("edit-tipo-celebracao")?.value || 'missa';
+    const container = document.getElementById("lista-escalas-editor");
+
+    // Capturar dados atuais antes de regerendar
+    const escalasAtuais = [];
+    document.querySelectorAll(".row-escala-edit").forEach((row, index) => {
+      const mesceInput = document.querySelectorAll(".esc-mesce-lista")[index];
+      const coroinhasInput = document.querySelectorAll(".esc-coroinhas-lista")[index];
+
+      escalasAtuais.push({
+        hora_celebracao: row.querySelector(".esc-hora")?.value || "19:00",
+        equipe_leitura_id: row.querySelector(".esc-leitura")?.value,
+        equipe_canto_id: row.querySelector(".esc-canto")?.value,
+        equipe_mep_id: row.querySelector(".esc-mep")?.value,
+        celebrante_nome: row.querySelector(".esc-celebrante")?.value,
+        lista_mesce: mesceInput ? mesceInput.value.split(',').map(n => n.trim()).filter(n => n) : [],
+        lista_coroinhas: coroinhasInput ? coroinhasInput.value.split(',').map(n => n.trim()).filter(n => n) : []
+      });
+    });
+
+    // Regerendar com novo tipo
+    container.innerHTML = this.gerarLinhasEscalaEditor(escalasAtuais.length > 0 ? escalasAtuais : [{}], tipoCelebracao);
   },
 
   atualizarVisaoGeral: async function () {

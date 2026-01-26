@@ -24,7 +24,7 @@ window.api = {
     const { data, error } = await _supabaseClient
       .from("eventos_base")
       .select(
-        `*, liturgia_cores(hex_code), escalas(*, equipe_leitura:equipes!equipe_leitura_id(nome_equipe), equipe_canto:equipes!equipe_canto_id(nome_equipe))`
+        `*, liturgia_cores(hex_code), escalas(*, equipe_leitura:equipes!equipe_leitura_id(nome_equipe), equipe_canto:equipes!equipe_canto_id(nome_equipe), equipe_mep:equipes!equipe_mep_id(nome_equipe))`
       )
       .gte("data", inicio)
       .lte("data", fim)
@@ -42,7 +42,7 @@ window.api = {
     const { data, error } = await _supabaseClient
       .from("eventos_base")
       .select(
-        `*, liturgia_cores(hex_code), escalas(*, equipe_leitura:equipes!equipe_leitura_id(nome_equipe), equipe_canto:equipes!equipe_canto_id(nome_equipe))`
+        `*, liturgia_cores(hex_code), escalas(*, equipe_leitura:equipes!equipe_leitura_id(nome_equipe), equipe_canto:equipes!equipe_canto_id(nome_equipe), equipe_mep:equipes!equipe_mep_id(nome_equipe))`
       )
       .gte("data", dataInicio)
       .lte("data", dataFim)
@@ -239,7 +239,11 @@ window.api = {
         evento_id: eventoId,
         hora_celebracao: s.hora_celebracao,
         equipe_leitura_id: s.equipe_leitura_id,
-        equipe_canto_id: s.equipe_canto_id
+        equipe_canto_id: s.equipe_canto_id,
+        equipe_mep_id: s.equipe_mep_id || null,
+        celebrante_nome: s.celebrante_nome || null,
+        lista_mesce: s.lista_mesce || [],
+        lista_coroinhas: s.lista_coroinhas || []
       }));
 
       const { error: errScales } = await _supabaseClient
@@ -257,7 +261,7 @@ window.api = {
     const { data, error } = await _supabaseClient
       .from("eventos_base")
       .select(
-        `*, liturgia_cores(hex_code), escalas(*, equipe_leitura:equipes!equipe_leitura_id(nome_equipe), equipe_canto:equipes!equipe_canto_id(nome_equipe))`
+        `*, liturgia_cores(hex_code), escalas(*, equipe_leitura:equipes!equipe_leitura_id(nome_equipe), equipe_canto:equipes!equipe_canto_id(nome_equipe), equipe_mep:equipes!equipe_mep_id(nome_equipe))`
       )
       .eq("data", dataISO)
       .order("created_at", { ascending: true });
