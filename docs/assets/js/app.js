@@ -28,6 +28,10 @@ const ICONS = {
     '<svg class="equipe-icon" viewBox="0 0 24 24" fill="currentColor" style="color:var(--cor-vinho)"><path d="M12 3v18.5c-2.3-.6-4.4-1-6.5-1-2.4 0-4.6.5-6.5 1.2V3.2C1.4 2.5 3.6 2 6 2c2.1 0 4.1.4 6 1zm10.5-.8c-1.9-.7-4.1-1.2-6.5-1.2v18.5c2.1 0 4.2.4 6.5 1V3.2z"/></svg>',
   canto:
     '<svg class="equipe-icon" viewBox="0 0 24 24" fill="currentColor" style="color:var(--cor-dourado)"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>',
+  celebrante: '🐑',
+  mep: '📜',
+  mesce: '✨',
+  coroinhas: '🕯️',
 };
 
 // ==========================================================================
@@ -477,15 +481,73 @@ function gerarHTMLLeitura(evento) {
   }
   return evento.escalas
     .map((esc) => {
+      const hora = esc.hora_celebracao.substring(0, 5);
       const leit = esc.equipe_leitura?.nome_equipe || "-";
       const cant = esc.equipe_canto?.nome_equipe || "-";
-      const hora = esc.hora_celebracao.substring(0, 5);
+
+      let htmlRows = `
+        <div class="ministerio-row">
+            <div class="ministerio-icon">${ICONS.leitura}</div>
+            <div class="ministerio-label">Leitura</div>
+            <div class="ministerio-value">${leit}</div>
+        </div>
+        <div class="ministerio-row">
+            <div class="ministerio-icon">${ICONS.canto}</div>
+            <div class="ministerio-label">Canto</div>
+            <div class="ministerio-value">${cant}</div>
+        </div>
+      `;
+
+      // Celebrante (Missa) ou MEP (Palavra)
+      if (evento.tipo_celebracao === 'missa' && esc.celebrante_nome) {
+        htmlRows += `
+          <div class="ministerio-row">
+              <div class="ministerio-icon">${ICONS.celebrante}</div>
+              <div class="ministerio-label">Celebrante</div>
+              <div class="ministerio-value">${esc.celebrante_nome}</div>
+          </div>
+        `;
+      } else if (evento.tipo_celebracao === 'celebracao_palavra' && esc.equipe_mep) {
+        htmlRows += `
+          <div class="ministerio-row">
+              <div class="ministerio-icon">${ICONS.mep}</div>
+              <div class="ministerio-label">Presidente</div>
+              <div class="ministerio-value">${esc.equipe_mep.nome_equipe}</div>
+          </div>
+        `;
+      }
+
+      // MESCE
+      if (esc.lista_mesce && Array.isArray(esc.lista_mesce) && esc.lista_mesce.length > 0) {
+        htmlRows += `
+          <div class="ministerio-row">
+              <div class="ministerio-icon">${ICONS.mesce}</div>
+              <div class="ministerio-label">Comunhão</div>
+              <div class="ministerio-value-lista">
+                  ${esc.lista_mesce.map(n => `<span class="nome-pill">${n}</span>`).join('')}
+              </div>
+          </div>
+        `;
+      }
+
+      // Coroinhas
+      if (esc.lista_coroinhas && Array.isArray(esc.lista_coroinhas) && esc.lista_coroinhas.length > 0) {
+        htmlRows += `
+          <div class="ministerio-row">
+              <div class="ministerio-icon">${ICONS.coroinhas}</div>
+              <div class="ministerio-label">Serviço</div>
+              <div class="ministerio-value-lista">
+                  ${esc.lista_coroinhas.map(n => `<span class="nome-pill nome-pill--coroinha">${n}</span>`).join('')}
+              </div>
+          </div>
+        `;
+      }
+
       return `
         <div class="escala-item">
             <div class="escala-hora">${hora}</div>
-            <div class="escala-equipes">
-                <div class="equipe-row">${ICONS.leitura} <span class="equipe-label">Leitura</span> <strong>${leit}</strong></div>
-                <div class="equipe-row">${ICONS.canto} <span class="equipe-label">Canto</span> <strong>${cant}</strong></div>
+            <div class="escala-equipes-expanded">
+                ${htmlRows}
             </div>
         </div>`;
     })
@@ -986,10 +1048,26 @@ function gerarHTMLLinhaImpressao(evento) {
       const leit = esc.equipe_leitura?.nome_equipe || "-";
       const cant = esc.equipe_canto?.nome_equipe || "-";
 
+      let detalhesExtra = `📖 ${leit} &nbsp; 🎵 ${cant}`;
+
+      if (evento.tipo_celebracao === 'missa' && esc.celebrante_nome) {
+        detalhesExtra += `<br><small>🐑 <b>Celebrante:</b> ${esc.celebrante_nome}</small>`;
+      } else if (evento.tipo_celebracao === 'celebracao_palavra' && esc.equipe_mep) {
+        detalhesExtra += `<br><small>📜 <b>Presidência:</b> ${esc.equipe_mep.nome_equipe}</small>`;
+      }
+
+      if (esc.lista_mesce && esc.lista_mesce.length > 0) {
+        detalhesExtra += `<br><small>✨ <b>MESCE:</b> ${esc.lista_mesce.join(', ')}</small>`;
+      }
+
+      if (esc.lista_coroinhas && esc.lista_coroinhas.length > 0) {
+        detalhesExtra += `<br><small>🕯️ <b>Coroinhas:</b> ${esc.lista_coroinhas.join(', ')}</small>`;
+      }
+
       htmlEscalas += `
-            <div class="print-escala-row">
+            <div class="print-escala-row" style="margin-bottom: 5px;">
                 <span class="print-hora">${hora}</span>
-                <span class="print-equipes">📖 ${leit} &nbsp; 🎵 ${cant}</span>
+                <span class="print-equipes">${detalhesExtra}</span>
             </div>`;
     });
   } else {

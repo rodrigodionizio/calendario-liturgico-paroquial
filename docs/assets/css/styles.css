@@ -1723,3 +1723,83 @@ header {
     radial-gradient(at 0% 0%, rgba(251, 181, 88, 0.05) 0px, transparent 50%),
     radial-gradient(at 100% 100%, rgba(164, 29, 49, 0.03) 0px, transparent 50%);
 }
+
+/* ==========================================================================
+   EXTENSÃO: MINISTÉRIOS EXPANDIDOS (SDS v7.0)
+   ========================================================================== */
+.escala-equipes-expanded {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.ministerio-row {
+  display: grid;
+  grid-template-columns: 24px 100px 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.05);
+}
+
+.ministerio-row:last-child {
+  border-bottom: none;
+}
+
+.ministerio-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.ministerio-label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #999;
+  letter-spacing: 0.5px;
+}
+
+.ministerio-value {
+  font-weight: 700;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.ministerio-value-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.nome-pill {
+  background: rgba(164, 29, 49, 0.05);
+  color: var(--cor-vinho);
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border: 1px solid rgba(164, 29, 49, 0.1);
+}
+
+.nome-pill--coroinha {
+  background: rgba(251, 181, 88, 0.1);
+  color: #a67c00;
+  border-color: rgba(251, 181, 88, 0.2);
+}
+
+/* Responsividade Modal */
+@media (max-width: 480px) {
+  .ministerio-row {
+    grid-template-columns: 24px 1fr;
+  }
+  .ministerio-label {
+    grid-column: 2;
+    margin-bottom: -5px;
+  }
+  .ministerio-value, .ministerio-value-lista {
+    grid-column: 2;
+  }
+}
