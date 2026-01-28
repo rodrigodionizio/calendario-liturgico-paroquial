@@ -488,7 +488,7 @@ function gerarHTMLLeitura(evento) {
       let htmlRows = `
         <div class="ministerio-row">
             <div class="ministerio-icon">${ICONS.leitura}</div>
-            <div class="ministerio-label">Leitura</div>
+            <div class="ministerio-label">Leitores</div>
             <div class="ministerio-value">${leit}</div>
         </div>
         <div class="ministerio-row">
@@ -522,7 +522,7 @@ function gerarHTMLLeitura(evento) {
         htmlRows += `
           <div class="ministerio-row">
               <div class="ministerio-icon">${ICONS.mesce}</div>
-              <div class="ministerio-label">Comunhão</div>
+              <div class="ministerio-label">MESCE</div>
               <div class="ministerio-value-lista">
                   ${esc.lista_mesce.map(n => `<span class="nome-pill">${n}</span>`).join('')}
               </div>
@@ -535,7 +535,7 @@ function gerarHTMLLeitura(evento) {
         htmlRows += `
           <div class="ministerio-row">
               <div class="ministerio-icon">${ICONS.coroinhas}</div>
-              <div class="ministerio-label">Serviço</div>
+              <div class="ministerio-label">Coroinhas</div>
               <div class="ministerio-value-lista">
                   ${esc.lista_coroinhas.map(n => `<span class="nome-pill nome-pill--coroinha">${n}</span>`).join('')}
               </div>
@@ -732,7 +732,7 @@ function gerarLinhaEditor(escala, index) {
         </div>
         <input type="time" class="edit-hora" value="${horaVal}" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; margin-bottom:10px; font-weight:bold;">
         <div style="display:grid; gap:10px;">
-            <div><label style="font-size:0.7rem; font-weight:bold; color:#666;">LEITURA</label>
+            <div><label style="font-size:0.7rem; font-weight:bold; color:#666;">LEITORES</label>
             <select class="edit-leitura" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
                 ${buildOpts(cacheEquipesLeitura, idLeit)}
             </select></div>
