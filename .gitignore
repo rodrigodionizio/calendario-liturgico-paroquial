@@ -8,6 +8,9 @@ venv/
 .DS_Store
 Thumbs.db
 
+#Documentação
+backend_automacao/
+
 # IDEs
 .vscode/
 .idea/
