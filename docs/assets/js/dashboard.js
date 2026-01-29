@@ -1,14 +1,14 @@
 /*
  * SACRISTIA DIGITAL - Sistema de Gestão Paroquial
- * 
+ *
  * © 2026 TODOS OS DIREITOS RESERVADOS
  * Desenvolvido EXCLUSIVAMENTE por Rodrigo Dionízio
  * Instagram: @rodrigodionizio
  * https://www.instagram.com/rodrigodionizio/
- * 
+ *
  * PROIBIDA a reprodução, distribuição ou modificação
  * sem autorização expressa do autor.
- * 
+ *
  * ARQUIVO: dashboard.js
  * DESCRIÇÃO: Controlador Mestre do Dashboard
  * VERSÃO: 9.0
@@ -49,7 +49,12 @@ window.DashboardController = {
         document.getElementById("user-name").textContent = nome;
 
         if (document.getElementById("user-avatar")) {
-          const iniciais = nome.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase();
+          const iniciais = nome
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .substring(0, 2)
+            .toUpperCase();
           document.getElementById("user-avatar").textContent = iniciais;
         }
       }
@@ -62,13 +67,13 @@ window.DashboardController = {
       // Cache de equipes para seletores
       const equipes = await window.api.listarEquipes();
       window.api.cacheEquipesLeitura = equipes.filter(
-        (e) => e.tipo_atuacao !== "Canto"
+        (e) => e.tipo_atuacao !== "Canto",
       );
       window.api.cacheEquipesCanto = equipes.filter(
-        (e) => e.tipo_atuacao !== "Leitura"
+        (e) => e.tipo_atuacao !== "Leitura",
       );
       window.api.cacheEquipesMEP = equipes.filter(
-        (e) => e.tipo_atuacao === "MEP"
+        (e) => e.tipo_atuacao === "MEP",
       );
 
       await this.atualizarVisaoGeral();
@@ -115,7 +120,7 @@ window.DashboardController = {
   carregarAgendaTotal: async function () {
     const nomeMes = new Date(this.agendaAno, this.agendaMes - 1).toLocaleString(
       "pt-BR",
-      { month: "long" }
+      { month: "long" },
     );
     const display = document.getElementById("admin-calendar-month");
     if (display)
@@ -154,7 +159,7 @@ window.DashboardController = {
     const container = document.getElementById("modalContent");
     const dataFmt = new Date(dataISO + "T12:00:00").toLocaleDateString(
       "pt-BR",
-      { weekday: "long", day: "2-digit", month: "long" }
+      { weekday: "long", day: "2-digit", month: "long" },
     );
 
     container.innerHTML = `
@@ -164,31 +169,37 @@ window.DashboardController = {
                     <h2 style="font-family:'Neulis'; color:var(--cor-vinho);">Agenda do Dia</h2>
                     <p style="color:#888; margin-bottom:20px;">${dataFmt}</p>
                     <div id="lista-eventos-dia" style="margin-bottom:25px;">
-                        ${eventosDia.length > 0
-        ? eventosDia
-          .map(
-            (ev) => `
-                            <div class="list-item o-surface-card" style="border-left:5px solid ${ev.liturgia_cores?.hex_code || "#64748b"
-              }">
+                        ${
+                          eventosDia.length > 0
+                            ? eventosDia
+                                .map(
+                                  (ev) => `
+                            <div class="list-item o-surface-card" style="border-left:5px solid ${
+                              ev.liturgia_cores?.hex_code || "#64748b"
+                            }">
                                 <div class="list-content">
                                     <strong>${(
-                ev.hora_inicio || "--:--"
-              ).substring(0, 5)} | ${ev.titulo}</strong>
+                                      ev.hora_inicio || "--:--"
+                                    ).substring(0, 5)} | ${ev.titulo}</strong>
                                     <br><small>${ev.local || "Paróquia"}</small>
                                 </div>
                                 <div style="display:flex; gap:10px;">
-                                    <button onclick="window.DashboardController.renderizarFormulario('${ev.data
-              }', '${ev.id
-              }')" style="background:none; border:none; cursor:pointer; font-size:1.2rem;">✏️</button>
-                                    <button onclick="window.DashboardController.confirmarExclusao('${ev.id
-              }', '${ev.data}', '${ev.titulo
-              }')" style="background:none; border:none; cursor:pointer; font-size:1.2rem; color:var(--cor-cereja);">🗑️</button>
+                                    <button onclick="window.DashboardController.renderizarFormulario('${
+                                      ev.data
+                                    }', '${
+                                      ev.id
+                                    }')" style="background:none; border:none; cursor:pointer; font-size:1.2rem;">✏️</button>
+                                    <button onclick="window.DashboardController.confirmarExclusao('${
+                                      ev.id
+                                    }', '${ev.data}', '${
+                                      ev.titulo
+                                    }')" style="background:none; border:none; cursor:pointer; font-size:1.2rem; color:var(--cor-cereja);">🗑️</button>
                                 </div>
-                            </div>`
-          )
-          .join("")
-        : '<div class="c-alert">Sem compromissos agendados.</div>'
-      }
+                            </div>`,
+                                )
+                                .join("")
+                            : '<div class="c-alert">Sem compromissos agendados.</div>'
+                        }
                     </div>
                     <button onclick="window.DashboardController.renderizarFormulario('${dataISO}')" class="btn-ver-todas" style="width:100%;">＋ ADICIONAR NOVO COMPROMISSO</button>
                 </div>
@@ -220,62 +231,72 @@ window.DashboardController = {
     container.innerHTML = `
             <div class="modal-card o-surface-card" style="max-width: 580px; flex-direction:column;">
                 <div class="modal-body" style="padding: 30px; overflow-y:auto; max-height:85vh;">
-                    <h3 style="font-family:'Neulis'; color:var(--cor-vinho); margin-bottom:20px;">${eventoId ? "Editar" : "Novo"
-      } Atividade</h3>
+                    <h3 style="font-family:'Neulis'; color:var(--cor-vinho); margin-bottom:20px;">${
+                      eventoId ? "Editar" : "Novo"
+                    } Atividade</h3>
                     
                     <div class="form-section">
                         <span class="form-section-title">1. Informações Básicas</span>
                         <select id="edit-tipo" onchange="window.DashboardController.toggleCamposEditor(this.value)" class="o-surface-card" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ddd; font-weight:bold;">
-                            <option value="liturgia" ${evento.tipo_compromisso === "liturgia"
-        ? "selected"
-        : ""
-      }>Liturgia / Missa</option>
-                            <option value="reuniao" ${evento.tipo_compromisso === "reuniao"
-        ? "selected"
-        : ""
-      }>Reunião / Pastoral</option>
-                            <option value="atendimento" ${evento.tipo_compromisso === "atendimento"
-        ? "selected"
-        : ""
-      }>Agenda do Padre</option>
+                            <option value="liturgia" ${
+                              evento.tipo_compromisso === "liturgia"
+                                ? "selected"
+                                : ""
+                            }>Liturgia / Missa</option>
+                            <option value="reuniao" ${
+                              evento.tipo_compromisso === "reuniao"
+                                ? "selected"
+                                : ""
+                            }>Reunião / Pastoral</option>
+                            <option value="atendimento" ${
+                              evento.tipo_compromisso === "atendimento"
+                                ? "selected"
+                                : ""
+                            }>Agenda do Padre</option>
                         </select>
-                        <input type="text" id="edit-titulo" value="${evento.titulo
-      }" placeholder="Título/Assunto" class="o-surface-card" style="width:100%; padding:12px; border:1px solid #ddd; font-weight:bold;">
+                        <input type="text" id="edit-titulo" value="${
+                          evento.titulo
+                        }" placeholder="Título/Assunto" class="o-surface-card" style="width:100%; padding:12px; border:1px solid #ddd; font-weight:bold;">
                         
                         <!-- NEW: Opções de Mural -->
                         <div style="display:flex; gap:10px; margin-top:10px; align-items:center; background:#f5f5f5; padding:10px; border-radius:8px;">
                             <div style="display:flex; align-items:center; gap:5px;">
-                                <input type="checkbox" id="edit-mural" ${evento.mural_destaque ? 'checked' : ''}>
+                                <input type="checkbox" id="edit-mural" ${evento.mural_destaque ? "checked" : ""}>
                                 <label for="edit-mural" style="cursor:pointer; font-size:0.9rem;">No Mural?</label>
                             </div>
                             <select id="edit-prioridade" style="padding:5px; border-radius:4px; flex:1;">
-                                <option value="2" ${!evento.mural_prioridade || evento.mural_prioridade == 2 ? 'selected' : ''}>Prioridade Normal</option>
-                                <option value="3" ${evento.mural_prioridade == 3 ? 'selected' : ''}>🔥 Alta Prioridade</option>
-                                <option value="1" ${evento.mural_prioridade == 1 ? 'selected' : ''}>❄️ Baixa Prioridade</option>
+                                <option value="2" ${!evento.mural_prioridade || evento.mural_prioridade == 2 ? "selected" : ""}>Prioridade Normal</option>
+                                <option value="3" ${evento.mural_prioridade == 3 ? "selected" : ""}>🔥 Alta Prioridade</option>
+                                <option value="1" ${evento.mural_prioridade == 1 ? "selected" : ""}>❄️ Baixa Prioridade</option>
                             </select>
                         </div>
                     </div>
 
-                    <div id="campos-liturgia" class="form-section" style="display: ${evento.tipo_compromisso === "liturgia" ? "block" : "none"
-      }">
+                    <div id="campos-liturgia" class="form-section" style="display: ${
+                      evento.tipo_compromisso === "liturgia" ? "block" : "none"
+                    }">
                         <span class="form-section-title">2. Detalhes Litúrgicos</span>
                         <!-- NEW: Tempo Litúrgico -->
                         <select id="edit-tempo" class="o-surface-card" style="width:100%; padding:12px; margin-bottom:10px; border:1px solid #ddd;">
-                             <option value="Tempo Comum" ${!evento.tempo_liturgico || evento.tempo_liturgico === 'Tempo Comum' ? 'selected' : ''}>🌿 Tempo Comum</option>
-                             <option value="Advento" ${evento.tempo_liturgico === 'Advento' ? 'selected' : ''}>🕯️ Advento</option>
-                             <option value="Natal" ${evento.tempo_liturgico === 'Natal' ? 'selected' : ''}>🌟 Natal</option>
-                             <option value="Quaresma" ${evento.tempo_liturgico === 'Quaresma' ? 'selected' : ''}>🌵 Quaresma</option>
-                             <option value="Páscoa" ${evento.tempo_liturgico === 'Páscoa' ? 'selected' : ''}>🔥 Páscoa</option>
+                             <option value="Tempo Comum" ${!evento.tempo_liturgico || evento.tempo_liturgico === "Tempo Comum" ? "selected" : ""}>🌿 Tempo Comum</option>
+                             <option value="Advento" ${evento.tempo_liturgico === "Advento" ? "selected" : ""}>🕯️ Advento</option>
+                             <option value="Natal" ${evento.tempo_liturgico === "Natal" ? "selected" : ""}>🌟 Natal</option>
+                             <option value="Quaresma" ${evento.tempo_liturgico === "Quaresma" ? "selected" : ""}>🌵 Quaresma</option>
+                             <option value="Páscoa" ${evento.tempo_liturgico === "Páscoa" ? "selected" : ""}>🔥 Páscoa</option>
                         </select>
                         <select id="edit-cor" class="o-surface-card" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ddd;">
-                             <option value="1" ${evento.cor_id == 1 ? "selected" : ""
-      }>🟢 Verde</option>
-                             <option value="2" ${evento.cor_id == 2 ? "selected" : ""
-      }>⚪ Branco</option>
-                             <option value="3" ${evento.cor_id == 3 ? "selected" : ""
-      }>🔴 Vermelho</option>
-                             <option value="4" ${evento.cor_id == 4 ? "selected" : ""
-      }>🟣 Roxo</option>
+                             <option value="1" ${
+                               evento.cor_id == 1 ? "selected" : ""
+                             }>🟢 Verde</option>
+                             <option value="2" ${
+                               evento.cor_id == 2 ? "selected" : ""
+                             }>⚪ Branco</option>
+                             <option value="3" ${
+                               evento.cor_id == 3 ? "selected" : ""
+                             }>🔴 Vermelho</option>
+                             <option value="4" ${
+                               evento.cor_id == 4 ? "selected" : ""
+                             }>🟣 Roxo</option>
                         </select>
                         
                         <!-- NEW: Tipo de Celebração -->
@@ -284,27 +305,31 @@ window.DashboardController = {
                                 Tipo de Celebração
                             </label>
                             <select id="edit-tipo-celebracao" onchange="window.DashboardController.atualizarCamposEscala()" class="o-surface-card" style="width:100%; padding:12px; border:1px solid #ddd;">
-                                <option value="missa" ${!evento.tipo_celebracao || evento.tipo_celebracao === 'missa' ? 'selected' : ''}>
+                                <option value="missa" ${!evento.tipo_celebracao || evento.tipo_celebracao === "missa" ? "selected" : ""}>
                                     ✝️ Santa Missa (com Celebrante e MESCE)
                                 </option>
-                                <option value="celebracao_palavra" ${evento.tipo_celebracao === 'celebracao_palavra' ? 'selected' : ''}>
+                                <option value="celebracao_palavra" ${evento.tipo_celebracao === "celebracao_palavra" ? "selected" : ""}>
                                     📖 Celebração da Palavra (com MEP)
                                 </option>
                             </select>
                         </div>
                         
                         <div id="lista-escalas-editor">${this.gerarLinhasEscalaEditor(
-        evento.escalas, evento.tipo_celebracao || 'missa'
-      )}</div>
+                          evento.escalas,
+                          evento.tipo_celebracao || "missa",
+                        )}</div>
                         <button onclick="window.DashboardController.adicionarLinhaEscala()" style="width:100%; background:none; border:1px dashed #ccc; padding:10px; margin-top:10px; cursor:pointer;">＋ Novo Horário</button>
                     </div>
 
-                    <div id="campos-agenda" class="form-section" style="display: ${evento.tipo_compromisso !== "liturgia" ? "grid" : "none"
-      }; grid-template-columns: 1fr 1fr; gap:10px;">
-                        <input type="time" id="edit-hora" value="${evento.hora_inicio || "19:00"
-      }" class="o-surface-card" style="padding:10px;">
-                        <input type="text" id="edit-local" value="${evento.local || ""
-      }" placeholder="Local" class="o-surface-card" style="padding:10px;">
+                    <div id="campos-agenda" class="form-section" style="display: ${
+                      evento.tipo_compromisso !== "liturgia" ? "grid" : "none"
+                    }; grid-template-columns: 1fr 1fr; gap:10px;">
+                        <input type="time" id="edit-hora" value="${
+                          evento.hora_inicio || "19:00"
+                        }" class="o-surface-card" style="padding:10px;">
+                        <input type="text" id="edit-local" value="${
+                          evento.local || ""
+                        }" placeholder="Local" class="o-surface-card" style="padding:10px;">
                     </div>
 
                     <!-- MÓDULO REPLICADOR (EXCLUSIVO ADMIN) -->
@@ -327,8 +352,9 @@ window.DashboardController = {
                     </div>
 
                     <div style="display:flex; gap:12px; margin-top:25px;">
-                        <button id="btn-save-agenda" onclick="window.DashboardController.salvarFinal('${dataISO}', ${eventoId ? `'${eventoId}'` : "null"
-      })" class="btn-ver-todas c-button" style="flex:2; background:var(--sys-color-success);">💾 SALVAR NA AGENDA</button>
+                        <button id="btn-save-agenda" onclick="window.DashboardController.salvarFinal('${dataISO}', ${
+                          eventoId ? `'${eventoId}'` : "null"
+                        })" class="btn-ver-todas c-button" style="flex:2; background:var(--sys-color-success);">💾 SALVAR NA AGENDA</button>
                         <button onclick="window.DashboardController.abrirGerenciadorAgenda('${dataISO}')" class="btn-ver-todas" style="flex:1; background:#eee; color:#666; border:none; border-radius:8px; cursor:pointer;">VOLTAR</button>
                     </div>
                 </div>
@@ -350,19 +376,21 @@ window.DashboardController = {
                     <button onclick="window.DashboardController.abrirModalEquipe()" class="btn-ver-todas">＋ Nova Equipe</button>
                 </div>
                 ${equipes
-        .map(
-          (eq) => `
+                  .map(
+                    (eq) => `
                     <div class="list-item o-surface-card">
-                        <div class="list-content"><strong>${eq.nome_equipe
-            }</strong><br><small>${eq.tipo_atuacao}</small></div>
+                        <div class="list-content"><strong>${
+                          eq.nome_equipe
+                        }</strong><br><small>${eq.tipo_atuacao}</small></div>
                         <button onclick='window.DashboardController.abrirModalEquipe(${JSON.stringify(
-              eq
-            )})' style="background:none; border:none; cursor:pointer; font-size:1.1rem;">✏️</button>
-                        <button onclick="window.DashboardController.deletarEquipe(${eq.id
-            })" style="background:none; border:none; cursor:pointer; font-size:1.1rem; color:red; margin-left:10px;">🗑️</button>
-                    </div>`
-        )
-        .join("")}
+                          eq,
+                        )})' style="background:none; border:none; cursor:pointer; font-size:1.1rem;">✏️</button>
+                        <button onclick="window.DashboardController.deletarEquipe(${
+                          eq.id
+                        })" style="background:none; border:none; cursor:pointer; font-size:1.1rem; color:red; margin-left:10px;">🗑️</button>
+                    </div>`,
+                  )
+                  .join("")}
             </div>`;
   },
 
@@ -372,30 +400,40 @@ window.DashboardController = {
             <div class="modal-card o-surface-card" style="max-width: 450px; flex-direction:column;">
                 <div class="modal-body" style="padding: 30px;">
                     <button class="btn-close" onclick="window.DashboardController.fecharModal()">×</button>
-                    <h3 style="font-family:'Neulis'; color:var(--cor-vinho); margin-bottom:20px;">${eq ? "Editar" : "Nova"
-      } Equipe</h3>
+                    <h3 style="font-family:'Neulis'; color:var(--cor-vinho); margin-bottom:20px;">${
+                      eq ? "Editar" : "Nova"
+                    } Equipe</h3>
                     <div class="form-section">
-                        <input type="text" id="eq-nome" value="${eq?.nome_equipe || ""
-      }" placeholder="Nome da Equipe" class="o-surface-card" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ddd;">
+                        <input type="text" id="eq-nome" value="${
+                          eq?.nome_equipe || ""
+                        }" placeholder="Nome da Equipe" class="o-surface-card" style="width:100%; padding:12px; margin-bottom:15px; border:1px solid #ddd;">
                         <select id="eq-tipo" class="o-surface-card" style="width:100%; padding:12px; border:1px solid #ddd;">
-                            <option value="Leitura" ${eq?.tipo_atuacao == "Leitura" ? "selected" : ""
-      }>📖 Leitura</option>
-                            <option value="Canto" ${eq?.tipo_atuacao == "Canto" ? "selected" : ""
-      }>🎵 Canto</option>
-                            <option value="Ambos" ${eq?.tipo_atuacao == "Ambos" ? "selected" : ""
-      }>🔄 Ambos</option>
-                            <option value="MESCE" ${eq?.tipo_atuacao == "MESCE" ? "selected" : ""
-      }>✨ MESCE (Ministros da Comunhão)</option>
-                            <option value="MEP" ${eq?.tipo_atuacao == "MEP" ? "selected" : ""
-      }>📜 MEP (Ministros da Palavra)</option>
-                            <option value="Coroinhas" ${eq?.tipo_atuacao == "Coroinhas" ? "selected" : ""
-      }>🕯️ Coroinhas</option>
-                            <option value="Celebrante" ${eq?.tipo_atuacao == "Celebrante" ? "selected" : ""
-      }>🐑 Celebrante</option>
+                            <option value="Leitura" ${
+                              eq?.tipo_atuacao == "Leitura" ? "selected" : ""
+                            }>📖 Leitura</option>
+                            <option value="Canto" ${
+                              eq?.tipo_atuacao == "Canto" ? "selected" : ""
+                            }>🎵 Canto</option>
+                            <option value="Ambos" ${
+                              eq?.tipo_atuacao == "Ambos" ? "selected" : ""
+                            }>🔄 Ambos</option>
+                            <option value="MESCE" ${
+                              eq?.tipo_atuacao == "MESCE" ? "selected" : ""
+                            }>✨ MESCE (Ministros da Comunhão)</option>
+                            <option value="MEP" ${
+                              eq?.tipo_atuacao == "MEP" ? "selected" : ""
+                            }>📜 MEP (Ministros da Palavra)</option>
+                            <option value="Coroinhas" ${
+                              eq?.tipo_atuacao == "Coroinhas" ? "selected" : ""
+                            }>🕯️ Coroinhas</option>
+                            <option value="Celebrante" ${
+                              eq?.tipo_atuacao == "Celebrante" ? "selected" : ""
+                            }>🐑 Celebrante</option>
                         </select>
                     </div>
-                    <button onclick="window.DashboardController.salvarEquipeFinal('${eq?.id || ""
-      }')" class="btn-ver-todas" style="width:100%; margin-top:20px;">💾 SALVAR EQUIPE</button>
+                    <button onclick="window.DashboardController.salvarEquipeFinal('${
+                      eq?.id || ""
+                    }')" class="btn-ver-todas" style="width:100%; margin-top:20px;">💾 SALVAR EQUIPE</button>
                 </div>
             </div>`;
     document.getElementById("modalOverlay").classList.add("active");
@@ -434,20 +472,23 @@ window.DashboardController = {
                     <button onclick="window.DashboardController.abrirModalUsuario()" class="btn-ver-todas">＋ Novo Usuário</button>
                 </div>
                 ${users
-        .map(
-          (u) => `
+                  .map(
+                    (u) => `
                     <div class="list-item o-surface-card">
-                        <div class="list-content"><strong>${u.nome || "Sem Nome"
-            }</strong><br><small>${u.email} • Nível ${u.perfil_nivel
-            }</small></div>
+                        <div class="list-content"><strong>${
+                          u.nome || "Sem Nome"
+                        }</strong><br><small>${u.email} • Nível ${
+                          u.perfil_nivel
+                        }</small></div>
                         <button onclick='window.DashboardController.abrirModalUsuario(${JSON.stringify(
-              u
-            )})' style="background:none; border:none; cursor:pointer; font-size:1.1rem;">✏️</button>
-                        <button onclick="window.DashboardController.deletarUsuario('${u.id
-            }')" style="background:none; border:none; cursor:pointer; font-size:1.1rem; color:red; margin-left:10px;">🗑️</button>
-                    </div>`
-        )
-        .join("")}
+                          u,
+                        )})' style="background:none; border:none; cursor:pointer; font-size:1.1rem;">✏️</button>
+                        <button onclick="window.DashboardController.deletarUsuario('${
+                          u.id
+                        }')" style="background:none; border:none; cursor:pointer; font-size:1.1rem; color:red; margin-left:10px;">🗑️</button>
+                    </div>`,
+                  )
+                  .join("")}
             </div>`;
   },
 
@@ -457,24 +498,31 @@ window.DashboardController = {
             <div class="modal-card o-surface-card" style="max-width: 480px; flex-direction:column;">
                 <div class="modal-body" style="padding: 30px;">
                     <button class="btn-close" onclick="window.DashboardController.fecharModal()">×</button>
-                    <h3 style="font-family:'Neulis'; color:var(--cor-vinho); margin-bottom:25px;">${u ? "Editar" : "Novo"
-      } Acesso</h3>
+                    <h3 style="font-family:'Neulis'; color:var(--cor-vinho); margin-bottom:25px;">${
+                      u ? "Editar" : "Novo"
+                    } Acesso</h3>
                     <div class="form-section">
-                        <input type="email" id="user-email" value="${u?.email || ""
-      }" placeholder="E-mail" class="o-surface-card" style="width:100%; padding:12px; margin-bottom:15px;">
-                        <input type="text" id="user-nome" value="${u?.nome || ""
-      }" placeholder="Nome Completo" class="o-surface-card" style="width:100%; padding:12px; margin-bottom:15px;">
+                        <input type="email" id="user-email" value="${
+                          u?.email || ""
+                        }" placeholder="E-mail" class="o-surface-card" style="width:100%; padding:12px; margin-bottom:15px;">
+                        <input type="text" id="user-nome" value="${
+                          u?.nome || ""
+                        }" placeholder="Nome Completo" class="o-surface-card" style="width:100%; padding:12px; margin-bottom:15px;">
                         <select id="user-nivel" class="o-surface-card" style="width:100%; padding:12px;">
-                            <option value="1" ${u?.perfil_nivel == 1 ? "selected" : ""
-      }>👑 Nível 1 - Master</option>
-                            <option value="2" ${u?.perfil_nivel == 2 ? "selected" : ""
-      }>🏢 Nível 2 - Secretaria</option>
-                            <option value="3" ${u?.perfil_nivel == 3 ? "selected" : ""
-      }>👥 Nível 3 - Coordenador</option>
+                            <option value="1" ${
+                              u?.perfil_nivel == 1 ? "selected" : ""
+                            }>👑 Nível 1 - Master</option>
+                            <option value="2" ${
+                              u?.perfil_nivel == 2 ? "selected" : ""
+                            }>🏢 Nível 2 - Secretaria</option>
+                            <option value="3" ${
+                              u?.perfil_nivel == 3 ? "selected" : ""
+                            }>👥 Nível 3 - Coordenador</option>
                         </select>
                     </div>
-                    <button id="btn-save-user" onclick="window.DashboardController.salvarUsuarioFinal('${u?.id || ""
-      }')" class="btn-ver-todas" style="width:100%; background:var(--sys-color-success); margin-top:20px;">💾 SALVAR ACESSO</button>
+                    <button id="btn-save-user" onclick="window.DashboardController.salvarUsuarioFinal('${
+                      u?.id || ""
+                    }')" class="btn-ver-todas" style="width:100%; background:var(--sys-color-success); margin-top:20px;">💾 SALVAR ACESSO</button>
                 </div>
             </div>`;
     document.getElementById("modalOverlay").classList.add("active");
@@ -554,7 +602,10 @@ window.DashboardController = {
     const btn = document.getElementById("btn-save-agenda");
     btn.classList.add("c-button--loading");
     const tipo = document.getElementById("edit-tipo").value;
-    const tipoCelebracao = tipo === 'liturgia' ? (document.getElementById("edit-tipo-celebracao")?.value || 'missa') : null;
+    const tipoCelebracao =
+      tipo === "liturgia"
+        ? document.getElementById("edit-tipo-celebracao")?.value || "missa"
+        : null;
 
     const payload = {
       id: eventoId,
@@ -571,30 +622,52 @@ window.DashboardController = {
           ? parseInt(document.getElementById("edit-cor").value)
           : 1,
       // NEW FIELD
-      tempo_liturgico: tipo === "liturgia" ? document.getElementById("edit-tempo").value : "Tempo Comum",
+      tempo_liturgico:
+        tipo === "liturgia"
+          ? document.getElementById("edit-tempo").value
+          : "Tempo Comum",
       status: "aprovado",
       // NEW FIELDS
       mural_destaque: document.getElementById("edit-mural").checked,
-      mural_prioridade: parseInt(document.getElementById("edit-prioridade").value) || 2
+      mural_prioridade:
+        parseInt(document.getElementById("edit-prioridade").value) || 2,
     };
     const escalas = [];
     if (tipo === "liturgia") {
       document.querySelectorAll(".row-escala-edit").forEach((row, index) => {
         // Capturar listas MESCE e Coroinhas
         const mesceInput = document.querySelectorAll(".esc-mesce-lista")[index];
-        const coroinhasInput = document.querySelectorAll(".esc-coroinhas-lista")[index];
+        const coroinhasInput = document.querySelectorAll(
+          ".esc-coroinhas-lista",
+        )[index];
 
-        const listaMesce = mesceInput ? mesceInput.value.split(',').map(n => n.trim()).filter(n => n) : [];
-        const listaCoroinhas = coroinhasInput ? coroinhasInput.value.split(',').map(n => n.trim()).filter(n => n) : [];
+        const listaMesce = mesceInput
+          ? mesceInput.value
+              .split(",")
+              .map((n) => n.trim())
+              .filter((n) => n)
+          : [];
+        const listaCoroinhas = coroinhasInput
+          ? coroinhasInput.value
+              .split(",")
+              .map((n) => n.trim())
+              .filter((n) => n)
+          : [];
 
         escalas.push({
           hora_celebracao: row.querySelector(".esc-hora").value,
           equipe_leitura_id: row.querySelector(".esc-leitura").value || null,
           equipe_canto_id: row.querySelector(".esc-canto").value || null,
-          equipe_mep_id: tipoCelebracao === 'celebracao_palavra' ? (row.querySelector(".esc-mep")?.value || null) : null,
-          celebrante_nome: tipoCelebracao === 'missa' ? (row.querySelector(".esc-celebrante")?.value || null) : null,
+          equipe_mep_id:
+            tipoCelebracao === "celebracao_palavra"
+              ? row.querySelector(".esc-mep")?.value || null
+              : null,
+          celebrante_nome:
+            tipoCelebracao === "missa"
+              ? row.querySelector(".esc-celebrante")?.value || null
+              : null,
           lista_mesce: listaMesce,
-          lista_coroinhas: listaCoroinhas
+          lista_coroinhas: listaCoroinhas,
         });
       });
     }
@@ -603,7 +676,8 @@ window.DashboardController = {
     // Sincronização de Salvamento (Replicador)
     const checkRecorrencia = document.getElementById("check-recorrencia");
     if (checkRecorrencia && checkRecorrencia.checked) {
-      const meses = parseInt(document.getElementById("recorrencia-meses").value) || 3;
+      const meses =
+        parseInt(document.getElementById("recorrencia-meses").value) || 3;
       await window.api.replicarEventoPadrao(payload, escalas, meses);
     }
 
@@ -611,7 +685,7 @@ window.DashboardController = {
     window.CalendarEngine.carregarERenderizar();
   },
 
-  gerarLinhasEscalaEditor: function (escalas = [], tipoCelebracao = 'missa') {
+  gerarLinhasEscalaEditor: function (escalas = [], tipoCelebracao = "missa") {
     const eL = window.api.cacheEquipesLeitura || [];
     const eC = window.api.cacheEquipesCanto || [];
     const eM = window.api.cacheEquipesMEP || [];
@@ -621,8 +695,9 @@ window.DashboardController = {
       l
         .map(
           (e) =>
-            `<option value="${e.id}" ${e.id == s ? "selected" : ""}>${e.nome_equipe
-            }</option>`
+            `<option value="${e.id}" ${e.id == s ? "selected" : ""}>${
+              e.nome_equipe
+            }</option>`,
         )
         .join("");
     if (!escalas || escalas.length === 0)
@@ -630,23 +705,28 @@ window.DashboardController = {
     return escalas
       .map(
         (esc) => `
-            <div class="row-escala-edit" style="display: grid; grid-template-columns: 85px 1fr 1fr ${tipoCelebracao === 'missa' ? '1fr' : '1fr'} 30px; gap:8px; margin-bottom:8px; background:#f9f9f9; padding:8px; border-radius:8px; border:1px solid #eee;">
-                <input type="time" class="esc-hora" value="${esc.hora_celebracao?.substring(0, 5) || "19:00"
-          }" style="border:none; background:none; font-weight:bold;">
+            <div class="row-escala-edit" style="display: grid; grid-template-columns: 85px 1fr 1fr ${tipoCelebracao === "missa" ? "1fr" : "1fr"} 30px; gap:8px; margin-bottom:8px; background:#f9f9f9; padding:8px; border-radius:8px; border:1px solid #eee;">
+                <input type="time" class="esc-hora" value="${
+                  esc.hora_celebracao?.substring(0, 5) || "19:00"
+                }" style="border:none; background:none; font-weight:bold;">
                 <select class="esc-leitura" style="width:100%; border:none; background:none; font-size:0.8rem;">${build(
-            eL,
-            esc.equipe_leitura_id || esc.equipe_leitura?.id
-          )}</select>
+                  eL,
+                  esc.equipe_leitura_id || esc.equipe_leitura?.id,
+                )}</select>
                 <select class="esc-canto" style="width:100%; border:none; background:none; font-size:0.8rem;">${build(
-            eC,
-            esc.equipe_canto_id || esc.equipe_canto?.id
-          )}</select>
+                  eC,
+                  esc.equipe_canto_id || esc.equipe_canto?.id,
+                )}</select>
                 
-                ${tipoCelebracao === 'missa' ? `
-                    <input type="text" class="esc-celebrante" value="${esc.celebrante_nome || ''}" placeholder="Nome do Padre" style="width:100%; border:none; background:none; font-size:0.8rem; padding: 4px;">
-                ` : `
+                ${
+                  tipoCelebracao === "missa"
+                    ? `
+                    <input type="text" class="esc-celebrante" value="${esc.celebrante_nome || ""}" placeholder="Nome do Padre" style="width:100%; border:none; background:none; font-size:0.8rem; padding: 4px;">
+                `
+                    : `
                     <select class="esc-mep" style="width:100%; border:none; background:none; font-size:0.8rem;">${build(eM, esc.equipe_mep_id || esc.equipe_mep?.id)}</select>
-                `}
+                `
+                }
                 
                 <button onclick="this.parentElement.remove()" style="background:none; border:none; color:red; cursor:pointer;">×</button>
             </div>
@@ -655,21 +735,22 @@ window.DashboardController = {
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; padding: 8px; background: #f0f0f0; border-radius: 8px;">
                 <div>
                     <label style="font-size: 0.7rem; font-weight: 700; color: #666; display: block; margin-bottom: 4px;">✨ MESCE (separar por vírgula)</label>
-                    <input type="text" class="esc-mesce-lista" value="${Array.isArray(esc.lista_mesce) ? esc.lista_mesce.join(', ') : ''}" placeholder="Maria, José, Pedro" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.75rem;">
+                    <input type="text" class="esc-mesce-lista" value="${Array.isArray(esc.lista_mesce) ? esc.lista_mesce.join(", ") : ""}" placeholder="Maria, José, Pedro" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.75rem;">
                 </div>
                 <div>
                     <label style="font-size: 0.7rem; font-weight: 700; color: #666; display: block; margin-bottom: 4px;">🕯️ Coroinhas (separar por vírgula)</label>
-                    <input type="text" class="esc-coroinhas-lista" value="${Array.isArray(esc.lista_coroinhas) ? esc.lista_coroinhas.join(', ') : ''}" placeholder="Ana, Lucas, Miguel" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.75rem;">
+                    <input type="text" class="esc-coroinhas-lista" value="${Array.isArray(esc.lista_coroinhas) ? esc.lista_coroinhas.join(", ") : ""}" placeholder="Ana, Lucas, Miguel" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.75rem;">
                 </div>
             </div>
-        `
+        `,
       )
       .join("");
   },
 
   adicionarLinhaEscala: function () {
     const container = document.getElementById("lista-escalas-editor");
-    const tipoCelebracao = document.getElementById("edit-tipo-celebracao")?.value || 'missa';
+    const tipoCelebracao =
+      document.getElementById("edit-tipo-celebracao")?.value || "missa";
     const div = document.createElement("div");
     div.innerHTML = this.gerarLinhasEscalaEditor([{}], tipoCelebracao);
     container.appendChild(div.firstElementChild);
@@ -677,14 +758,17 @@ window.DashboardController = {
   },
 
   atualizarCamposEscala: function () {
-    const tipoCelebracao = document.getElementById("edit-tipo-celebracao")?.value || 'missa';
+    const tipoCelebracao =
+      document.getElementById("edit-tipo-celebracao")?.value || "missa";
     const container = document.getElementById("lista-escalas-editor");
 
     // Capturar dados atuais antes de regerendar
     const escalasAtuais = [];
     document.querySelectorAll(".row-escala-edit").forEach((row, index) => {
       const mesceInput = document.querySelectorAll(".esc-mesce-lista")[index];
-      const coroinhasInput = document.querySelectorAll(".esc-coroinhas-lista")[index];
+      const coroinhasInput = document.querySelectorAll(".esc-coroinhas-lista")[
+        index
+      ];
 
       escalasAtuais.push({
         hora_celebracao: row.querySelector(".esc-hora")?.value || "19:00",
@@ -692,13 +776,26 @@ window.DashboardController = {
         equipe_canto_id: row.querySelector(".esc-canto")?.value,
         equipe_mep_id: row.querySelector(".esc-mep")?.value,
         celebrante_nome: row.querySelector(".esc-celebrante")?.value,
-        lista_mesce: mesceInput ? mesceInput.value.split(',').map(n => n.trim()).filter(n => n) : [],
-        lista_coroinhas: coroinhasInput ? coroinhasInput.value.split(',').map(n => n.trim()).filter(n => n) : []
+        lista_mesce: mesceInput
+          ? mesceInput.value
+              .split(",")
+              .map((n) => n.trim())
+              .filter((n) => n)
+          : [],
+        lista_coroinhas: coroinhasInput
+          ? coroinhasInput.value
+              .split(",")
+              .map((n) => n.trim())
+              .filter((n) => n)
+          : [],
       });
     });
 
     // Regerendar com novo tipo
-    container.innerHTML = this.gerarLinhasEscalaEditor(escalasAtuais.length > 0 ? escalasAtuais : [{}], tipoCelebracao);
+    container.innerHTML = this.gerarLinhasEscalaEditor(
+      escalasAtuais.length > 0 ? escalasAtuais : [{}],
+      tipoCelebracao,
+    );
   },
 
   atualizarVisaoGeral: async function () {
@@ -730,18 +827,49 @@ window.DashboardController = {
       document.getElementById("admin-chart") ||
       document.getElementById("chart-week");
     if (!container) return;
-    const eventos = await window.api.buscarEventosProximos(7);
-    const dens = [0, 0, 0, 0, 0, 0, 0];
-    eventos.forEach((ev) => dens[new Date(ev.data + "T12:00:00").getDay()]++);
-    const max = Math.max(...dens, 1);
-    container.innerHTML = dens
-      .map(
-        (c, i) =>
-          `<div class="chart-bar-group"><div class="chart-bar" style="height:${(c / max) * 100
-          }%"></div><div class="chart-label">${["D", "S", "T", "Q", "Q", "S", "S"][i]
-          }</div></div>`
-      )
-      .join("");
+
+    try {
+      const eventos = await window.api.buscarEventosProximos(7);
+
+      // Validação: verifica se há eventos
+      if (!eventos || eventos.length === 0) {
+        container.innerHTML = `
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 30px 20px; text-align: center; color: #999;">
+            <div style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;">📭</div>
+            <div style="font-size: 0.9rem; line-height: 1.4;">Nenhuma atividade agendada<br>para os próximos 7 dias</div>
+          </div>
+        `;
+        return;
+      }
+
+      // Processa distribuição por dia da semana
+      const dens = [0, 0, 0, 0, 0, 0, 0];
+      eventos.forEach((ev) => {
+        if (ev && ev.data) {
+          dens[new Date(ev.data + "T12:00:00").getDay()]++;
+        }
+      });
+
+      const max = Math.max(...dens, 1);
+      container.innerHTML = dens
+        .map(
+          (c, i) =>
+            `<div class="chart-bar-group"><div class="chart-bar" style="height:${
+              (c / max) * 100
+            }%"></div><div class="chart-label">${
+              ["D", "S", "T", "Q", "Q", "S", "S"][i]
+            }</div></div>`,
+        )
+        .join("");
+    } catch (e) {
+      console.error("❌ Erro ao renderizar gráfico de carga:", e);
+      // Fallback seguro: mostra mensagem de erro sem quebrar o dashboard
+      container.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center; height: 100%; padding: 20px; text-align: center; color: #dc2626;">
+          <div style="font-size: 0.85rem;">⚠️ Erro ao carregar gráfico</div>
+        </div>
+      `;
+    }
   },
 
   renderizarListaRecentes: async function () {
@@ -750,24 +878,27 @@ window.DashboardController = {
 
     const eventos = await window.api.buscarEventosRecentes(6);
 
-    container.innerHTML = eventos.map(ev => {
-      const dataObj = new Date(ev.data + "T12:00:00");
-      const dia = dataObj.getDate().toString().padStart(2, '0');
-      const mes = dataObj.toLocaleString("pt-BR", { month: "short" }).toUpperCase();
+    container.innerHTML = eventos
+      .map((ev) => {
+        const dataObj = new Date(ev.data + "T12:00:00");
+        const dia = dataObj.getDate().toString().padStart(2, "0");
+        const mes = dataObj
+          .toLocaleString("pt-BR", { month: "short" })
+          .toUpperCase();
 
-      // Determina a cor do indicador lateral
-      let corIndicador = "#2e3fd1ff"; // Atendimento
-      let tagClass = "u-bg-azul";
+        // Determina a cor do indicador lateral
+        let corIndicador = "#2e3fd1ff"; // Atendimento
+        let tagClass = "u-bg-azul";
 
-      if (ev.tipo_compromisso === 'liturgia') {
-        corIndicador = "var(--sys-color-success)";
-        tagClass = "u-bg-verde";
-      } else if (ev.tipo_compromisso === 'reuniao') {
-        corIndicador = "var(--cor-slate)";
-        tagClass = "u-bg-slate";
-      }
+        if (ev.tipo_compromisso === "liturgia") {
+          corIndicador = "var(--sys-color-success)";
+          tagClass = "u-bg-verde";
+        } else if (ev.tipo_compromisso === "reuniao") {
+          corIndicador = "var(--cor-slate)";
+          tagClass = "u-bg-slate";
+        }
 
-      return `
+        return `
             <div class="c-card-event" onclick="window.DashboardController.abrirGerenciadorAgenda('${ev.data}')">
                 <div class="c-card-event__indicator" style="background: ${corIndicador}"></div>
                 
@@ -782,8 +913,8 @@ window.DashboardController = {
                     </div>
                     <h4 class="c-card-event__title">${ev.titulo}</h4>
                     <div class="c-card-event__meta">
-                        <span>🕒 ${ev.hora_inicio?.substring(0, 5) || '--:--'}</span>
-                        <span>📍 ${ev.local || 'Paróquia'}</span>
+                        <span>🕒 ${ev.hora_inicio?.substring(0, 5) || "--:--"}</span>
+                        <span>📍 ${ev.local || "Paróquia"}</span>
                     </div>
                 </div>
 
@@ -792,7 +923,8 @@ window.DashboardController = {
                 </div>
             </div>
         `;
-    }).join("");
+      })
+      .join("");
 
     // Vital: Re-inicializa os ícones após injetar o HTML
     if (window.lucide) lucide.createIcons();
@@ -837,12 +969,14 @@ window.DashboardController = {
     } else {
       body.classList.remove("mobile-overlay-active");
     }
-  }
+  },
 };
 
 document.addEventListener("DOMContentLoaded", () => {
   window.DashboardController.init();
   // Garante injecao no load e no resize
   window.DashboardController.initMobile();
-  window.addEventListener('resize', () => window.DashboardController.initMobile());
+  window.addEventListener("resize", () =>
+    window.DashboardController.initMobile(),
+  );
 });

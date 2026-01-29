@@ -1,14 +1,14 @@
 /*
  * SACRISTIA DIGITAL - Sistema de Gestão Paroquial
- * 
+ *
  * © 2026 TODOS OS DIREITOS RESERVADOS
  * Desenvolvido EXCLUSIVAMENTE por Rodrigo Dionízio
  * Instagram: @rodrigodionizio
  * https://www.instagram.com/rodrigodionizio/
- * 
+ *
  * PROIBIDA a reprodução, distribuição ou modificação
  * sem autorização expressa do autor.
- * 
+ *
  * ARQUIVO: api.js
  * DESCRIÇÃO: Camada de Conexão Supabase e API
  * VERSÃO: 6.0
@@ -31,23 +31,23 @@ window.api = {
    * @param {string} key - Chave do cache
    * @returns {*|null} Dados em cache ou null se expirado
    */
-  getCache: function(key) {
+  getCache: function (key) {
     try {
       const item = sessionStorage.getItem(key);
       if (!item) return null;
-      
+
       const { data, timestamp, ttl } = JSON.parse(item);
       const age = Date.now() - timestamp;
-      
+
       if (age > ttl) {
         sessionStorage.removeItem(key);
         return null;
       }
-      
-      console.log(`📦 Cache hit: ${key} (idade: ${Math.round(age/1000)}s)`);
+
+      console.log(`📦 Cache hit: ${key} (idade: ${Math.round(age / 1000)}s)`);
       return data;
     } catch (e) {
-      console.warn('Erro ao ler cache:', e);
+      console.warn("Erro ao ler cache:", e);
       return null;
     }
   },
@@ -58,16 +58,19 @@ window.api = {
    * @param {*} data - Dados a cachear
    * @param {number} ttl - Tempo de vida em milissegundos (padrão: 5 minutos)
    */
-  setCache: function(key, data, ttl = 5 * 60 * 1000) {
+  setCache: function (key, data, ttl = 5 * 60 * 1000) {
     try {
-      sessionStorage.setItem(key, JSON.stringify({
-        data,
-        timestamp: Date.now(),
-        ttl
-      }));
-      console.log(`💾 Cache salvo: ${key} (TTL: ${ttl/1000}s)`);
+      sessionStorage.setItem(
+        key,
+        JSON.stringify({
+          data,
+          timestamp: Date.now(),
+          ttl,
+        }),
+      );
+      console.log(`💾 Cache salvo: ${key} (TTL: ${ttl / 1000}s)`);
     } catch (e) {
-      console.warn('Cache storage full ou erro:', e);
+      console.warn("Cache storage full ou erro:", e);
       // Se o storage estiver cheio, limpa caches antigos
       this.cleanOldCache();
     }
@@ -76,21 +79,21 @@ window.api = {
   /**
    * Limpa cache de eventos (útil após modificações)
    */
-  clearCache: function() {
-    Object.keys(sessionStorage).forEach(key => {
-      if (key.startsWith('eventos_')) {
+  clearCache: function () {
+    Object.keys(sessionStorage).forEach((key) => {
+      if (key.startsWith("eventos_")) {
         sessionStorage.removeItem(key);
       }
     });
-    console.log('🗑️ Cache de eventos limpo');
+    console.log("🗑️ Cache de eventos limpo");
   },
 
   /**
    * Remove caches antigos para liberar espaço
    */
-  cleanOldCache: function() {
-    Object.keys(sessionStorage).forEach(key => {
-      if (key.startsWith('eventos_')) {
+  cleanOldCache: function () {
+    Object.keys(sessionStorage).forEach((key) => {
+      if (key.startsWith("eventos_")) {
         try {
           const item = JSON.parse(sessionStorage.getItem(key));
           const age = Date.now() - item.timestamp;
@@ -112,32 +115,32 @@ window.api = {
     // 1. Verifica cache primeiro
     const cacheKey = `eventos_${ano}_${mes}`;
     const cached = this.getCache(cacheKey);
-    
+
     if (cached) {
       return cached;
     }
-    
+
     // 2. Busca do banco
     console.log(`🌐 Fetching: ${cacheKey}`);
     const mesStr = String(mes).padStart(2, "0");
     const inicio = `${ano}-${mesStr}-01`;
     const ultimoDia = new Date(ano, mes, 0).getDate();
     const fim = `${ano}-${mesStr}-${ultimoDia}`;
-    
+
     const { data, error } = await _supabaseClient
       .from("eventos_base")
       .select(
-        `*, liturgia_cores(hex_code), escalas(*, equipe_leitura:equipes!equipe_leitura_id(nome_equipe), equipe_canto:equipes!equipe_canto_id(nome_equipe), equipe_mep:equipes!equipe_mep_id(nome_equipe))`
+        `*, liturgia_cores(hex_code), escalas(*, equipe_leitura:equipes!equipe_leitura_id(nome_equipe), equipe_canto:equipes!equipe_canto_id(nome_equipe), equipe_mep:equipes!equipe_mep_id(nome_equipe))`,
       )
       .gte("data", inicio)
       .lte("data", fim)
       .order("data", { ascending: true });
-    
+
     if (error) {
-      console.error('❌ API Error:', error);
+      console.error("❌ API Error:", error);
       return [];
     }
-    
+
     // 3. Salva em cache
     this.setCache(cacheKey, data);
     return data;
@@ -153,7 +156,7 @@ window.api = {
     const { data, error } = await _supabaseClient
       .from("eventos_base")
       .select(
-        `*, liturgia_cores(hex_code), escalas(*, equipe_leitura:equipes!equipe_leitura_id(nome_equipe), equipe_canto:equipes!equipe_canto_id(nome_equipe), equipe_mep:equipes!equipe_mep_id(nome_equipe))`
+        `*, liturgia_cores(hex_code), escalas(*, equipe_leitura:equipes!equipe_leitura_id(nome_equipe), equipe_canto:equipes!equipe_canto_id(nome_equipe), equipe_mep:equipes!equipe_mep_id(nome_equipe))`,
       )
       .gte("data", dataInicio)
       .lte("data", dataFim)
@@ -295,13 +298,31 @@ window.api = {
   // Argumentos: dias (Integer)
   // Descrição: Busca datas dos próximos eventos para alimentar o gráfico de carga.
   buscarEventosProximos: async function (dias = 7) {
-    const hoje = new Date().toISOString().split("T")[0];
-    const { data, error } = await _supabaseClient
-      .from("eventos_base")
-      .select("data")
-      .gte("data", hoje)
-      .limit(100);
-    return error ? [] : data;
+    try {
+      const hoje = new Date().toISOString().split("T")[0];
+
+      // Calcula data final baseada no parâmetro dias
+      const fimDate = new Date();
+      fimDate.setDate(fimDate.getDate() + dias);
+      const fim = fimDate.toISOString().split("T")[0];
+
+      const { data, error } = await _supabaseClient
+        .from("eventos_base")
+        .select("data")
+        .gte("data", hoje)
+        .lte("data", fim) // Filtro de data final corrigido
+        .limit(100);
+
+      if (error) {
+        console.error("⚠️ Erro ao buscar eventos próximos:", error.message);
+        return [];
+      }
+
+      return data || [];
+    } catch (e) {
+      console.error("❌ Exceção em buscarEventosProximos:", e);
+      return [];
+    }
   },
   // =============================
   // 6 - FIM: buscarEventosProximos
@@ -340,13 +361,10 @@ window.api = {
       // O padrão do projeto parece ser conectar via id.
 
       // Delete previous scales
-      await _supabaseClient
-        .from("escalas")
-        .delete()
-        .eq("evento_id", eventoId);
+      await _supabaseClient.from("escalas").delete().eq("evento_id", eventoId);
 
       // Prepare new scales
-      const scalesToInsert = escalasPayload.map(s => ({
+      const scalesToInsert = escalasPayload.map((s) => ({
         evento_id: eventoId,
         hora_celebracao: s.hora_celebracao,
         equipe_leitura_id: s.equipe_leitura_id,
@@ -354,7 +372,7 @@ window.api = {
         equipe_mep_id: s.equipe_mep_id || null,
         celebrante_nome: s.celebrante_nome || null,
         lista_mesce: s.lista_mesce || [],
-        lista_coroinhas: s.lista_coroinhas || []
+        lista_coroinhas: s.lista_coroinhas || [],
       }));
 
       const { error: errScales } = await _supabaseClient
@@ -363,7 +381,7 @@ window.api = {
 
       if (errScales) console.error("Erro ao salvar escalas:", errScales);
     }
-    
+
     // 3. NOVO: Invalida cache do mês modificado
     const data = new Date(eventoPayload.data);
     const ano = data.getFullYear();
@@ -371,7 +389,7 @@ window.api = {
     const cacheKey = `eventos_${ano}_${mes}`;
     sessionStorage.removeItem(cacheKey);
     console.log(`🗑️ Cache invalidado após salvar: ${cacheKey}`);
-    
+
     return eventoId;
   },
 
@@ -382,7 +400,7 @@ window.api = {
     const { data, error } = await _supabaseClient
       .from("eventos_base")
       .select(
-        `*, liturgia_cores(hex_code), escalas(*, equipe_leitura:equipes!equipe_leitura_id(nome_equipe), equipe_canto:equipes!equipe_canto_id(nome_equipe), equipe_mep:equipes!equipe_mep_id(nome_equipe))`
+        `*, liturgia_cores(hex_code), escalas(*, equipe_leitura:equipes!equipe_leitura_id(nome_equipe), equipe_canto:equipes!equipe_canto_id(nome_equipe), equipe_mep:equipes!equipe_mep_id(nome_equipe))`,
       )
       .eq("data", dataISO)
       .order("created_at", { ascending: true });
@@ -397,7 +415,7 @@ window.api = {
       email,
       {
         redirectTo: window.location.origin + "/admin.html", // Onde ele volta após clicar no e-mail
-      }
+      },
     );
     if (error) throw error;
     return data;
@@ -442,11 +460,11 @@ window.api = {
     for (let i = 1; i <= meses; i++) {
       let busca = new Date(d.getFullYear(), d.getMonth() + i, 1);
       let offset = (7 + diaSemana - busca.getDay()) % 7;
-      let diaAlvo = 1 + offset + ((ordemNoMes - 1) * 7);
+      let diaAlvo = 1 + offset + (ordemNoMes - 1) * 7;
       let dataFinal = new Date(busca.getFullYear(), busca.getMonth(), diaAlvo);
 
       if (dataFinal.getMonth() === busca.getMonth()) {
-        resultados.push(dataFinal.toISOString().split('T')[0]);
+        resultados.push(dataFinal.toISOString().split("T")[0]);
       }
     }
     return resultados;
