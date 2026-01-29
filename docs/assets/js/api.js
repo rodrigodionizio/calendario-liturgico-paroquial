@@ -1,7 +1,17 @@
 /*
+ * SACRISTIA DIGITAL - Sistema de Gestão Paroquial
+ * 
+ * © 2026 TODOS OS DIREITOS RESERVADOS
+ * Desenvolvido EXCLUSIVAMENTE por Rodrigo Dionízio
+ * Instagram: @rodrigodionizio
+ * https://www.instagram.com/rodrigodionizio/
+ * 
+ * PROIBIDA a reprodução, distribuição ou modificação
+ * sem autorização expressa do autor.
+ * 
  * ARQUIVO: api.js
- * DESCRIÇÃO: Camada de Conexão Supabase (Versão 6.0 - Full Sincronizada)
- * PROJETO: Sacristia Digital 2026
+ * DESCRIÇÃO: Camada de Conexão Supabase e API
+ * VERSÃO: 6.0
  */
 
 const SUPABASE_URL = "https://gmfmebnodmtozpzhlgvk.supabase.co";
@@ -14,13 +24,106 @@ window.api = {
   client: _supabaseClient,
 
   // =============================
-  // 1 - INÍCIO: buscarEventos
+  // SISTEMA DE CACHE
+  // =============================
+  /**
+   * Obtém dados do cache se ainda válidos
+   * @param {string} key - Chave do cache
+   * @returns {*|null} Dados em cache ou null se expirado
+   */
+  getCache: function(key) {
+    try {
+      const item = sessionStorage.getItem(key);
+      if (!item) return null;
+      
+      const { data, timestamp, ttl } = JSON.parse(item);
+      const age = Date.now() - timestamp;
+      
+      if (age > ttl) {
+        sessionStorage.removeItem(key);
+        return null;
+      }
+      
+      console.log(`📦 Cache hit: ${key} (idade: ${Math.round(age/1000)}s)`);
+      return data;
+    } catch (e) {
+      console.warn('Erro ao ler cache:', e);
+      return null;
+    }
+  },
+
+  /**
+   * Salva dados no cache com TTL
+   * @param {string} key - Chave do cache
+   * @param {*} data - Dados a cachear
+   * @param {number} ttl - Tempo de vida em milissegundos (padrão: 5 minutos)
+   */
+  setCache: function(key, data, ttl = 5 * 60 * 1000) {
+    try {
+      sessionStorage.setItem(key, JSON.stringify({
+        data,
+        timestamp: Date.now(),
+        ttl
+      }));
+      console.log(`💾 Cache salvo: ${key} (TTL: ${ttl/1000}s)`);
+    } catch (e) {
+      console.warn('Cache storage full ou erro:', e);
+      // Se o storage estiver cheio, limpa caches antigos
+      this.cleanOldCache();
+    }
+  },
+
+  /**
+   * Limpa cache de eventos (útil após modificações)
+   */
+  clearCache: function() {
+    Object.keys(sessionStorage).forEach(key => {
+      if (key.startsWith('eventos_')) {
+        sessionStorage.removeItem(key);
+      }
+    });
+    console.log('🗑️ Cache de eventos limpo');
+  },
+
+  /**
+   * Remove caches antigos para liberar espaço
+   */
+  cleanOldCache: function() {
+    Object.keys(sessionStorage).forEach(key => {
+      if (key.startsWith('eventos_')) {
+        try {
+          const item = JSON.parse(sessionStorage.getItem(key));
+          const age = Date.now() - item.timestamp;
+          // Remove se tiver mais de 10 minutos
+          if (age > 10 * 60 * 1000) {
+            sessionStorage.removeItem(key);
+          }
+        } catch (e) {
+          sessionStorage.removeItem(key);
+        }
+      }
+    });
+  },
+
+  // =============================
+  // 1 - INÍCIO: buscarEventos (com cache)
   // =============================
   buscarEventos: async function (ano, mes) {
+    // 1. Verifica cache primeiro
+    const cacheKey = `eventos_${ano}_${mes}`;
+    const cached = this.getCache(cacheKey);
+    
+    if (cached) {
+      return cached;
+    }
+    
+    // 2. Busca do banco
+    console.log(`🌐 Fetching: ${cacheKey}`);
     const mesStr = String(mes).padStart(2, "0");
     const inicio = `${ano}-${mesStr}-01`;
     const ultimoDia = new Date(ano, mes, 0).getDate();
     const fim = `${ano}-${mesStr}-${ultimoDia}`;
+    
     const { data, error } = await _supabaseClient
       .from("eventos_base")
       .select(
@@ -29,7 +132,15 @@ window.api = {
       .gte("data", inicio)
       .lte("data", fim)
       .order("data", { ascending: true });
-    return error ? [] : data;
+    
+    if (error) {
+      console.error('❌ API Error:', error);
+      return [];
+    }
+    
+    // 3. Salva em cache
+    this.setCache(cacheKey, data);
+    return data;
   },
   // =============================
   // 1 - FIM: buscarEventos
@@ -197,7 +308,7 @@ window.api = {
   // =============================
 
   // =============================
-  // NEW: salvarEventoCompleto (Fix solicitado)
+  // NEW: salvarEventoCompleto (Fix solicitado + Cache Invalidation)
   // =============================
   salvarEventoCompleto: async function (eventoPayload, escalasPayload) {
     // 1. Salva/Atualiza o Evento Base
@@ -252,6 +363,16 @@ window.api = {
 
       if (errScales) console.error("Erro ao salvar escalas:", errScales);
     }
+    
+    // 3. NOVO: Invalida cache do mês modificado
+    const data = new Date(eventoPayload.data);
+    const ano = data.getFullYear();
+    const mes = data.getMonth() + 1;
+    const cacheKey = `eventos_${ano}_${mes}`;
+    sessionStorage.removeItem(cacheKey);
+    console.log(`🗑️ Cache invalidado após salvar: ${cacheKey}`);
+    
+    return eventoId;
   },
 
   // =============================

@@ -1,9 +1,17 @@
 /*
+ * SACRISTIA DIGITAL - Sistema de Gestão Paroquial
+ * 
+ * © 2026 TODOS OS DIREITOS RESERVADOS
+ * Desenvolvido EXCLUSIVAMENTE por Rodrigo Dionízio
+ * Instagram: @rodrigodionizio
+ * https://www.instagram.com/rodrigodionizio/
+ * 
+ * PROIBIDA a reprodução, distribuição ou modificação
+ * sem autorização expressa do autor.
+ * 
  * ARQUIVO: calendar-engine.js
- * DESCRIÇÃO: Motor de Renderização Único e Universal (V12.0)
- * FUNCIONALIDADE: Gerencia a lógica visual do calendário para áreas públicas e administrativas.
- * SUPORTE: Múltiplos eventos por dia (Arquitetura SaaS).
- * PROJETO: Liturgia Paroquial 2026
+ * DESCRIÇÃO: Motor de Renderização Universal
+ * VERSÃO: 12.0
  */
 
 window.CalendarEngine = {

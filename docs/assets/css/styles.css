@@ -1,8 +1,17 @@
-/* 
+/*
+ * SACRISTIA DIGITAL - Sistema de Gestão Paroquial
+ * 
+ * © 2026 TODOS OS DIREITOS RESERVADOS
+ * Desenvolvido EXCLUSIVAMENTE por Rodrigo Dionízio
+ * Instagram: @rodrigodionizio
+ * https://www.instagram.com/rodrigodionizio/
+ * 
+ * PROIBIDA a reprodução, distribuição ou modificação
+ * sem autorização expressa do autor.
+ * 
  * ARQUIVO: styles.css
- * PROJETO: Liturgia Paroquial 2026
- * DESCRIÇÃO: Estilos globais, componentes, mural e responsividade.
- * VERSÃO: 5.0 (Gold + Mural)
+ * DESCRIÇÃO: Estilos Globais e Design System
+ * VERSÃO: 5.0
  */
 
 /* ==========================================================================
@@ -423,11 +432,13 @@ header {
   display: flex;
   flex: 1;
   overflow: hidden;
+  background-color: var(--cor-fundo);
+  background: var(--cor-fundo);
 }
 
 .sidebar {
   width: 260px;
-  background-color: rgba(255, 255, 255, 0.6);
+  background-color: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-right: 1px solid rgba(0, 0, 0, 0.05);
@@ -448,7 +459,7 @@ header {
   align-items: center;
   justify-content: center;
   border: 1px solid rgba(0, 0, 0, 0.05);
-  color: #aaa;
+  color: #888;
   font-size: 0.8rem;
 }
 
@@ -700,7 +711,7 @@ header {
 
 .aviso-meta {
   font-size: 0.75rem;
-  color: #666;
+  color: #555;
   display: flex;
   align-items: center;
   gap: 5px;
@@ -732,6 +743,8 @@ header {
 }
 
 .scroll-wrapper {
+  background-color: var(--cor-fundo) !important;
+  background: var(--cor-fundo);
   padding: 20px;
   flex: 1;
   display: flex;
@@ -790,7 +803,7 @@ header {
   text-align: center;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #888;
+  color: #666;
   text-transform: uppercase;
 }
 
@@ -817,13 +830,13 @@ header {
 
 .other-month {
   background-color: #f4f4f4;
-  opacity: 0.5;
+  opacity: 0.85;
   pointer-events: none;
 }
 
 /* Filtros Visuais (Grid) */
 .hidden-by-filter {
-  opacity: 0.1;
+  opacity: 0.5;
   pointer-events: none;
   filter: grayscale(100%);
 }
@@ -958,7 +971,7 @@ header {
 .footer-copyright {
   text-align: center;
   font-size: 0.8rem;
-  opacity: 0.6;
+  opacity: 0.8;
   margin-top: 40px;
   padding-top: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
@@ -1035,7 +1048,7 @@ header {
 
 .modal-weekday {
   font-size: 0.75rem;
-  color: #888;
+  color: #666;
   text-transform: uppercase;
 }
 
@@ -1801,5 +1814,171 @@ header {
   }
   .ministerio-value, .ministerio-value-lista {
     grid-column: 2;
+  }
+}
+/* ==========================================================================
+   ACESSIBILIDADE (A11Y) - MELHORIAS v2.0
+   ========================================================================== */
+
+/* Remove outline padrão feio mas mantém funcionalidade */
+*:focus {
+  outline: none;
+}
+
+/* Adiciona outline personalizado para navegação por teclado */
+*:focus-visible {
+  outline: 3px solid var(--cor-dourado);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Focus especial para botões */
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid var(--cor-dourado);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(251, 181, 88, 0.2);
+}
+
+/* Skip link para acessibilidade */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--cor-vinho);
+  color: white;
+  padding: 8px 16px;
+  text-decoration: none;
+  z-index: 100;
+  border-radius: 0 0 8px 0;
+  font-weight: 600;
+  transition: top 0.3s;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Melhor contraste para textos */
+.text-low-contrast {
+  color: #666;
+}
+
+/* Estados hover mais evidentes */
+button:hover,
+.btn-primary:hover,
+.btn-secondary:hover {
+  transform: translateY(-1px);
+  transition: transform 0.2s ease;
+}
+
+/* Indicador de loading acessível */
+.loading-spinner[role="status"]::after {
+  content: "Carregando...";
+  position: absolute;
+  left: -9999px;
+}
+
+/* Melhor visibilidade dos links */
+a {
+  text-decoration-skip-ink: auto;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Estados disabled mais claros */
+button:disabled,
+input:disabled,
+select:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Melhor contraste de cores do calendário */
+.day-event {
+  min-height: 44px; /* Área de toque mínima WCAG */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Screen reader only (elemento visível apenas para leitores de tela) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Mensagens de erro mais visíveis */
+.error-message {
+  color: #c82038;
+  font-weight: 600;
+  padding: 12px;
+  background: #fff5f5;
+  border-left: 4px solid #c82038;
+  border-radius: 4px;
+  margin: 8px 0;
+}
+
+/* Tooltips acessíveis */
+[data-tooltip] {
+  position: relative;
+  cursor: help;
+}
+
+[data-tooltip]:hover::after,
+[data-tooltip]:focus::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  z-index: 1000;
+  margin-bottom: 8px;
+}
+
+/* Redução de movimento para usuários sensíveis */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Alto contraste para usuários com necessidades especiais */
+@media (prefers-contrast: high) {
+  * {
+    border-color: currentColor !important;
+  }
+  
+  .day-event {
+    border: 2px solid currentColor !important;
+  }
+}
+
+/* Dark mode básico (se o usuário preferir) */
+@media (prefers-color-scheme: dark) {
+  /* Apenas um exemplo - ajustar conforme necessário */
+  :root {
+    --text-main: #e0e0e0;
+    --cor-fundo: #1a1a1a;
   }
 }

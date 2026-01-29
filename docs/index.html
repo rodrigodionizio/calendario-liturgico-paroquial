@@ -4,18 +4,63 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Calendário Litúrgico e Paroquial 2026 - Paróquia Senhor Bom Jesus" />
-  <title>Calendário Paroquial 2026 | Paróquia Sr. Bom Jesus</title>
-
-  <!-- Open Graph / Meta Tags para Redes Sociais (SDS v6.8) -->
-  <meta property="og:title" content="Sacristia Digital - Paróquia Senhor Bom Jesus" />
-  <meta property="og:description"
-    content="Sistema de gestão pastoral, agenda litúrgica e controle de equipes paroquiais. Itabirinha/MG." />
+  
+  <!-- SEO Básico -->
+  <title>Calendário Litúrgico 2026 | Paróquia Senhor Bom Jesus - Itabirinha MG</title>
+  <meta name="description" content="Acompanhe o calendário litúrgico, horários de missas, eventos e escalas da Paróquia Senhor Bom Jesus em Itabirinha, Minas Gerais. Sistema digital de gestão pastoral." />
+  <meta name="keywords" content="paróquia, igreja católica, itabirinha, minas gerais, calendário litúrgico, horário de missa, eventos paroquiais, sacristia digital" />
+  <meta name="author" content="Rodrigo Dionízio" />
+  <link rel="canonical" href="https://rodrigodionizio.github.io/calendario-liturgico-paroquial/" />
+  
+  <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://rodrigodionizio.github.io/calendario-liturgico-paroquial/" />
+  <meta property="og:title" content="Paróquia Senhor Bom Jesus - Itabirinha MG" />
+  <meta property="og:description" content="Sistema digital de gestão pastoral com calendário litúrgico, escalas e eventos da paróquia. Acompanhe nossa programação religiosa." />
+  <meta property="og:image" content="https://rodrigodionizio.github.io/calendario-liturgico-paroquial/assets/img/og-image.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
   <meta property="og:locale" content="pt_BR" />
+  <meta property="og:site_name" content="Paróquia Senhor Bom Jesus" />
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://rodrigodionizio.github.io/calendario-liturgico-paroquial/" />
+  <meta name="twitter:title" content="Paróquia Senhor Bom Jesus - Itabirinha MG" />
+  <meta name="twitter:description" content="Sistema digital de gestão pastoral com calendário litúrgico, escalas e eventos paroquiais." />
+  <meta name="twitter:image" content="https://rodrigodionizio.github.io/calendario-liturgico-paroquial/assets/img/og-image.jpg" />
+  
+  <!-- Schema.org Markup para SEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Church",
+    "name": "Paróquia Senhor Bom Jesus",
+    "description": "Paróquia Católica em Itabirinha, Minas Gerais",
+    "url": "https://rodrigodionizio.github.io/calendario-liturgico-paroquial/",
+    "telephone": "+55-33-99428407",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Praça da Igreja",
+      "addressLocality": "Itabirinha",
+      "addressRegion": "MG",
+      "postalCode": "35280-000",
+      "addressCountry": "BR"
+    },
+    "sameAs": [
+      "https://www.instagram.com/bomjesusdeitabirinha/",
+      "https://www.youtube.com/@pascomdabomjesusitabirinha"
+    ],
+    "memberOf": {
+      "@type": "Organization",
+      "name": "Diocese de Teófilo Otoni"
+    }
+  }
+  </script>
 
-  <!-- Preconnect para CDNs (Performance) -->
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <!-- Preconnect para Performance -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="preconnect" href="https://gmfmebnodmtozpzhlgvk.supabase.co" crossorigin />
 
   <!-- Supabase JS (CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -27,6 +72,7 @@
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <!-- Favicon em Alta Resolução -->
   <link rel="icon" type="image/png" href="assets/img/favicon.ico" />
+  
   <!-- Configurações para PWA Mobile -->
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#a41d31" />
@@ -45,11 +91,15 @@
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        // USAMOS './sw.js' (com ponto) para que ele busque na pasta do projeto no GitHub
-        navigator.serviceWorker
-          .register("./sw.js")
-          .then((reg) => console.log("PWA: Service Worker Ativo!", reg.scope))
-          .catch((err) => console.error("PWA: Erro no registro", err));
+        // Verifica se está rodando via HTTP/HTTPS (não file://)
+        if (location.protocol === 'http:' || location.protocol === 'https:') {
+          navigator.serviceWorker
+            .register("./sw.js")
+            .then((reg) => console.log("✅ PWA: Service Worker Ativo!", reg.scope))
+            .catch((err) => console.error("❌ PWA: Erro no registro", err));
+        } else {
+          console.log("⚠️ PWA: Service Worker desabilitado (ambiente local)");
+        }
       });
     }
   </script>
@@ -265,16 +315,22 @@
   </div>
 
   <!-- ==========================================================================
-         SCRIPTS (ORDEM OBRIGATÓRIA: LIB -> API -> APP)
+         SCRIPTS (ORDEM OBRIGATÓRIA: LIB -> API -> CONTROLLERS -> APP)
     ========================================================================== -->
 
-  <!-- 2. Módulo de Conexão (Cria window.api) -->
+  <!-- 1. Error Handler (Sistema de tratamento de erros) -->
+  <script src="assets/js/error-handler.js"></script>
+
+  <!-- 2. Módulo de Conexão (Cria window.api com cache) -->
   <script src="assets/js/api.js"></script>
 
-  <!-- 2.1 Módulo do Calendário (Essencial para Integrações) -->
+  <!-- 3. Modal Controller (Sistema unificado de modais) -->
+  <script src="assets/js/modal-controller.js"></script>
+
+  <!-- 4. Módulo do Calendário (Essencial para Integrações) -->
   <script src="assets/js/calendar-engine.js"></script>
 
-  <!-- 3. Aplicação Principal (Usa window.api) -->
+  <!-- 5. Aplicação Principal (Usa window.api) -->
   <script src="assets/js/app.js" defer></script>
 </body>
 

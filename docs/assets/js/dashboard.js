@@ -1,7 +1,17 @@
 /*
+ * SACRISTIA DIGITAL - Sistema de Gestão Paroquial
+ * 
+ * © 2026 TODOS OS DIREITOS RESERVADOS
+ * Desenvolvido EXCLUSIVAMENTE por Rodrigo Dionízio
+ * Instagram: @rodrigodionizio
+ * https://www.instagram.com/rodrigodionizio/
+ * 
+ * PROIBIDA a reprodução, distribuição ou modificação
+ * sem autorização expressa do autor.
+ * 
  * ARQUIVO: dashboard.js
- * VERSÃO: 9.0 (Full Integration - Integridade Total)
- * DESCRIÇÃO: Controlador Mestre do Dashboard com suporte a Agenda, Equipes e Acessos.
+ * DESCRIÇÃO: Controlador Mestre do Dashboard
+ * VERSÃO: 9.0
  */
 
 window.DashboardController = {

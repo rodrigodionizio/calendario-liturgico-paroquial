@@ -78,14 +78,23 @@
     </div>
 
     <a href="index.html" class="menu-item" style="
-          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          border-top: 1px solid rgba(255, 255, 255, 0.15);
           margin-top: 20px;
-          opacity: 0.6;
-        ">
+          opacity: 1;
+          background: rgba(251, 181, 88, 0.15);
+          transition: all 0.3s;
+        "
+        onmouseover="this.style.background='rgba(251, 181, 88, 0.25)'"
+        onmouseout="this.style.background='rgba(251, 181, 88, 0.15)'">
       <i data-lucide="globe"></i> Ver Site Público
     </a>
 
-    <div class="menu-item" onclick="window.api.logout()" style="margin-top: auto; color: #ff9999">
+    <div class="menu-item" onclick="window.api.logout()" style="
+          margin-top: auto; 
+          color: #ff9999;
+          transition: all 0.3s;"
+          onmouseover="this.style.background='rgba(255,153,153,0.1)'"
+          onmouseout="this.style.background='transparent'">
       <i data-lucide="log-out"></i> Sair do Sistema
     </div>
   </nav>

@@ -1,0 +1,54 @@
+# robots.txt para Sacristia Digital
+# Desenvolvido por Rodrigo Dionízio
+# © 2026 - Todos os direitos reservados
+
+User-agent: *
+
+# Permitir acesso público
+Allow: /
+Allow: /index.html
+Allow: /assets/css/
+Allow: /assets/js/app.js
+Allow: /assets/js/calendar-engine.js
+Allow: /assets/img/
+Allow: /assets/fonts/
+Allow: /manifest.json
+Allow: /sw.js
+
+# Bloquear área administrativa e arquivos sensíveis
+Disallow: /admin.html
+Disallow: /dashboard.html
+Disallow: /assets/js/dashboard.js
+Disallow: /assets/css/dashboard.css
+Disallow: *.backup
+Disallow: /database/
+Disallow: /backend_automacao/
+
+# Bloquear arquivos de sistema
+Disallow: /.git/
+Disallow: /.github/
+Disallow: /node_modules/
+Disallow: /.vscode/
+
+# Sitemap
+Sitemap: https://rodrigodionizio.github.io/calendario-liturgico-paroquial/sitemap.xml
+
+# Crawl delay para proteção do servidor
+Crawl-delay: 1
+
+# Bots específicos
+User-agent: Googlebot
+Crawl-delay: 0
+
+User-agent: Bingbot
+Crawl-delay: 1
+
+# Bloquear bots maliciosos conhecidos
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /

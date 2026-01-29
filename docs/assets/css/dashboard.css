@@ -1,11 +1,18 @@
-/**
- * SACRISTIA DIGITAL - DESIGN SYSTEM (ADMIN EXTENSION)
- * Versão: 5.5
- * Arquitetura: OOCSS + BEM + Design Tokens
- * Documentação: Camada de estilos para o Dashboard Administrativo SaaS.
+/*
+ * SACRISTIA DIGITAL - Sistema de Gestão Paroquial
  * 
- * NOTA DE SEGURANÇA: Este arquivo mantém compatibilidade com IDs e Classes legadas 
- * para garantir a integridade do sistema em produção.
+ * © 2026 TODOS OS DIREITOS RESERVADOS
+ * Desenvolvido EXCLUSIVAMENTE por Rodrigo Dionízio
+ * Instagram: @rodrigodionizio
+ * https://www.instagram.com/rodrigodionizio/
+ * 
+ * PROIBIDA a reprodução, distribuição ou modificação
+ * sem autorização expressa do autor.
+ * 
+ * ARQUIVO: dashboard.css
+ * DESCRIÇÃO: Estilos do Dashboard Administrativo
+ * VERSÃO: 5.5
+ * Arquitetura: OOCSS + BEM + Design Tokens
  */
 
 /* ==========================================================================
@@ -13,7 +20,7 @@
    ========================================================================== */
 :root {
   /* Cores de Fundo e Superfície */
-  --sys-bg-admin: #f5f7fa;
+  --sys-bg-admin: #fff8e7;
   --sys-surface: #ffffff;
   --sys-sidebar-width: 260px;
 
@@ -338,7 +345,7 @@
   align-items: center;
   gap: 15px;
   transition: all 0.2s ease;
-  opacity: 0.75;
+  opacity: 0.9;
   font-size: 0.95rem;
   font-family: "AntennaCond", sans-serif;
   border-left: 4px solid transparent;
@@ -539,7 +546,7 @@
 .chart-bar {
   width: 100%;
   background-color: var(--cor-vinho);
-  opacity: 0.85;
+  opacity: 0.95;
   border-radius: 6px 6px 0 0;
   transition: height 0.8s cubic-bezier(0.17, 0.67, 0.83, 0.67);
   min-height: 4px;

@@ -1,8 +1,17 @@
 /*
+ * SACRISTIA DIGITAL - Sistema de Gestão Paroquial
+ * 
+ * © 2026 TODOS OS DIREITOS RESERVADOS
+ * Desenvolvido EXCLUSIVAMENTE por Rodrigo Dionízio
+ * Instagram: @rodrigodionizio
+ * https://www.instagram.com/rodrigodionizio/
+ * 
+ * PROIBIDA a reprodução, distribuição ou modificação
+ * sem autorização expressa do autor.
+ * 
  * ARQUIVO: app.js
- * DESCRIÇÃO: Controlador Principal - Versão V10.0 (Gold Master)
- * FUNCIONALIDADES: Calendário, Mural, Filtros, PDF, Agenda Total com Horários
- * AUTOR: Rodrigo & Dev AI
+ * DESCRIÇÃO: Controlador Principal
+ * VERSÃO: 10.0 (Gold Master)
  */
 
 console.log("🚀 Sistema Litúrgico V10.0 Iniciado");
@@ -63,8 +72,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   carregarMes(ESTADO.anoAtual, ESTADO.mesAtual);
   configurarBotoesNavegacao();
 
-  // 1.4. Auto-Refresh com Supabase Realtime (Performance Otimizada)
-  inicializarAutoRefresh();
+  // 1.4. Auto-Refresh desabilitado temporariamente
+  // TODO: Implementar com Supabase Realtime se necessário
 });
 
 // ==========================================================================
@@ -1126,7 +1135,32 @@ function adicionarBotaoLogin() {
   const div = document.createElement("div");
   div.style.position = "absolute";
   div.style.right = "20px";
-  div.innerHTML = `<a href="admin.html" title="Acesso Restrito" style="color:rgba(255,255,255,0.5); text-decoration:none;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></a>`;
+  div.style.display = "flex";
+  div.style.gap = "10px";
+  div.style.alignItems = "center";
+  div.innerHTML = `
+    <a href="admin.html" 
+       title="Acesso Administrativo" 
+       style="color:#fff; 
+              text-decoration:none; 
+              display:flex; 
+              align-items:center; 
+              gap:6px;
+              padding:8px 16px;
+              background:rgba(255,255,255,0.2);
+              border-radius:20px;
+              transition:all 0.3s;
+              font-size:0.9rem;
+              font-weight:600;"
+       onmouseover="this.style.background='rgba(255,255,255,0.3)'"
+       onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+      <span>Admin</span>
+    </a>
+  `;
   header.appendChild(div);
 }
 
@@ -1135,7 +1169,56 @@ function adicionarBotaoLogout() {
   const div = document.createElement("div");
   div.style.position = "absolute";
   div.style.right = "20px";
-  div.innerHTML = `<button onclick="window.api.logout()" style="background:rgba(255,255,255,0.2); border:1px solid #fff; color:#fff; padding:5px 12px; border-radius:20px; cursor:pointer; font-size:0.8rem;">Sair</button>`;
+  div.style.display = "flex";
+  div.style.gap = "10px";
+  div.style.alignItems = "center";
+  div.innerHTML = `
+    <a href="dashboard.html" 
+       title="Painel Administrativo" 
+       style="color:#fff; 
+              text-decoration:none; 
+              display:flex; 
+              align-items:center; 
+              gap:6px;
+              padding:8px 16px;
+              background:rgba(255,255,255,0.25);
+              border-radius:20px;
+              transition:all 0.3s;
+              font-size:0.9rem;
+              font-weight:600;"
+       onmouseover="this.style.background='rgba(255,255,255,0.35)'"
+       onmouseout="this.style.background='rgba(255,255,255,0.25)'">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7"></rect>
+        <rect x="14" y="3" width="7" height="7"></rect>
+        <rect x="14" y="14" width="7" height="7"></rect>
+        <rect x="3" y="14" width="7" height="7"></rect>
+      </svg>
+      <span>Dashboard</span>
+    </a>
+    <button onclick="window.api.logout()" 
+            style="background:rgba(200,32,56,0.9); 
+                   border:none; 
+                   color:#fff; 
+                   padding:8px 16px; 
+                   border-radius:20px; 
+                   cursor:pointer; 
+                   font-size:0.9rem;
+                   font-weight:600;
+                   transition:all 0.3s;
+                   display:flex;
+                   align-items:center;
+                   gap:6px;"
+            onmouseover="this.style.background='rgba(200,32,56,1)'"
+            onmouseout="this.style.background='rgba(200,32,56,0.9)'">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+        <polyline points="16 17 21 12 16 7"></polyline>
+        <line x1="21" y1="12" x2="9" y2="12"></line>
+      </svg>
+      <span>Sair</span>
+    </button>
+  `;
   header.appendChild(div);
 }
 
