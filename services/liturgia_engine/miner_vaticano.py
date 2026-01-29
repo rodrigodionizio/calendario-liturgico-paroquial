@@ -9,6 +9,8 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 from supabase import create_client
+from dotenv import load_dotenv
+load_dotenv()
 import time
 
 # Configurações via Variáveis de Ambiente (Segurança)

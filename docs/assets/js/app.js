@@ -1,14 +1,14 @@
 /*
  * SACRISTIA DIGITAL - Sistema de Gestão Paroquial
- * 
+ *
  * © 2026 TODOS OS DIREITOS RESERVADOS
  * Desenvolvido EXCLUSIVAMENTE por Rodrigo Dionízio
  * Instagram: @rodrigodionizio
  * https://www.instagram.com/rodrigodionizio/
- * 
+ *
  * PROIBIDA a reprodução, distribuição ou modificação
  * sem autorização expressa do autor.
- * 
+ *
  * ARQUIVO: app.js
  * DESCRIÇÃO: Controlador Principal
  * VERSÃO: 10.0 (Gold Master)
@@ -34,6 +34,19 @@ let cacheEquipesCanto = [];
 
 const ICONS = {
   leitura:
+    '<img src="assets/img/icones/leitores.png" alt="Ícone de Leitores" class="equipe-icon" />',
+  canto:
+    '<img src="assets/img/icones/canto.png" alt="Ícone de Canto" class="equipe-icon" />',
+  celebrante:
+    '<img src="assets/img/icones/celebrante.png" alt="Ícone de Celebrante" class="equipe-icon" />',
+  mep: '<img src="assets/img/icones/mep.png" alt="Ícone do Ministro da Palavra" class="equipe-icon" />',
+  mesce:
+    '<img src="assets/img/icones/mesce.png" alt="Ícone do Ministro da Eucaristia" class="equipe-icon" />',
+  coroinhas:
+    '<img src="assets/img/icones/coroinhas.png" alt="Ícone de Coroinhas" class="equipe-icon" />',
+};
+/*const ICONS = {
+  leitura:
     '<svg class="equipe-icon" viewBox="0 0 24 24" fill="currentColor" style="color:var(--cor-vinho)"><path d="M12 3v18.5c-2.3-.6-4.4-1-6.5-1-2.4 0-4.6.5-6.5 1.2V3.2C1.4 2.5 3.6 2 6 2c2.1 0 4.1.4 6 1zm10.5-.8c-1.9-.7-4.1-1.2-6.5-1.2v18.5c2.1 0 4.2.4 6.5 1V3.2z"/></svg>',
   canto:
     '<svg class="equipe-icon" viewBox="0 0 24 24" fill="currentColor" style="color:var(--cor-dourado)"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>',
@@ -42,7 +55,7 @@ const ICONS = {
   mesce: '✨',
   coroinhas: '🕯️',
 };
-
+*/
 // ==========================================================================
 // 1. INICIALIZAÇÃO
 // ==========================================================================
@@ -60,10 +73,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 1.2. Dados Básicos
   ESTADO.listaEquipes = await window.api.listarEquipes();
   cacheEquipesLeitura = ESTADO.listaEquipes.filter(
-    (e) => e.tipo_atuacao === "Leitura" || e.tipo_atuacao === "Ambos"
+    (e) => e.tipo_atuacao === "Leitura" || e.tipo_atuacao === "Ambos",
   );
   cacheEquipesCanto = ESTADO.listaEquipes.filter(
-    (e) => e.tipo_atuacao === "Canto" || e.tipo_atuacao === "Ambos"
+    (e) => e.tipo_atuacao === "Canto" || e.tipo_atuacao === "Ambos",
   );
 
   // 1.3. Interface
@@ -163,7 +176,7 @@ async function carregarMes(ano, mes) {
 
   const grid = document.querySelector(".calendar-wrapper");
   const headersMatch = grid.innerHTML.match(
-    /<div class="day-header">.*?<\/div>/g
+    /<div class="day-header">.*?<\/div>/g,
   );
   const headers = headersMatch ? headersMatch.join("") : "";
 
@@ -197,7 +210,7 @@ function renderizarGrid(ano, mes, gridElement, headersHTML) {
 
   for (let dia = 1; dia <= ultimoDia; dia++) {
     const dataISO = `${ano}-${String(mes).padStart(2, "0")}-${String(
-      dia
+      dia,
     ).padStart(2, "0")}`;
     const evento = ESTADO.dadosEventos[dataISO];
     let conteudoHTML = "";
@@ -211,30 +224,31 @@ function renderizarGrid(ano, mes, gridElement, headersHTML) {
 
       // Define a classe e o ícone baseado no tipo
       switch (evento.tipo_compromisso) {
-        case 'atendimento':
+        case "atendimento":
           classeCategoria = "pill--padre";
           icone = "";
           break;
-        case 'reuniao':
+        case "reuniao":
           classeCategoria = "pill--reuniao";
           icone = "";
           break;
-        case 'evento':
+        case "evento":
           classeCategoria = "pill--festa";
           icone = "";
           break;
       }
 
       // Captura o horário
-      let horaShow = evento.hora_inicio ? evento.hora_inicio.substring(0, 5) :
-        (evento.escalas?.[0]?.hora_celebracao?.substring(0, 5) || "");
+      let horaShow = evento.hora_inicio
+        ? evento.hora_inicio.substring(0, 5)
+        : evento.escalas?.[0]?.hora_celebracao?.substring(0, 5) || "";
 
       // Para Liturgia, a borda é a cor litúrgica. Para Outros, a classe CSS resolve.
       // EXCLUSIVO: Atendimento recebe box colorido sólido (v6.8)
       let estiloAdicional = "";
-      if (evento.tipo_compromisso === 'liturgia') {
+      if (evento.tipo_compromisso === "liturgia") {
         estiloAdicional = `style="border-left: 4px solid ${corLiturgica} !important;"`;
-      } else if (evento.tipo_compromisso === 'atendimento') {
+      } else if (evento.tipo_compromisso === "atendimento") {
         estiloAdicional = `style="background-color: #2e3fd1ff !important; color: white !important; border: none !important;"`;
       }
 
@@ -242,7 +256,7 @@ function renderizarGrid(ano, mes, gridElement, headersHTML) {
 
       conteudoHTML = `
         <div class="pill ${classeCategoria} ${classeSolenidade}" ${estiloAdicional} title="${evento.titulo}">
-            ${horaShow ? `<span style="font-size: 0.65rem; opacity: 0.8;">${horaShow}</span>` : ''}
+            ${horaShow ? `<span style="font-size: 0.65rem; opacity: 0.8;">${horaShow}</span>` : ""}
             <span>${icone} ${evento.titulo}</span>
         </div>`;
 
@@ -324,7 +338,7 @@ function aplicarFiltrosVisuais() {
 
   if (ESTADO.filtrosAtivos.size === 0) {
     celulas.forEach((cel) =>
-      cel.classList.remove("hidden-by-filter", "highlight-filter")
+      cel.classList.remove("hidden-by-filter", "highlight-filter"),
     );
     return;
   }
@@ -392,19 +406,19 @@ window.abrirModal = function (dataISO) {
   let corTxt = "#2e7d32";
 
   switch (evento.tipo_compromisso) {
-    case 'atendimento':
+    case "atendimento":
       corHex = "#2e3fd1ff"; // Blue (Padre)
       corTxt = "#2e3fd1ff";
       break;
-    case 'reuniao':
+    case "reuniao":
       corHex = "#475569"; // Slate Blue (Reunião)
       corTxt = "#475569";
       break;
-    case 'evento':
+    case "evento":
       corHex = "#bfa15f"; // Dourado Escuro (Festa)
       corTxt = "#a67c00";
       break;
-    case 'liturgia':
+    case "liturgia":
     default:
       // Mantém a cor litúrgica dinâmica para celebrações
       corHex = evento.liturgia_cores?.hex_code || "#2e7d32";
@@ -425,10 +439,12 @@ window.abrirModal = function (dataISO) {
     conteudoHTML = `
             <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:10px;">
                 <p><strong>Horário:</strong> ${horaShow}</p>
-                <p><strong>Local:</strong> ${evento.local || "Não informado"
-      }</p>
-                <p><strong>Responsável:</strong> ${evento.responsavel || "Não informado"
-      }</p>
+                <p><strong>Local:</strong> ${
+                  evento.local || "Não informado"
+                }</p>
+                <p><strong>Responsável:</strong> ${
+                  evento.responsavel || "Não informado"
+                }</p>
             </div>`;
   } else {
     conteudoHTML = gerarHTMLLeitura(evento);
@@ -508,7 +524,7 @@ function gerarHTMLLeitura(evento) {
       `;
 
       // Celebrante (Missa) ou MEP (Palavra)
-      if (evento.tipo_celebracao === 'missa' && esc.celebrante_nome) {
+      if (evento.tipo_celebracao === "missa" && esc.celebrante_nome) {
         htmlRows += `
           <div class="ministerio-row">
               <div class="ministerio-icon">${ICONS.celebrante}</div>
@@ -516,7 +532,10 @@ function gerarHTMLLeitura(evento) {
               <div class="ministerio-value">${esc.celebrante_nome}</div>
           </div>
         `;
-      } else if (evento.tipo_celebracao === 'celebracao_palavra' && esc.equipe_mep) {
+      } else if (
+        evento.tipo_celebracao === "celebracao_palavra" &&
+        esc.equipe_mep
+      ) {
         htmlRows += `
           <div class="ministerio-row">
               <div class="ministerio-icon">${ICONS.mep}</div>
@@ -527,26 +546,34 @@ function gerarHTMLLeitura(evento) {
       }
 
       // MESCE
-      if (esc.lista_mesce && Array.isArray(esc.lista_mesce) && esc.lista_mesce.length > 0) {
+      if (
+        esc.lista_mesce &&
+        Array.isArray(esc.lista_mesce) &&
+        esc.lista_mesce.length > 0
+      ) {
         htmlRows += `
           <div class="ministerio-row">
               <div class="ministerio-icon">${ICONS.mesce}</div>
               <div class="ministerio-label">MESCE</div>
               <div class="ministerio-value-lista">
-                  ${esc.lista_mesce.map(n => `<span class="nome-pill">${n}</span>`).join('')}
+                  ${esc.lista_mesce.map((n) => `<span class="nome-pill">${n}</span>`).join("")}
               </div>
           </div>
         `;
       }
 
       // Coroinhas
-      if (esc.lista_coroinhas && Array.isArray(esc.lista_coroinhas) && esc.lista_coroinhas.length > 0) {
+      if (
+        esc.lista_coroinhas &&
+        Array.isArray(esc.lista_coroinhas) &&
+        esc.lista_coroinhas.length > 0
+      ) {
         htmlRows += `
           <div class="ministerio-row">
               <div class="ministerio-icon">${ICONS.coroinhas}</div>
               <div class="ministerio-label">Coroinhas</div>
               <div class="ministerio-value-lista">
-                  ${esc.lista_coroinhas.map(n => `<span class="nome-pill nome-pill--coroinha">${n}</span>`).join('')}
+                  ${esc.lista_coroinhas.map((n) => `<span class="nome-pill nome-pill--coroinha">${n}</span>`).join("")}
               </div>
           </div>
         `;
@@ -588,14 +615,18 @@ function ativarModoEdicao(evento) {
         <div style="background:#fff; padding:15px; border-radius:8px; border:1px solid #e0e0e0; margin-bottom:15px;">
             <label for="editTipoComp" style="font-size:0.7rem; font-weight:bold; color:#888;">TIPO DE COMPROMISSO</label>
             <select id="editTipoComp" onchange="window.toggleCamposEditor()" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; margin-bottom:10px; font-weight:bold; background:#f9f9f9;">
-                <option value="liturgia" ${tipoComp === "liturgia" ? "selected" : ""
-    }>Liturgia / Missa</option>
-                <option value="reuniao" ${tipoComp === "reuniao" ? "selected" : ""
-    }>Reunião / Pastoral</option>
-                <option value="evento" ${tipoComp === "evento" ? "selected" : ""
-    }>Evento / Festa</option>
-                <option value="atendimento" ${tipoComp === "atendimento" ? "selected" : ""
-    }>Atendimento Padre</option>
+                <option value="liturgia" ${
+                  tipoComp === "liturgia" ? "selected" : ""
+                }>Liturgia / Missa</option>
+                <option value="reuniao" ${
+                  tipoComp === "reuniao" ? "selected" : ""
+                }>Reunião / Pastoral</option>
+                <option value="evento" ${
+                  tipoComp === "evento" ? "selected" : ""
+                }>Evento / Festa</option>
+                <option value="atendimento" ${
+                  tipoComp === "atendimento" ? "selected" : ""
+                }>Atendimento Padre</option>
             </select>
 
             <label for="editTitulo" style="font-size:0.7rem; font-weight:bold; color:#888;">TÍTULO</label>
@@ -626,19 +657,23 @@ function ativarModoEdicao(evento) {
         <!-- Mural -->
         <div style="background:#fff9e6; padding:10px; border-radius:8px; border:1px solid #eee; margin-bottom:15px;">
             <div style="display:flex; align-items:center; gap:10px;">
-                <input type="checkbox" id="checkMural" onchange="window.toggleMuralPrio()" ${isMural ? "checked" : ""
-    } style="width:18px; height:18px;">
+                <input type="checkbox" id="checkMural" onchange="window.toggleMuralPrio()" ${
+                  isMural ? "checked" : ""
+                } style="width:18px; height:18px;">
                 <label for="checkMural" style="font-weight:bold; font-size:0.9rem; color:#d97706;">Destacar no Mural?</label>
             </div>
             <div id="area-prio" style="margin-top:10px; display:none; padding-left:28px;">
                 <label for="editPrio" style="font-size:0.7rem; font-weight:bold; color:#888;">PRIORIDADE</label>
                 <select id="editPrio" style="padding:5px; border:1px solid #ccc; border-radius:4px;">
-                    <option value="1" ${prioMural == 1 ? "selected" : ""
-    }>🔴 Urgente</option>
-                    <option value="2" ${prioMural == 2 ? "selected" : ""
-    }>🟡 Atenção</option>
-                    <option value="3" ${prioMural == 3 ? "selected" : ""
-    }>🔵 Info</option>
+                    <option value="1" ${
+                      prioMural == 1 ? "selected" : ""
+                    }>🔴 Urgente</option>
+                    <option value="2" ${
+                      prioMural == 2 ? "selected" : ""
+                    }>🟡 Atenção</option>
+                    <option value="3" ${
+                      prioMural == 3 ? "selected" : ""
+                    }>🔵 Info</option>
                 </select>
             </div>
         </div>
@@ -682,7 +717,7 @@ function gerarCamposLiturgia(evento, tempoVal, corAtualId) {
   const optionsTempo = tempos
     .map(
       (t) =>
-        `<option value="${t}" ${t === tempoVal ? "selected" : ""}>${t}</option>`
+        `<option value="${t}" ${t === tempoVal ? "selected" : ""}>${t}</option>`,
     )
     .join("");
 
@@ -695,22 +730,27 @@ function gerarCamposLiturgia(evento, tempoVal, corAtualId) {
         <div style="flex:1;">
             <label for="editTipo" style="font-size:0.7rem; font-weight:bold; color:#888;">TIPO</label>
             <select id="editTipo" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
-                <option value="comum" ${!evento.is_solenidade ? "selected" : ""
-    }>Comum</option>
-                <option value="solenidade" ${evento.is_solenidade ? "selected" : ""
-    }>Solenidade</option>
+                <option value="comum" ${
+                  !evento.is_solenidade ? "selected" : ""
+                }>Comum</option>
+                <option value="solenidade" ${
+                  evento.is_solenidade ? "selected" : ""
+                }>Solenidade</option>
             </select>
         </div>
     </div>
     <div>
         <label for="editCor" style="font-size:0.7rem; font-weight:bold; color:#888;">COR</label>
         <select id="editCor" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:4px;">
-            <option value="1" ${corAtualId == 1 ? "selected" : ""
-    }>Verde</option>
-            <option value="2" ${corAtualId == 2 ? "selected" : ""
-    }>Branco</option>
-            <option value="3" ${corAtualId == 3 ? "selected" : ""
-    }>Vermelho</option>
+            <option value="1" ${
+              corAtualId == 1 ? "selected" : ""
+            }>Verde</option>
+            <option value="2" ${
+              corAtualId == 2 ? "selected" : ""
+            }>Branco</option>
+            <option value="3" ${
+              corAtualId == 3 ? "selected" : ""
+            }>Vermelho</option>
             <option value="4" ${corAtualId == 4 ? "selected" : ""}>Roxo</option>
             <option value="5" ${corAtualId == 5 ? "selected" : ""}>Rosa</option>
         </select>
@@ -769,7 +809,7 @@ window.toggleCamposEditor = function () {
 
 window.toggleMuralPrio = function () {
   document.getElementById("area-prio").style.display = document.getElementById(
-    "checkMural"
+    "checkMural",
   ).checked
     ? "block"
     : "none";
@@ -930,28 +970,30 @@ window.abrirOpcoesImpressao = function () {
 window.gerarRelatorio = async function (tipo) {
   // Feedback visual
   const modalBody = document.querySelector("#modalContent .modal-body");
-  if (modalBody) modalBody.innerHTML = '<div style="text-align:center; padding:40px;"><p>🔄 Gerando documento...</p><small>Isso pode levar alguns segundos.</small></div>';
+  if (modalBody)
+    modalBody.innerHTML =
+      '<div style="text-align:center; padding:40px;"><p>🔄 Gerando documento...</p><small>Isso pode levar alguns segundos.</small></div>';
 
   let dataInicio, dataFim, tituloRelatorio;
   const ano = ESTADO.anoAtual;
   const mes = ESTADO.mesAtual;
 
   // Definição das Datas
-  if (tipo === 'mes_atual') {
+  if (tipo === "mes_atual") {
     const ultimoDia = new Date(ano, mes, 0).getDate();
-    dataInicio = `${ano}-${String(mes).padStart(2, '0')}-01`;
-    dataFim = `${ano}-${String(mes).padStart(2, '0')}-${ultimoDia}`;
-    tituloRelatorio = new Date(ano, mes - 1).toLocaleString('pt-BR', { month: 'long' }).toUpperCase();
-  }
-  else if (tipo === 'trimestre') {
+    dataInicio = `${ano}-${String(mes).padStart(2, "0")}-01`;
+    dataFim = `${ano}-${String(mes).padStart(2, "0")}-${ultimoDia}`;
+    tituloRelatorio = new Date(ano, mes - 1)
+      .toLocaleString("pt-BR", { month: "long" })
+      .toUpperCase();
+  } else if (tipo === "trimestre") {
     // Começa dia 1 do mês atual
-    dataInicio = `${ano}-${String(mes).padStart(2, '0')}-01`;
+    dataInicio = `${ano}-${String(mes).padStart(2, "0")}-01`;
     // Pega o último dia do mês + 2
     const dataFimDate = new Date(ano, mes + 2, 0); // O dia 0 do mês seguinte é o último do anterior
-    dataFim = dataFimDate.toISOString().split('T')[0];
+    dataFim = dataFimDate.toISOString().split("T")[0];
     tituloRelatorio = "RELATÓRIO TRIMESTRAL";
-  }
-  else if (tipo === 'ano_completo') {
+  } else if (tipo === "ano_completo") {
     dataInicio = `${ano}-01-01`;
     dataFim = `${ano}-12-31`;
     tituloRelatorio = `ANO DE ${ano}`;
@@ -963,27 +1005,31 @@ window.gerarRelatorio = async function (tipo) {
     // Atualiza cabeçalho do PDF
     document.getElementById("print-month-name").textContent = tituloRelatorio;
     document.getElementById("print-year-val").textContent = ano;
-    document.getElementById("print-footer-date").textContent = new Date().toLocaleString('pt-BR');
+    document.getElementById("print-footer-date").textContent =
+      new Date().toLocaleString("pt-BR");
 
     // Renderização da Tabela
     const tbody = document.getElementById("print-table-body");
     tbody.innerHTML = "";
 
     if (eventos.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:20px;">Nenhum evento encontrado neste período.</td></tr>';
+      tbody.innerHTML =
+        '<tr><td colspan="4" style="text-align:center; padding:20px;">Nenhum evento encontrado neste período.</td></tr>';
     } else {
       let mesAtualProcessamento = -1;
 
-      eventos.forEach(ev => {
+      eventos.forEach((ev) => {
         const dataObj = new Date(ev.data + "T12:00:00");
         const mesEv = dataObj.getMonth();
 
         // Inserção de Separador de Mês (Se mudou o mês e não é mês único)
-        if (tipo !== 'mes_atual' && mesEv !== mesAtualProcessamento) {
-          const nomeMesSep = dataObj.toLocaleString('pt-BR', { month: 'long' }).toUpperCase();
+        if (tipo !== "mes_atual" && mesEv !== mesAtualProcessamento) {
+          const nomeMesSep = dataObj
+            .toLocaleString("pt-BR", { month: "long" })
+            .toUpperCase();
           const anoSep = dataObj.getFullYear();
 
-          const trSep = document.createElement('tr');
+          const trSep = document.createElement("tr");
           trSep.innerHTML = `
                     <td colspan="4" style="background-color:#eee; color:#333; font-weight:bold; text-transform:uppercase; font-size:0.9rem; padding:8px 10px; border-bottom:2px solid #ccc;">
                         ${nomeMesSep} DE ${anoSep}
@@ -1000,13 +1046,13 @@ window.gerarRelatorio = async function (tipo) {
         let classeCategoria = "";
         // Prioridade: Categorias Específicas > Domingo/Solenidade
         switch (ev.tipo_compromisso) {
-          case 'atendimento':
+          case "atendimento":
             classeCategoria = "cat-padre";
             break;
-          case 'reuniao':
+          case "reuniao":
             classeCategoria = "cat-reuniao";
             break;
-          case 'evento':
+          case "evento":
             classeCategoria = "cat-festa";
             break;
           default: // Liturgia
@@ -1018,7 +1064,7 @@ window.gerarRelatorio = async function (tipo) {
 
         // Se for destaque, injeta a classe CSS na tag <tr>
         if (classeCategoria) {
-          htmlRow = htmlRow.replace('<tr>', `<tr class="${classeCategoria}">`);
+          htmlRow = htmlRow.replace("<tr>", `<tr class="${classeCategoria}">`);
         }
 
         // Renderiza Linha do Evento
@@ -1031,7 +1077,6 @@ window.gerarRelatorio = async function (tipo) {
     setTimeout(() => {
       window.print();
     }, 500); // Pequeno delay para renderizar o DOM
-
   } catch (error) {
     console.error(error);
     alert("Erro ao gerar relatório: " + error.message);
@@ -1047,30 +1092,40 @@ function gerarHTMLLinhaImpressao(evento) {
 
   const dataObj = new Date(evento.data + "T12:00:00");
   const diaNum = dataObj.getDate().toString().padStart(2, "0");
-  const diaSem = dataObj.toLocaleString("pt-BR", { weekday: "short" }).toUpperCase().replace(".", "");
+  const diaSem = dataObj
+    .toLocaleString("pt-BR", { weekday: "short" })
+    .toUpperCase()
+    .replace(".", "");
 
   let htmlEscalas = "";
 
-  if (evento.tipo_compromisso === "liturgia" && evento.escalas && evento.escalas.length > 0) {
-    evento.escalas.forEach(esc => {
+  if (
+    evento.tipo_compromisso === "liturgia" &&
+    evento.escalas &&
+    evento.escalas.length > 0
+  ) {
+    evento.escalas.forEach((esc) => {
       const hora = esc.hora_celebracao.substring(0, 5);
       const leit = esc.equipe_leitura?.nome_equipe || "-";
       const cant = esc.equipe_canto?.nome_equipe || "-";
 
       let detalhesExtra = `📖 ${leit} &nbsp; 🎵 ${cant}`;
 
-      if (evento.tipo_celebracao === 'missa' && esc.celebrante_nome) {
+      if (evento.tipo_celebracao === "missa" && esc.celebrante_nome) {
         detalhesExtra += `<br><small>🐑 <b>Celebrante:</b> ${esc.celebrante_nome}</small>`;
-      } else if (evento.tipo_celebracao === 'celebracao_palavra' && esc.equipe_mep) {
+      } else if (
+        evento.tipo_celebracao === "celebracao_palavra" &&
+        esc.equipe_mep
+      ) {
         detalhesExtra += `<br><small>📜 <b>Presidência:</b> ${esc.equipe_mep.nome_equipe}</small>`;
       }
 
       if (esc.lista_mesce && esc.lista_mesce.length > 0) {
-        detalhesExtra += `<br><small>✨ <b>MESCE:</b> ${esc.lista_mesce.join(', ')}</small>`;
+        detalhesExtra += `<br><small>✨ <b>MESCE:</b> ${esc.lista_mesce.join(", ")}</small>`;
       }
 
       if (esc.lista_coroinhas && esc.lista_coroinhas.length > 0) {
-        detalhesExtra += `<br><small>🕯️ <b>Coroinhas:</b> ${esc.lista_coroinhas.join(', ')}</small>`;
+        detalhesExtra += `<br><small>🕯️ <b>Coroinhas:</b> ${esc.lista_coroinhas.join(", ")}</small>`;
       }
 
       htmlEscalas += `
@@ -1081,7 +1136,9 @@ function gerarHTMLLinhaImpressao(evento) {
     });
   } else {
     // Evento Comum / Reunião
-    const hora = evento.hora_inicio ? evento.hora_inicio.substring(0, 5) : "--:--";
+    const hora = evento.hora_inicio
+      ? evento.hora_inicio.substring(0, 5)
+      : "--:--";
     const local = evento.local ? `(${evento.local})` : "";
 
     htmlEscalas = `
@@ -1106,7 +1163,7 @@ function gerarHTMLLinhaImpressao(evento) {
              <!-- A hora é exibida na coluna de detalhes para alinhar com escalas, 
                   mas se nao tiver escalas multiplas, poderia ser aqui. 
                   Mantendo vazio ou ícone para limpeza visual -->
-             ${evento.tipo_compromisso === 'liturgia' ? '✝️' : '📅'}
+             ${evento.tipo_compromisso === "liturgia" ? "✝️" : "📅"}
         </td>
         <td>
             <div class="print-titulo">${evento.titulo}</div>
@@ -1125,7 +1182,6 @@ function gerarHTMLLinhaImpressao(evento) {
 window.fecharModalForce = function () {
   document.getElementById("modalOverlay").classList.remove("active");
 };
-
 
 // ==========================================================================
 // 8. UTILS

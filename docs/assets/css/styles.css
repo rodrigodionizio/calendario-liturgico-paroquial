@@ -366,7 +366,7 @@
    ========================================================================== */
 body {
   background-color: var(--cor-fundo);
-  background: var(--cor-fundo);
+  background: #fff8e7;
   color: var(--text-main);
   font-family: "AntennaCond", "Segoe UI", Tahoma, sans-serif;
   margin: 0;
@@ -745,7 +745,7 @@ header {
 
 .scroll-wrapper {
   background-color: var(--cor-fundo) !important;
-  background: var(--cor-fundo);
+  background: #fff8e7;
   padding: 20px;
   flex: 1;
   display: flex;
@@ -1218,7 +1218,6 @@ header {
 
 /* MOBILE (Celulares menores que 768px) */
 @media (max-width: 768px) {
-
   /* Mostra botão de menu */
   #btn-mobile-menu {
     display: block;
@@ -1316,7 +1315,6 @@ header {
 }
 
 @media print {
-
   /* 2. "Reseta" o corpo da página para impressão */
   html,
   body {
@@ -1328,7 +1326,7 @@ header {
   }
 
   /* 3. ESCONDE TUDO (Header, Sidebar, App, Modais, etc.) */
-  body>*:not(#relatorio-impressao) {
+  body > *:not(#relatorio-impressao) {
     display: none !important;
   }
 
@@ -1373,7 +1371,8 @@ header {
   }
 
   .print-header__title {
-    font-family: "Neulis", "Roboto", "Helvetica", "Arial", sans-serif !important;
+    font-family:
+      "Neulis", "Roboto", "Helvetica", "Arial", sans-serif !important;
     font-size: 16pt !important;
     color: var(--cor-vinho) !important;
     margin: 0 !important;
@@ -1383,7 +1382,8 @@ header {
   }
 
   .print-header__subtitle {
-    font-family: "AntennaCond", "Segoe UI", "Roboto", "Arial", sans-serif !important;
+    font-family:
+      "AntennaCond", "Segoe UI", "Roboto", "Arial", sans-serif !important;
     font-size: 11pt !important;
     color: #666 !important;
     margin-top: 5px !important;
@@ -1590,7 +1590,6 @@ header {
   }
 }
 
-
 /* ==========================================================================
    12. COMPONENTES DE SINCRONIZAÇÃO (PÚBLICO E ADMIN)
    ========================================================================== */
@@ -1611,7 +1610,7 @@ header {
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   background: #fff;
-  font-family: 'AntennaCond', sans-serif;
+  font-family: "AntennaCond", sans-serif;
   font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
@@ -1723,7 +1722,9 @@ header {
 
 /* Hover: Elevação Suave */
 .hover-elevate {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .hover-elevate:hover {
@@ -1813,7 +1814,8 @@ header {
     grid-column: 2;
     margin-bottom: -5px;
   }
-  .ministerio-value, .ministerio-value-lista {
+  .ministerio-value,
+  .ministerio-value-lista {
     grid-column: 2;
   }
 }
@@ -1969,7 +1971,7 @@ select:disabled {
   * {
     border-color: currentColor !important;
   }
-  
+
   .day-event {
     border: 2px solid currentColor !important;
   }
