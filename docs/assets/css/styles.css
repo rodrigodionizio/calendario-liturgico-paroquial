@@ -365,8 +365,7 @@
    3. RESET & BASE
    ========================================================================== */
 body {
-  background-color: var(--cor-fundo);
-  background: #fff8e7;
+  background-color: var(--cor-fundo) !important;
   color: var(--text-main);
   font-family: "AntennaCond", "Segoe UI", Tahoma, sans-serif;
   margin: 0;
@@ -736,6 +735,7 @@ header {
    7. CONTEÚDO PRINCIPAL (CALENDÁRIO)
    ========================================================================== */
 .main-content {
+  background-color: #fff8e7 !important;
   flex: 1;
   padding: 0;
   display: flex;
@@ -744,8 +744,7 @@ header {
 }
 
 .scroll-wrapper {
-  background-color: var(--cor-fundo) !important;
-  background: #fff8e7;
+  background-color: #fff8e7 !important;
   padding: 20px;
   flex: 1;
   display: flex;
@@ -761,8 +760,8 @@ header {
 
 .month-name {
   font-size: 1.8rem;
-  font-weight: 900;
-  color: var(--text-main);
+  font-weight: 700;
+  color: #2c0e12;
   margin: 0;
 }
 

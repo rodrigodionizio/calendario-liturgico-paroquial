@@ -52,10 +52,11 @@
   --sys-alert-danger-border: #c82038;
   /* Nosso Cereja como borda */
 
-  --inter-font: 'Inter', -apple-system, sans-serif;
+  --inter-font: "Inter", -apple-system, sans-serif;
   --cor-borda: rgba(0, 0, 0, 0.05);
   --cor-sub: #64748b;
   --cor-slate: #475569;
+  --text-main: #2c0e12;
 }
 
 /* EXTENSÃO DO DESIGN SYSTEM: UI PREMIUM */
@@ -107,7 +108,7 @@
   font-size: 0.7rem;
   font-weight: 800;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: #2c2c2c;
 }
 
 .c-card-event__content {
@@ -124,7 +125,7 @@
 
 .c-card-event__meta {
   font-size: 0.8rem;
-  color: #64748b;
+  color: #333435;
   display: flex;
   gap: 12px;
 }
@@ -191,6 +192,11 @@
   padding: 30px;
   box-sizing: border-box;
   scroll-behavior: smooth;
+  padding: 80px 15px 80px 15px;
+  /* Topo compensa Header; Base compensa botão flutuante se houver */
+  height: auto;
+  overflow: visible;
+  background-color: var(--sys-bg-admin) !important;
 }
 
 /* ==========================================================================
@@ -205,7 +211,9 @@
   box-shadow: var(--sys-shadow-sm);
   border: var(--sys-border-subtle);
   padding: 25px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .panel:hover {
@@ -451,6 +459,10 @@
   flex: 1;
   margin-left: 18px;
 }
+.list-content small,
+strong {
+  color: #494949;
+}
 
 .list-title {
   font-weight: 800;
@@ -594,7 +606,6 @@
 }
 
 @media (max-width: 768px) {
-
   /* 
      10.1. SHELL & LAYOUT FLUIDO 
      Remoção do modelo de Sidebar Fixa Desktop e adoção de Gaveta 
@@ -604,13 +615,7 @@
     overflow-y: auto !important;
     /* Habilita scroll nativo da janela */
     height: auto !important;
-  }
-
-  .admin-main {
-    padding: 80px 15px 80px 15px;
-    /* Topo compensa Header; Base compensa botão flutuante se houver */
-    height: auto;
-    overflow: visible;
+    background-color: var(--sys-bg-admin) !important;
   }
 
   /* 

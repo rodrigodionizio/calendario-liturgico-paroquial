@@ -834,7 +834,7 @@ window.DashboardController = {
       // Validação: verifica se há eventos
       if (!eventos || eventos.length === 0) {
         container.innerHTML = `
-          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 30px 20px; text-align: center; color: #999;">
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 30px 20px; text-align: center; color: #303030;">
             <div style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;">📭</div>
             <div style="font-size: 0.9rem; line-height: 1.4;">Nenhuma atividade agendada<br>para os próximos 7 dias</div>
           </div>
@@ -908,7 +908,7 @@ window.DashboardController = {
                 </div>
 
                 <div class="c-card-event__content">
-                    <div style="font-size: 9px; font-weight: 900; text-transform: uppercase; color: #999; margin-bottom: 4px;">
+                    <div style="font-size: 9px; font-weight: 900; text-transform: uppercase; color: #292929; margin-bottom: 4px;">
                         ${ev.tipo_compromisso}
                     </div>
                     <h4 class="c-card-event__title">${ev.titulo}</h4>

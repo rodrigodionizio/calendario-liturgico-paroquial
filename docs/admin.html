@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
@@ -80,11 +80,11 @@
           min-height: 100vh;
         }
         .login-card {
-           padding: 30px 20px;
-           box-shadow: none; /* Mais limpo no mobile */
+          padding: 30px 20px;
+          box-shadow: none; /* Mais limpo no mobile */
         }
         h2 {
-           font-size: 1.5rem;
+          font-size: 1.5rem;
         }
       }
     </style>
@@ -101,7 +101,7 @@
         style="
           color: var(--cor-vinho);
           margin-bottom: 20px;
-          font-family: 'Neulis', sans-serif;
+          font-family: &quot;Neulis&quot;, sans-serif;
         "
       >
         Acesso Coordenador
@@ -139,6 +139,17 @@
           >
             Esqueci minha senha
           </a>
+          <a
+            href="index.html"
+            style="
+              color: #494949;
+              font-size: 0.8rem;
+              text-decoration: none;
+              font-weight: 300;
+            "
+          >
+            ← Voltar para Página Principal
+          </a>
         </div>
       </form>
 
@@ -167,12 +178,12 @@
         // Lógica SaaS: Avisamos que o e-mail deve ter sido autorizado pelo Admin
         if (
           confirm(
-            "Para criar seu acesso, seu e-mail já deve ter sido autorizado pela coordenação no Dashboard. Continuar?"
+            "Para criar seu acesso, seu e-mail já deve ter sido autorizado pela coordenação no Dashboard. Continuar?",
           )
         ) {
           try {
             const senhaProvisoria = prompt(
-              "Defina uma senha para seu primeiro acesso:"
+              "Defina uma senha para seu primeiro acesso:",
             );
             if (!senhaProvisoria || senhaProvisoria.length < 6) {
               alert("A senha deve ter no mínimo 6 caracteres.");
@@ -181,7 +192,7 @@
 
             await window.api.criarContaPrimeiroAcesso(email, senhaProvisoria);
             alert(
-              "✅ Solicitação enviada! Verifique sua caixa de e-mail para confirmar a conta antes de logar."
+              "✅ Solicitação enviada! Verifique sua caixa de e-mail para confirmar a conta antes de logar.",
             );
           } catch (err) {
             alert("Erro: " + err.message);
@@ -198,7 +209,7 @@
         try {
           await window.api.solicitarNovaSenha(email);
           alert(
-            "📧 E-mail de recuperação enviado! Verifique sua caixa de entrada."
+            "📧 E-mail de recuperação enviado! Verifique sua caixa de entrada.",
           );
         } catch (err) {
           alert("Erro ao solicitar: " + err.message);
@@ -238,7 +249,7 @@
           {
             email: email,
             password: password,
-          }
+          },
         );
 
         if (error) {

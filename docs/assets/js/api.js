@@ -290,7 +290,7 @@ window.api = {
   },
   logout: async function () {
     await _supabaseClient.auth.signOut();
-    window.location.href = "admin.html";
+    window.location.href = "index.html";
   },
   // =============================
   // 6 - INÍCIO: buscarEventosProximos
