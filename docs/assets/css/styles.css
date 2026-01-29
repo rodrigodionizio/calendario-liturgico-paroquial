@@ -366,6 +366,7 @@
    ========================================================================== */
 body {
   background-color: var(--cor-fundo);
+  background: var(--cor-fundo);
   color: var(--text-main);
   font-family: "AntennaCond", "Segoe UI", Tahoma, sans-serif;
   margin: 0;
