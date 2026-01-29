@@ -46,50 +46,6 @@
 
 ---
 
-## 🔧 Instalação e Configuração
-
-### Pré-requisitos
-- Conta no [Supabase](https://supabase.com/)
-- Git instalado
-- Editor de código (VS Code recomendado)
-
-### Passo 1: Clone o Repositório
-```bash
-git clone https://github.com/rodrigodionizio/calendario-liturgico-paroquial.git
-cd calendario-liturgico-paroquial
-```
-
-### Passo 2: Configure o Supabase
-
-1. Crie um projeto no Supabase
-2. Execute os scripts SQL em `database/`:
-   - `schema.sql` (cria tabelas)
-   - `function_create.sql` (cria funções)
-
-3. Configure as variáveis em `docs/assets/js/api.js`:
-```javascript
-const SUPABASE_URL = "SUA_URL_AQUI";
-const SUPABASE_KEY = "SUA_CHAVE_AQUI";
-```
-
-### Passo 3: Teste Localmente
-```bash
-# Serve com qualquer servidor HTTP
-python -m http.server 8000
-# OU
-npx serve docs
-```
-
-Acesse: `http://localhost:8000`
-
-### Passo 4: Deploy no GitHub Pages
-1. Vá em **Settings** → **Pages**
-2. Source: **Deploy from a branch**
-3. Branch: **main** / Folder: **/docs**
-4. Aguarde o deploy e acesse a URL gerada
-
----
-
 ## 📚 Novidades Versão 2.0
 
 ### ✨ Novos Recursos
