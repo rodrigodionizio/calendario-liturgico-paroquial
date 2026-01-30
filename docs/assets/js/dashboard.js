@@ -823,47 +823,98 @@ window.DashboardController = {
   },
 
   renderizarGraficoCarga: async function () {
-    const container =
-      document.getElementById("admin-chart") ||
-      document.getElementById("chart-week");
+    const container = document.getElementById("chart-week");
+    const badge = document.getElementById("chart-total-badge");
     if (!container) return;
 
     try {
-      const eventos = await window.api.buscarEventosProximos(7);
+      // 1. Definir range do mês atual
+      const hoje = new Date();
+      const ano = hoje.getFullYear();
+      const mes = hoje.getMonth();
 
-      // Validação: verifica se há eventos
+      const primeiroDia = new Date(ano, mes, 1);
+      const ultimoDia = new Date(ano, mes + 1, 0);
+
+      const startStr = primeiroDia.toISOString().split("T")[0];
+      const endStr = ultimoDia.toISOString().split("T")[0];
+
+      // 2. Buscar eventos do mês atual
+      const { data: eventos, error } = await window.api.client
+        .from("eventos_base")
+        .select("data, titulo")
+        .gte("data", startStr)
+        .lte("data", endStr);
+
+      if (error) throw error;
+
+      // Atualizar badge com total
+      const mesNome = hoje
+        .toLocaleString("pt-BR", { month: "long" })
+        .toUpperCase();
+      if (badge)
+        badge.textContent = `${eventos.length} ${eventos.length === 1 ? "ATIVIDADE" : "ATIVIDADES"}`;
+
+      // 3. Estado vazio elegante
       if (!eventos || eventos.length === 0) {
         container.innerHTML = `
-          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 30px 20px; text-align: center; color: #303030;">
-            <div style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;">📭</div>
-            <div style="font-size: 0.9rem; line-height: 1.4;">Nenhuma atividade agendada<br>para os próximos 7 dias</div>
+          <div class="chart-empty-state" onclick="window.DashboardController.abrirGerenciadorAgenda('${startStr}')" style="cursor:pointer;">
+            <i data-lucide="calendar-plus" style="width: 32px; height: 32px; margin-bottom: 10px; color: var(--cor-dourado);"></i>
+            <span style="font-size: 0.9rem; font-weight: bold; color: #666;">Agenda de ${mesNome} está vazia</span>
+            <span style="font-size: 0.75rem; color: var(--cor-vinho); margin-top:5px; text-decoration: underline;">+ Planejar Mês Agora</span>
           </div>
         `;
+        if (window.lucide) lucide.createIcons();
         return;
       }
 
-      // Processa distribuição por dia da semana
-      const dens = [0, 0, 0, 0, 0, 0, 0];
+      // 4. Agrupamento por semanas do mês
+      const semanas = [0, 0, 0, 0, 0, 0];
+
       eventos.forEach((ev) => {
-        if (ev && ev.data) {
-          dens[new Date(ev.data + "T12:00:00").getDay()]++;
+        const dataEvento = new Date(ev.data + "T12:00:00");
+        const diaMes = dataEvento.getDate();
+        const primeiroDiaSemana = primeiroDia.getDay();
+        const semanaIndex = Math.floor((diaMes + primeiroDiaSemana - 1) / 7);
+
+        if (semanas[semanaIndex] !== undefined) {
+          semanas[semanaIndex]++;
         }
       });
 
-      const max = Math.max(...dens, 1);
-      container.innerHTML = dens
-        .map(
-          (c, i) =>
-            `<div class="chart-bar-group"><div class="chart-bar" style="height:${
-              (c / max) * 100
-            }%"></div><div class="chart-label">${
-              ["D", "S", "T", "Q", "Q", "S", "S"][i]
-            }</div></div>`,
-        )
+      // Determinar quantas semanas realmente têm dados
+      let ultimaSemanaComDados = 0;
+      for (let i = semanas.length - 1; i >= 0; i--) {
+        if (semanas[i] > 0) {
+          ultimaSemanaComDados = i;
+          break;
+        }
+      }
+      const semanasVisuais = semanas.slice(0, Math.max(ultimaSemanaComDados + 1, 4));
+      const maxEventos = Math.max(...semanasVisuais, 1);
+
+      // 5. Renderizar com cores inteligentes
+      container.innerHTML = semanasVisuais
+        .map((qtd, i) => {
+          // Heatmap: poucos eventos = dourado, muitos = vinho
+          let corBarra = "linear-gradient(to top, var(--cor-vinho), #d6455b)";
+          if (qtd === 0) corBarra = "#eee";
+          else if (qtd < 3)
+            corBarra = "linear-gradient(to top, #fbb558, #ffcc80)";
+
+          const altura = qtd === 0 ? 4 : (qtd / maxEventos) * 100;
+
+          return `
+            <div class="chart-bar-group">
+              <div class="chart-value-tooltip">${qtd}</div>
+              <div class="chart-bar" style="height: ${altura}%; background: ${corBarra};"></div>
+              <div class="chart-label">SEM ${i + 1}</div>
+            </div>
+          `;
+        })
         .join("");
     } catch (e) {
-      console.error("❌ Erro ao renderizar gráfico de carga:", e);
-      // Fallback seguro: mostra mensagem de erro sem quebrar o dashboard
+      console.error("❌ Erro ao renderizar gráfico mensal:", e);
       container.innerHTML = `
         <div style="display: flex; align-items: center; justify-content: center; height: 100%; padding: 20px; text-align: center; color: #dc2626;">
           <div style="font-size: 0.85rem;">⚠️ Erro ao carregar gráfico</div>

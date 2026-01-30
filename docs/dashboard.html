@@ -185,7 +185,31 @@
 
         <div class="dashboard-split">
           <div class="panel">
-            <div class="panel-title">Volume de Atividades (Carga)</div>
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 15px;
+              "
+            >
+              <div class="panel-title" style="margin: 0">Ritmo Mensal</div>
+              <div
+                id="chart-total-badge"
+                style="
+                  font-size: 0.7rem;
+                  background: #fff1f2;
+                  color: var(--cor-vinho);
+                  padding: 4px 10px;
+                  border-radius: 12px;
+                  font-weight: 800;
+                  font-family: var(--font-titulo);
+                  letter-spacing: 0.5px;
+                "
+              >
+                Carregando...
+              </div>
+            </div>
             <div class="chart-container" id="chart-week"></div>
           </div>
           <div class="panel">
