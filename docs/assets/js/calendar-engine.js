@@ -31,8 +31,8 @@ window.CalendarEngine = {
 
     this.selector = config.selector;
     this.isAdmin = config.isAdmin || false;
-    this.ano = config.ano || 2026;
-    this.mes = config.mes || 1;
+    this.ano = config.ano || new Date().getFullYear();
+    this.mes = config.mes || (new Date().getMonth() + 1);
 
     // Dispara o processo de busca e montagem visual
     await this.carregarERenderizar();

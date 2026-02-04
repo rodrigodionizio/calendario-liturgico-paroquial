@@ -820,6 +820,54 @@ header {
   background-color: #fafafa;
 }
 
+/* ==========================================================================
+   DESTAQUE DO DIA ATUAL (Feature "Hoje")
+   ========================================================================== */
+.day-cell.today {
+  position: relative;
+  background: linear-gradient(135deg, #fff9e6 0%, #ffffff 100%) !important;
+  border: 2px solid var(--cor-dourado) !important;
+  box-shadow: 0 4px 12px rgba(251, 181, 88, 0.3) !important;
+  transform: scale(1.02);
+  z-index: 10; /* Garante que fique acima de células adjacentes */
+}
+
+/* Indicador visual extra (círculo dourado no canto superior direito) */
+.day-cell.today::before {
+  content: "●";
+  position: absolute;
+  top: 5px;
+  right: 8px;
+  color: var(--cor-dourado);
+  font-size: 1.2rem;
+  animation: pulse-today 2s ease-in-out infinite;
+}
+
+@keyframes pulse-today {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.15);
+  }
+}
+
+/* Responsividade Mobile: Destaque mais discreto */
+@media (max-width: 768px) {
+  .day-cell.today {
+    border-width: 2px;
+    transform: scale(1);
+  }
+  
+  .day-cell.today::before {
+    font-size: 0.9rem;
+    top: 2px;
+    right: 2px;
+  }
+}
+
 .day-number {
   font-weight: 700;
   font-size: 1rem;

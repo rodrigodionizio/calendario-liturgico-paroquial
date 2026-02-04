@@ -20,8 +20,8 @@ console.log("🚀 Sistema Litúrgico V10.0 Iniciado");
 // 0. ESTADO GLOBAL & CONSTANTES
 // ==========================================================================
 const ESTADO = {
-  anoAtual: 2026,
-  mesAtual: 1,
+  anoAtual: new Date().getFullYear(),   // 🟢 Captura ano do sistema
+  mesAtual: new Date().getMonth() + 1,  // 🟢 Captura mês do sistema (Janeiro = 1)
   dadosEventos: {},
   isAdmin: false,
   listaEquipes: [],
@@ -84,6 +84,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   renderizarMural();
   carregarMes(ESTADO.anoAtual, ESTADO.mesAtual);
   configurarBotoesNavegacao();
+  
+  // 1.3.1. Destaque visual do dia atual
+  setTimeout(() => {
+    destacarDiaAtual();
+  }, 150); // Delay para garantir que renderização finalizou
 
   // 1.4. Auto-Refresh desabilitado temporariamente
   // TODO: Implementar com Supabase Realtime se necessário
@@ -1289,9 +1294,15 @@ function configurarBotoesNavegacao() {
     carregarMes(ESTADO.anoAtual, ESTADO.mesAtual);
   };
   btns[1].onclick = () => {
-    ESTADO.anoAtual = 2026;
-    ESTADO.mesAtual = 1;
+    const hoje = new Date();
+    ESTADO.anoAtual = hoje.getFullYear();
+    ESTADO.mesAtual = hoje.getMonth() + 1;
     carregarMes(ESTADO.anoAtual, ESTADO.mesAtual);
+    
+    // 🟢 Destaque visual após renderização
+    setTimeout(() => {
+      destacarDiaAtual();
+    }, 100);
   };
   btns[2].onclick = () => {
     ESTADO.mesAtual++;
@@ -1301,6 +1312,36 @@ function configurarBotoesNavegacao() {
     }
     carregarMes(ESTADO.anoAtual, ESTADO.mesAtual);
   };
+}
+
+/**
+ * Aplica destaque visual ao dia atual no calendário
+ * Classe CSS: .today (definida em styles.css)
+ */
+function destacarDiaAtual() {
+  const hoje = new Date();
+  const diaAtual = hoje.getDate();
+  const mesAtual = hoje.getMonth() + 1;
+  const anoAtual = hoje.getFullYear();
+
+  // Só destaca se o mês exibido é o mês atual
+  if (ESTADO.mesAtual === mesAtual && ESTADO.anoAtual === anoAtual) {
+    const dataISO = `${anoAtual}-${String(mesAtual).padStart(2, '0')}-${String(diaAtual).padStart(2, '0')}`;
+    const celula = document.querySelector(`.day-cell[data-iso="${dataISO}"]`);
+    
+    if (celula) {
+      // Remove destaques anteriores (caso existam)
+      document.querySelectorAll('.day-cell.today').forEach(el => {
+        el.classList.remove('today');
+      });
+      
+      // Aplica novo destaque
+      celula.classList.add('today');
+      
+      // 🟢 Scroll suave até o dia (melhora UX em mobile)
+      celula.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
 }
 
 window.fecharModal = (e) => {
