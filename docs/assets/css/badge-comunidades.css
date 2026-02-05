@@ -9,20 +9,20 @@
 .badge-comunidade {
   display: inline-block !important;
   font-size: 0.6rem;
-  background: rgba(251, 181, 88, 0.2);
-  color: #a67c00;
+  background: rgba(235, 235, 230, 0.2);
+  color: #501b09;
   padding: 2px 6px;
   border-radius: 4px;
   margin-left: 4px;
-  font-weight: 600;
+  font-weight: 400;
   white-space: nowrap;
   vertical-align: middle;
   transition: all 0.2s ease;
 }
 
 .badge-comunidade:hover {
-  background: rgba(251, 181, 88, 0.35);
-  color: #8b6600;
+  background: rgba(80, 76, 72, 0.35);
+  color: #9e9b9a;
   transform: scale(1.05);
 }
 
@@ -45,8 +45,8 @@
 /* Impressão */
 @media print {
   .badge-comunidade {
-    border: 1px solid #a67c00;
-    background: rgba(251, 181, 88, 0.1);
+    border: 1px solid #501b09;
+    background: rgba(235, 235, 230, 0.1);
     page-break-inside: avoid;
   }
 }
