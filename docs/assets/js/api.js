@@ -132,9 +132,9 @@ window.api = {
     let query = _supabaseClient
       .from("eventos_base")
       .select(
-        `*, 
+        `id, titulo, data, tipo_compromisso, tipo_celebracao, descricao, cor_id, comunidade_id,
          liturgia_cores(hex_code), 
-         comunidade:comunidades(id, nome, endereco),
+         comunidade:comunidades!comunidade_id(id, nome, endereco),
          escalas(*, 
            equipe_leitura:equipes!equipe_leitura_id(nome_equipe), 
            equipe_canto:equipes!equipe_canto_id(nome_equipe), 
@@ -178,9 +178,9 @@ window.api = {
     const { data, error } = await _supabaseClient
       .from("eventos_base")
       .select(
-        `*, 
+        `id, titulo, data, tipo_compromisso, tipo_celebracao, descricao, cor_id, comunidade_id,
          liturgia_cores(hex_code), 
-         comunidade:comunidades(id, nome, endereco),
+         comunidade:comunidades!comunidade_id(id, nome, endereco),
          escalas(*, 
            equipe_leitura:equipes!equipe_leitura_id(nome_equipe), 
            equipe_canto:equipes!equipe_canto_id(nome_equipe), 
