@@ -321,9 +321,23 @@ window.api = {
    */
   listarComunidades: async function () {
     const cacheKey = "comunidades_list";
+    
+    console.log("🔍 [API] Buscando comunidades...");
+    
+    // 🔧 Invalidar cache se forçado (para debug)
+    if (window.__FORCE_RELOAD_COMUNIDADES) {
+      console.warn("⚠️ [API] Cache de comunidades forçadamente invalidado");
+      this.clearCache(cacheKey);
+      window.__FORCE_RELOAD_COMUNIDADES = false;
+    }
+    
     const cached = this.getCache(cacheKey);
-    if (cached) return cached;
+    if (cached) {
+      console.log("✅ [API] Comunidades retornadas do CACHE:", cached.length, "itens");
+      return cached;
+    }
 
+    console.log("🌐 [API] Buscando comunidades no BANCO DE DADOS...");
     const { data, error } = await _supabaseClient
       .from("comunidades")
       .select("*")
@@ -331,9 +345,13 @@ window.api = {
       .order("nome", { ascending: true });
 
     if (error) {
-      console.error("❌ Erro ao listar comunidades:", error);
+      console.error("❌ [API] Erro ao listar comunidades:", error);
+      console.error("📋 [API] Detalhes do erro:", error.message, error.details, error.hint);
       return [];
     }
+
+    console.log("✅ [API] Comunidades retornadas do BANCO:", data?.length || 0, "itens");
+    console.log("📋 [API] Dados completos:", data);
 
     this.setCache(cacheKey, data);
     return data || [];

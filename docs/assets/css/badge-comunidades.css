@@ -1,0 +1,52 @@
+/**
+ * SACRISTIA DIGITAL - Badge de Comunidades
+ * Sistema de Design v6.0
+ * 
+ * Classe para identificação visual de eventos por comunidade
+ * Segue rigorosamente as cores da marca (vinho/dourado)
+ */
+
+.badge-comunidade {
+  display: inline-block !important;
+  font-size: 0.6rem;
+  background: rgba(251, 181, 88, 0.2);
+  color: #a67c00;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 4px;
+  font-weight: 600;
+  white-space: nowrap;
+  vertical-align: middle;
+  transition: all 0.2s ease;
+}
+
+.badge-comunidade:hover {
+  background: rgba(251, 181, 88, 0.35);
+  color: #8b6600;
+  transform: scale(1.05);
+}
+
+/* Badge de erro (fallback) */
+.badge-comunidade-erro {
+  background: rgba(244, 67, 54, 0.15) !important;
+  color: #c62828 !important;
+  border: 1px dashed #c62828;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .badge-comunidade {
+    font-size: 0.55rem;
+    padding: 1px 4px;
+    margin-left: 2px;
+  }
+}
+
+/* Impressão */
+@media print {
+  .badge-comunidade {
+    border: 1px solid #a67c00;
+    background: rgba(251, 181, 88, 0.1);
+    page-break-inside: avoid;
+  }
+}

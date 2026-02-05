@@ -82,7 +82,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   );
 
   // 🆕 Carregar comunidades
+  console.log("🔍 [APP] Iniciando carregamento de comunidades...");
+  
+  // Forçar reload de cache se necessário (debug)
+  // window.__FORCE_RELOAD_COMUNIDADES = true; // Descomente para forçar
+  
   ESTADO.listaComunidades = await window.api.listarComunidades();
+  
+  console.log("📋 [APP] Comunidades carregadas:", ESTADO.listaComunidades);
+  console.log("📊 [APP] Total de comunidades:", ESTADO.listaComunidades?.length || 0);
+  
+  if (!ESTADO.listaComunidades || ESTADO.listaComunidades.length === 0) {
+    console.error("⚠️ [APP] ATENÇÃO: Nenhuma comunidade foi carregada!");
+    console.error("🔧 [APP] Possíveis causas:");
+    console.error("   1. Todas as comunidades estão com ativo=false no banco");
+    console.error("   2. Erro na query Supabase (verificar RLS)");
+    console.error("   3. Cache corrompido (limpe o sessionStorage)");
+  }
 
   // 1.3. Interface
   inicializarSidebar();
@@ -267,12 +283,20 @@ function renderizarGrid(ano, mes, gridElement, headersHTML) {
 
       const classeSolenidade = evento.is_solenidade ? "solenidade" : "";
 
-      // 🆕 Badge de comunidade (apenas quando filtro = "Todas" e evento tem comunidade)
+      // �️ Badge de comunidade (SEMPRE exibir quando evento tem comunidade)
       let badgeComunidade = "";
-      if (!ESTADO.comunidadeFiltrada && evento.comunidade_id) {
+      if (evento.comunidade_id) {
+        console.log("🔍 [BADGE] Renderizando badge para evento:", evento.id);
+        console.log("   Comunidade ID:", evento.comunidade_id);
+        console.log("   Lista disponível:", ESTADO.listaComunidades?.length || 0, "comunidades");
         const comunidade = ESTADO.listaComunidades.find(c => c.id === evento.comunidade_id);
         if (comunidade) {
-          badgeComunidade = `<span style="font-size: 0.6rem; background: rgba(251,181,88,0.2); color: #a67c00; padding: 2px 6px; border-radius: 4px; margin-left: 4px; font-weight: 600;">🏛️ ${comunidade.nome}</span>`;
+          badgeComunidade = `<span class="badge-comunidade" style="display: inline-block;">🏛️ ${comunidade.nome}</span>`;
+          console.log("✅ [BADGE] Badge renderizado para:", comunidade.nome);
+        } else {
+          console.warn("⚠️ [BADGE] Comunidade não encontrada na lista:", evento.comunidade_id);
+          console.warn("   IDs disponíveis:", ESTADO.listaComunidades?.map(c => c.id));
+          badgeComunidade = `<span class="badge-comunidade badge-comunidade-erro" style="display: inline-block;">⚠️ Comunidade</span>`;
         }
       }
 
@@ -376,9 +400,12 @@ function inicializarFiltroComunidadesHeader() {
   const select = document.getElementById("public-community-filter");
   
   if (!select) {
-    console.warn("⚠️ Elemento public-community-filter não encontrado");
+    console.warn("⚠️ [FILTRO] Elemento public-community-filter não encontrado no HTML");
     return;
   }
+
+  console.log("🔍 [FILTRO] Inicializando filtro de comunidades...");
+  console.log("📊 [FILTRO] Comunidades disponíveis:", ESTADO.listaComunidades?.length || 0);
 
   // Limpa e recria as opções
   select.innerHTML = `
@@ -387,14 +414,24 @@ function inicializarFiltroComunidadesHeader() {
   `;
 
   // Adiciona comunidades cadastradas
-  ESTADO.listaComunidades.forEach((com) => {
+  if (!ESTADO.listaComunidades || ESTADO.listaComunidades.length === 0) {
+    console.error("⚠️ [FILTRO] Nenhuma comunidade disponível para adicionar ao select!");
     const option = document.createElement("option");
-    option.value = com.id;
-    option.textContent = `🏛️ ${com.nome}`;
+    option.value = "";
+    option.textContent = "⚠️ Nenhuma comunidade ativa";
+    option.disabled = true;
     select.appendChild(option);
-  });
+  } else {
+    ESTADO.listaComunidades.forEach((com) => {
+      console.log("  ➕ [FILTRO] Adicionando:", com.nome, "(ID:", com.id, ")");
+      const option = document.createElement("option");
+      option.value = com.id;
+      option.textContent = `🏛️ ${com.nome}`;
+      select.appendChild(option);
+    });
+  }
 
-  console.log("✅ Filtro de comunidades inicializado no header");
+  console.log("✅ [FILTRO] Filtro de comunidades inicializado no header com", select.options.length, "opções");
 }
 
 window.filtrarPorComunidade = async function (comunidadeId, divElement) {
@@ -593,9 +630,10 @@ window.abrirModal = function (dataISO) {
     btnAdmin = `<button id="btnEditar" class="btn-admin-action">🛠️ GERENCIAR AGENDA</button>`;
   }
 
-  // 🏛️ Badge de comunidade no modal
+  // 🏛️ Badge de comunidade no modal (SEMPRE exibir)
   let infoComunidade = "";
   if (evento.comunidade_id) {
+    console.log("🔍 DEBUG Modal:", { eventoId: evento.id, comunidadeId: evento.comunidade_id });
     const comunidade = ESTADO.listaComunidades.find(c => c.id === evento.comunidade_id);
     if (comunidade) {
       infoComunidade = `
@@ -603,13 +641,16 @@ window.abrirModal = function (dataISO) {
           <div style="display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 1.2rem;">🏛️</span>
             <div>
-              <p style="margin: 0; font-weight: 700; color: var(--cor-vinho); font-size: 0.9rem;">Local do Evento</p>
+              <p style="margin: 0; font-weight: 700; color: var(--cor-vinho); font-size: 0.9rem;">Capela</p>
               <p style="margin: 0; color: #666; font-size: 0.85rem;">${comunidade.nome}</p>
               ${comunidade.endereco ? `<p style="margin: 0; color: #999; font-size: 0.75rem; margin-top: 2px;">${comunidade.endereco}</p>` : ''}
             </div>
           </div>
         </div>
       `;
+      console.log("✅ Card modal renderizado para:", comunidade.nome);
+    } else {
+      console.warn("⚠️ Comunidade não encontrada no modal:", evento.comunidade_id);
     }
   }
 
@@ -1312,12 +1353,15 @@ function gerarHTMLLinhaImpressao(evento) {
   // Se quiser usar a cor litúrgica no dia, descomente abaixo:
   // if (evento.liturgia_cores?.hex_code) corDia = evento.liturgia_cores.hex_code;
 
-  // 🏛️ Identificação de Comunidade no Relatório
+  // 🏛️ Identificação de Comunidade no Relatório (SEMPRE exibir)
   let badgeComunidade = "";
   if (evento.comunidade_id) {
     const comunidade = ESTADO.listaComunidades.find(c => c.id === evento.comunidade_id);
     if (comunidade) {
       badgeComunidade = ` <span style="display:inline-block; background: rgba(251,181,88,0.2); color: #a67c00; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-left: 6px;">🏛️ ${comunidade.nome}</span>`;
+      console.log("✅ Badge impressão para:", comunidade.nome);
+    } else {
+      console.warn("⚠️ Comunidade não encontrada no relatório:", evento.comunidade_id);
     }
   }
 
