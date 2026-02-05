@@ -82,10 +82,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 1.3. Interface
   inicializarSidebar();
   renderizarMural();
-  carregarMes(ESTADO.anoAtual, ESTADO.mesAtual);
+  await carregarMes(ESTADO.anoAtual, ESTADO.mesAtual); // 🟢 Aguarda renderização completa
   configurarBotoesNavegacao();
   
-  // 1.3.1. Destaque visual do dia atual
+  // 1.3.1. Destaque visual do dia atual (auto-aplicado na inicialização)
   setTimeout(() => {
     destacarDiaAtual();
   }, 150); // Delay para garantir que renderização finalizou
