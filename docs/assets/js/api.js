@@ -134,7 +134,6 @@ window.api = {
       .select(
         `*, 
          liturgia_cores(hex_code), 
-         comunidade_id,
          comunidade:comunidades(id, nome, endereco),
          escalas(*, 
            equipe_leitura:equipes!equipe_leitura_id(nome_equipe), 
@@ -181,7 +180,6 @@ window.api = {
       .select(
         `*, 
          liturgia_cores(hex_code), 
-         comunidade_id,
          comunidade:comunidades(id, nome, endereco),
          escalas(*, 
            equipe_leitura:equipes!equipe_leitura_id(nome_equipe), 
