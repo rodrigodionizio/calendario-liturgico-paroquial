@@ -84,13 +84,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 🆕 Carregar comunidades
   console.log("🔍 [APP] Iniciando carregamento de comunidades...");
   
-  // Forçar reload de cache se necessário (debug)
-  // window.__FORCE_RELOAD_COMUNIDADES = true; // Descomente para forçar
+  // 🔧 Forçar reload de cache (DEBUG - REMOVER APÓS TESTES)
+  window.__FORCE_RELOAD_COMUNIDADES = true; // ⚠️ ATIVADO PARA DEBUG
   
   ESTADO.listaComunidades = await window.api.listarComunidades();
   
   console.log("📋 [APP] Comunidades carregadas:", ESTADO.listaComunidades);
   console.log("📊 [APP] Total de comunidades:", ESTADO.listaComunidades?.length || 0);
+  console.log("🔹 [APP] IDs:", ESTADO.listaComunidades?.map(c => `${c.nome} (${c.id})`));
   
   if (!ESTADO.listaComunidades || ESTADO.listaComunidades.length === 0) {
     console.error("⚠️ [APP] ATENÇÃO: Nenhuma comunidade foi carregada!");
@@ -98,6 +99,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("   1. Todas as comunidades estão com ativo=false no banco");
     console.error("   2. Erro na query Supabase (verificar RLS)");
     console.error("   3. Cache corrompido (limpe o sessionStorage)");
+    console.error("   4. Tipo de dado 'ativo' está como string ao invés de boolean");
+    console.error("🛠️ [APP] TESTE: Abra o Supabase SQL Editor e execute:");
+    console.error("   SELECT id, nome, ativo, pg_typeof(ativo) as tipo FROM comunidades;");
   }
 
   // 1.3. Interface

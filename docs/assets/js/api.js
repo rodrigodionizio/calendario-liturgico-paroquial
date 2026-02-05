@@ -334,27 +334,51 @@ window.api = {
     const cached = this.getCache(cacheKey);
     if (cached) {
       console.log("✅ [API] Comunidades retornadas do CACHE:", cached.length, "itens");
+      console.log("📋 [API] Cache data:", JSON.stringify(cached));
       return cached;
     }
 
     console.log("🌐 [API] Buscando comunidades no BANCO DE DADOS...");
-    const { data, error } = await _supabaseClient
-      .from("comunidades")
-      .select("*")
-      .eq("ativo", true)
-      .order("nome", { ascending: true });
+    
+    try {
+      // 🛠️ TESTE 1: Buscar TODAS as comunidades (sem filtro ativo)
+      const { data, error } = await _supabaseClient
+        .from("comunidades")
+        .select("*")
+        // .eq("ativo", true)  // ⚠️ COMENTADO TEMPORARIAMENTE PARA DEBUG
+        .order("nome", { ascending: true });
 
-    if (error) {
-      console.error("❌ [API] Erro ao listar comunidades:", error);
-      console.error("📋 [API] Detalhes do erro:", error.message, error.details, error.hint);
+      if (error) {
+        console.error("❌ [API] Erro ao listar comunidades:", error);
+        console.error("📋 [API] Detalhes do erro:", {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        return [];
+      }
+
+      console.log("✅ [API] Comunidades retornadas do BANCO:", data?.length || 0, "itens");
+      console.log("📋 [API] Dados completos:", JSON.stringify(data, null, 2));
+      
+      // 🛠️ FILTRO MANUAL: Filtra apenas ativas no JavaScript (workaround RLS)
+      const comunidadesAtivas = data ? data.filter(c => {
+        // Aceita boolean true ou string "true"
+        const isAtivo = c.ativo === true || c.ativo === "true" || c.ativo === 1;
+        console.log(`  🔹 ${c.nome}: ativo=${c.ativo} (tipo: ${typeof c.ativo}) -> ${isAtivo ? "✅" : "❌"}`);
+        return isAtivo;
+      }) : [];
+      
+      console.log("✅ [API] Comunidades ATIVAS filtradas:", comunidadesAtivas.length, "itens");
+
+      this.setCache(cacheKey, comunidadesAtivas);
+      return comunidadesAtivas;
+    } catch (error) {
+      console.error("❌ [API] Exceção ao listar comunidades:", error);
+      console.error("📋 [API] Stack trace:", error.stack);
       return [];
     }
-
-    console.log("✅ [API] Comunidades retornadas do BANCO:", data?.length || 0, "itens");
-    console.log("📋 [API] Dados completos:", data);
-
-    this.setCache(cacheKey, data);
-    return data || [];
   },
 
   /**
