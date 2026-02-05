@@ -72,9 +72,13 @@ window.DashboardController = {
       window.api.cacheEquipesCanto = equipes.filter(
         (e) => e.tipo_atuacao !== "Leitura",
       );
+      // 🔧 FIX: MEP pode ter tipo_atuacao "MEP" ou "Ambos"
       window.api.cacheEquipesMEP = equipes.filter(
-        (e) => e.tipo_atuacao === "MEP",
+        (e) => e.tipo_atuacao === "MEP" || e.tipo_atuacao === "Ambos",
       );
+
+      // Carregar filtro de comunidades
+      await this.carregarFiltroComunidadesUI();
 
       await this.atualizarVisaoGeral();
       this.configurarNavegacao();
@@ -107,6 +111,8 @@ window.DashboardController = {
           await window.DashboardController.atualizarVisaoGeral();
         else if (targetTab === "equipes")
           await window.DashboardController.renderizarAbaEquipes();
+        else if (targetTab === "comunidades")
+          await window.DashboardController.renderizarAbaComunidades();
         else if (targetTab === "usuarios")
           await window.DashboardController.renderizarAbaUsuarios();
       });
@@ -116,6 +122,9 @@ window.DashboardController = {
   // ==========================================================================
   // 3. GESTÃO DE AGENDA (CALENDÁRIO)
   // ==========================================================================
+
+  // Estado do filtro de comunidades
+  comunidadeFiltrada: null,
 
   carregarAgendaTotal: async function () {
     const nomeMes = new Date(this.agendaAno, this.agendaMes - 1).toLocaleString(
@@ -132,6 +141,7 @@ window.DashboardController = {
         isAdmin: true,
         ano: this.agendaAno,
         mes: this.agendaMes,
+        comunidadeId: this.comunidadeFiltrada,
       });
     }
   },
@@ -152,6 +162,68 @@ window.DashboardController = {
       }
     }
     await this.carregarAgendaTotal();
+  },
+
+  /**
+   * Carrega o filtro de comunidades na UI do dashboard
+   */
+  carregarFiltroComunidadesUI: async function () {
+    try {
+      const comunidades = await window.api.listarComunidades();
+      const select = document.getElementById("dashboard-community-filter");
+      
+      if (!select) return;
+
+      // Limpa opções existentes (mantém apenas "Todas")
+      select.innerHTML = '<option value="">Todas as Comunidades</option>';
+
+      // Adiciona comunidades ativas
+      comunidades.forEach(com => {
+        const option = document.createElement("option");
+        option.value = com.id;
+        option.textContent = com.nome;
+        select.appendChild(option);
+      });
+
+      // Restaura seleção anterior se existir
+      if (this.comunidadeFiltrada) {
+        select.value = this.comunidadeFiltrada;
+      }
+
+      console.log("✅ Dashboard: Filtro de comunidades carregado");
+    } catch (error) {
+      console.error("❌ Dashboard: Erro ao carregar filtro de comunidades", error);
+    }
+  },
+
+  /**
+   * Aplica o filtro de comunidade no calendário
+   * @param {string} comunidadeId - UUID da comunidade ou string vazia para "todas"
+   */
+  aplicarFiltroComunidade: async function (comunidadeId) {
+    this.comunidadeFiltrada = comunidadeId || null;
+    console.log("🔍 Dashboard: Filtro aplicado ->", comunidadeId || "Todas");
+    await this.carregarAgendaTotal();
+  },
+
+  /**
+   * Gera opções HTML de comunidades para select
+   * @param {string} selectedId - ID da comunidade selecionada
+   * @returns {string} HTML das options
+   */
+  gerarOpcoesComunidades: async function (selectedId) {
+    try {
+      const comunidades = await window.api.listarComunidades();
+      return comunidades
+        .map(
+          (com) =>
+            `<option value="${com.id}" ${com.id === selectedId ? "selected" : ""}>🏛️ ${com.nome}</option>`,
+        )
+        .join("");
+    } catch (error) {
+      console.error("❌ Erro ao carregar comunidades:", error);
+      return "";
+    }
   },
 
   abrirGerenciadorAgenda: async function (dataISO) {
@@ -257,6 +329,18 @@ window.DashboardController = {
                         <input type="text" id="edit-titulo" value="${
                           evento.titulo
                         }" placeholder="Título/Assunto" class="o-surface-card" style="width:100%; padding:12px; border:1px solid #ddd; font-weight:bold;">
+                        
+                        <!-- NEW: Seletor de Comunidade -->
+                        <div style="margin-top: 10px;">
+                            <label style="font-size: 0.85rem; font-weight: 700; color: #666; display: block; margin-bottom: 5px;">
+                                <i data-lucide="map-pin" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 4px; color: var(--cor-dourado);"></i>
+                                Local/Comunidade
+                            </label>
+                            <select id="edit-comunidade" class="o-surface-card" style="width:100%; padding:12px; border:1px solid #ddd;">
+                                <option value="">⛪ Matriz (Sede)</option>
+                                ${await this.gerarOpcoesComunidades(evento.comunidade_id)}
+                            </select>
+                        </div>
                         
                         <!-- NEW: Opções de Mural -->
                         <div style="display:flex; gap:10px; margin-top:10px; align-items:center; background:#f5f5f5; padding:10px; border-radius:8px;">
@@ -631,6 +715,8 @@ window.DashboardController = {
       mural_destaque: document.getElementById("edit-mural").checked,
       mural_prioridade:
         parseInt(document.getElementById("edit-prioridade").value) || 2,
+      // NEW: Comunidade
+      comunidade_id: document.getElementById("edit-comunidade").value || null,
     };
     const escalas = [];
     if (tipo === "liturgia") {
@@ -689,6 +775,11 @@ window.DashboardController = {
     const eL = window.api.cacheEquipesLeitura || [];
     const eC = window.api.cacheEquipesCanto || [];
     const eM = window.api.cacheEquipesMEP || [];
+    
+    // 🔍 Debug: Verificar se há equipes MEP disponíveis
+    if (tipoCelebracao === "celebracao_palavra" && eM.length === 0) {
+      console.warn("⚠️ Nenhuma equipe MEP encontrada no cache. Verifique o cadastro de equipes.");
+    }
 
     const build = (l, s) =>
       `<option value="">--</option>` +
@@ -1020,6 +1111,413 @@ window.DashboardController = {
     } else {
       body.classList.remove("mobile-overlay-active");
     }
+  },
+
+  // ==========================================================================
+  // 8. GESTÃO DE COMUNIDADES
+  // Criado em: 05/02/2026
+  // ==========================================================================
+
+  /**
+   * Renderiza a aba de gestão de comunidades
+   */
+  renderizarAbaComunidades: async function () {
+    const container = document.getElementById("tab-comunidades");
+    if (!container) return;
+
+    container.innerHTML = `
+      <div class="panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+          <h3 class="page-title">
+            <i data-lucide="church" style="vertical-align: middle; margin-right: 8px;"></i>
+            Gestão de Comunidades e Capelas
+          </h3>
+          <button class="btn-primary" onclick="window.DashboardController.abrirModalComunidade()">
+            <i data-lucide="plus" style="vertical-align: middle; margin-right: 5px;"></i>
+            Nova Comunidade
+          </button>
+        </div>
+        
+        <div class="loading-indicator" style="text-align: center; padding: 40px; color: #888;">
+          <i data-lucide="loader" class="spin" style="width: 32px; height: 32px;"></i>
+          <p>Carregando comunidades...</p>
+        </div>
+      </div>
+    `;
+
+    // Recarrega ícones do Lucide
+    if (window.lucide) window.lucide.createIcons();
+
+    try {
+      const comunidades = await window.api.listarTodasComunidades();
+      
+      container.innerHTML = `
+        <div class="panel">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <h3 class="page-title">
+              <i data-lucide="church" style="vertical-align: middle; margin-right: 8px;"></i>
+              Gestão de Comunidades e Capelas
+            </h3>
+            <button class="btn-primary" onclick="window.DashboardController.abrirModalComunidade()">
+              <i data-lucide="plus" style="vertical-align: middle; margin-right: 5px;"></i>
+              Nova Comunidade
+            </button>
+          </div>
+
+          ${comunidades.length === 0 ? `
+            <div style="text-align: center; padding: 60px 20px; color: #888;">
+              <i data-lucide="map-pin-off" style="width: 64px; height: 64px; margin-bottom: 15px; opacity: 0.3;"></i>
+              <p style="font-size: 1.1rem; margin: 10px 0;">Nenhuma comunidade cadastrada</p>
+              <p style="font-size: 0.9rem; opacity: 0.7;">Clique em "Nova Comunidade" para começar</p>
+            </div>
+          ` : `
+            <div class="crud-list-container">
+              ${comunidades.map(com => `
+                <div class="crud-list-item ${!com.ativo ? 'inactive' : ''}">
+                  <div class="crud-item-header">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                      <strong style="font-size: 1.1rem;">${com.nome}</strong>
+                      ${!com.ativo ? '<span class="badge-inactive">Inativa</span>' : ''}
+                    </div>
+                    <div class="crud-item-actions">
+                      <button 
+                        class="btn-icon-edit" 
+                        onclick='window.DashboardController.abrirModalComunidade(${JSON.stringify(com).replace(/'/g, "&apos;")})'
+                        title="Editar"
+                      >
+                        <i data-lucide="edit-2"></i>
+                      </button>
+                      ${com.ativo ? `
+                        <button 
+                          class="btn-icon-delete" 
+                          onclick="window.DashboardController.deletarComunidade('${com.id}', '${com.nome.replace(/'/g, "\\'")}')"
+                          title="Desativar"
+                        >
+                          <i data-lucide="trash-2"></i>
+                        </button>
+                      ` : `
+                        <button 
+                          class="btn-icon-success" 
+                          onclick="window.DashboardController.reativarComunidade('${com.id}', '${com.nome.replace(/'/g, "\\'")}')"
+                          title="Reativar"
+                        >
+                          <i data-lucide="check-circle"></i>
+                        </button>
+                      `}
+                    </div>
+                  </div>
+                  <div class="crud-item-body">
+                    ${com.endereco ? `
+                      <p><i data-lucide="map-pin" style="width: 14px; vertical-align: middle;"></i> ${com.endereco}</p>
+                    ` : ''}
+                    ${com.padroeiro ? `
+                      <p><i data-lucide="heart" style="width: 14px; vertical-align: middle;"></i> Padroeiro: ${com.padroeiro}</p>
+                    ` : ''}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          `}
+        </div>
+      `;
+
+      // Recarrega ícones
+      if (window.lucide) window.lucide.createIcons();
+
+    } catch (error) {
+      console.error("❌ Erro ao carregar comunidades:", error);
+      container.innerHTML = `
+        <div class="panel">
+          <div class="error-message">
+            <i data-lucide="alert-circle"></i>
+            <p>Erro ao carregar comunidades. Tente novamente.</p>
+          </div>
+        </div>
+      `;
+      if (window.lucide) window.lucide.createIcons();
+    }
+  },
+
+  /**
+   * Abre modal para criar/editar comunidade
+   */
+  abrirModalComunidade: function (comunidade = null) {
+    const isEdicao = comunidade !== null;
+    const titulo = isEdicao ? "Editar Comunidade" : "Nova Comunidade";
+
+    const modalHTML = `
+      <div class="modal-overlay" id="modal-comunidade" onclick="window.DashboardController.fecharModalComunidade(event)" style="z-index: 10000;">
+        <div class="modal-content" style="max-width: 550px; max-height: 90vh; overflow-y: auto;" onclick="event.stopPropagation()">
+          <div class="modal-header" style="background: linear-gradient(135deg, #a41d31 0%, #8b1829 100%); color: white; padding: 20px 24px; border-radius: 12px 12px 0 0;">
+            <h3 style="margin: 0; font-size: 1.3rem; font-weight: 600; display: flex; align-items: center; gap: 10px;">
+              <i data-lucide="church" style="width: 24px; height: 24px;"></i>
+              ${titulo}
+            </h3>
+            <button class="btn-close" onclick="window.DashboardController.fecharModalComunidade()" style="background: rgba(255,255,255,0.2); color: white; border: none; width: 32px; height: 32px; border-radius: 8px; font-size: 20px; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">×</button>
+          </div>
+          
+          <div class="modal-body" style="padding: 24px;">
+            <form id="form-comunidade" onsubmit="window.DashboardController.salvarComunidade(event)">
+              <input type="hidden" id="comunidade-id" value="${comunidade?.id || ''}">
+              
+              <div class="form-group" style="margin-bottom: 20px;">
+                <label for="comunidade-nome" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: 600; color: #374151;">
+                  <i data-lucide="tag" style="width: 16px; height: 16px; color: #fbb558;"></i>
+                  Nome da Comunidade *
+                </label>
+                <input 
+                  type="text" 
+                  id="comunidade-nome" 
+                  class="form-control" 
+                  value="${comunidade?.nome || ''}"
+                  placeholder="Ex: Capela Santa Luzia"
+                  required
+                  maxlength="100"
+                  style="border: 2px solid #e5e7eb; border-radius: 8px; padding: 12px; font-size: 15px; transition: all 0.2s;"
+                  onfocus="this.style.borderColor='#fbb558'; this.style.boxShadow='0 0 0 3px rgba(251,181,88,0.1)'"
+                  onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'"
+                />
+              </div>
+
+              <div class="form-group" style="margin-bottom: 20px;">
+                <label for="comunidade-endereco" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: 600; color: #374151;">
+                  <i data-lucide="map-pin" style="width: 16px; height: 16px; color: #fbb558;"></i>
+                  Endereço
+                </label>
+                <textarea 
+                  id="comunidade-endereco" 
+                  class="form-control" 
+                  rows="2"
+                  placeholder="Rua, número, bairro..."
+                  style="border: 2px solid #e5e7eb; border-radius: 8px; padding: 12px; font-size: 15px; transition: all 0.2s; resize: vertical;"
+                  onfocus="this.style.borderColor='#fbb558'; this.style.boxShadow='0 0 0 3px rgba(251,181,88,0.1)'"
+                  onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'"
+                >${comunidade?.endereco || ''}</textarea>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 20px;">
+                <label for="comunidade-padroeiro" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: 600; color: #374151;">
+                  <i data-lucide="heart" style="width: 16px; height: 16px; color: #fbb558;"></i>
+                  Padroeiro(a)
+                </label>
+                <input 
+                  type="text" 
+                  id="comunidade-padroeiro" 
+                  class="form-control" 
+                  value="${comunidade?.padroeiro || ''}"
+                  placeholder="Ex: Santa Luzia"
+                  maxlength="100"
+                  style="border: 2px solid #e5e7eb; border-radius: 8px; padding: 12px; font-size: 15px; transition: all 0.2s;"
+                  onfocus="this.style.borderColor='#fbb558'; this.style.boxShadow='0 0 0 3px rgba(251,181,88,0.1)'"
+                  onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'"
+                />
+              </div>
+
+              <div class="form-group" style="margin-top: 24px; padding: 16px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
+                <label class="checkbox-label" style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin: 0;">
+                  <input 
+                    type="checkbox" 
+                    id="comunidade-ativo" 
+                    ${comunidade?.ativo !== false ? 'checked' : ''}
+                    style="width: 20px; height: 20px; cursor: pointer; accent-color: #fbb558;"
+                  />
+                  <span style="font-weight: 600; color: #374151; font-size: 15px;">Comunidade ativa</span>
+                </label>
+                <small style="color: #6b7280; display: block; margin-top: 8px; margin-left: 30px; font-size: 13px;">
+                  <i data-lucide="info" style="width: 14px; height: 14px; vertical-align: middle; margin-right: 4px;"></i>
+                  Comunidades inativas não aparecem nos filtros
+                </small>
+              </div>
+
+              <div class="modal-footer" style="margin-top: 24px; padding-top: 20px; border-top: 1px solid #e5e7eb; display: flex; gap: 12px; justify-content: flex-end;">
+                <button type="button" class="btn-secondary" onclick="window.DashboardController.fecharModalComunidade()" style="padding: 12px 24px; border-radius: 8px; font-weight: 600; transition: all 0.2s;">
+                  <i data-lucide="x" style="width: 18px; height: 18px; vertical-align: middle; margin-right: 6px;"></i>
+                  Cancelar
+                </button>
+                <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #a41d31 0%, #c82038 100%); padding: 12px 24px; border-radius: 8px; font-weight: 600; transition: all 0.2s; box-shadow: 0 4px 12px rgba(164,29,49,0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(164,29,49,0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(164,29,49,0.3)'">
+                  <i data-lucide="save" style="width: 18px; height: 18px; vertical-align: middle; margin-right: 6px;"></i>
+                  ${isEdicao ? 'Atualizar' : 'Cadastrar'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Remove modal anterior se existir
+    const modalExistente = document.getElementById("modal-comunidade");
+    if (modalExistente) modalExistente.remove();
+
+    // Adiciona novo modal
+    document.body.insertAdjacentHTML("beforeend", modalHTML);
+
+    // Ativa animação
+    setTimeout(() => {
+      document.getElementById("modal-comunidade").classList.add("active");
+    }, 10);
+
+    // Recarrega ícones
+    if (window.lucide) window.lucide.createIcons();
+
+    // Foco no campo nome
+    setTimeout(() => document.getElementById("comunidade-nome").focus(), 100);
+  },
+
+  /**
+   * Fecha modal de comunidade
+   */
+  fecharModalComunidade: function (event) {
+    if (event && event.target.id !== "modal-comunidade") return;
+    
+    const modal = document.getElementById("modal-comunidade");
+    if (modal) {
+      modal.classList.remove("active");
+      setTimeout(() => modal.remove(), 300);
+    }
+  },
+
+  /**
+   * Salva (cria ou atualiza) comunidade
+   */
+  salvarComunidade: async function (event) {
+    event.preventDefault();
+
+    const comunidadeData = {
+      id: document.getElementById("comunidade-id").value || null,
+      nome: document.getElementById("comunidade-nome").value.trim(),
+      endereco: document.getElementById("comunidade-endereco").value.trim(),
+      padroeiro: document.getElementById("comunidade-padroeiro").value.trim(),
+      ativo: document.getElementById("comunidade-ativo").checked,
+    };
+
+    // Validação
+    if (!comunidadeData.nome) {
+      alert("⚠️ O nome da comunidade é obrigatório!");
+      return;
+    }
+
+    // Desabilita botão de submit
+    const btnSubmit = event.target.querySelector('button[type="submit"]');
+    const textoOriginal = btnSubmit.innerHTML;
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = '<i data-lucide="loader" class="spin"></i> Salvando...';
+    if (window.lucide) window.lucide.createIcons();
+
+    try {
+      await window.api.salvarComunidade(comunidadeData);
+      
+      // Fecha modal e recarrega lista
+      this.fecharModalComunidade();
+      await this.renderizarAbaComunidades();
+      
+      // Feedback
+      this.mostrarNotificacao(
+        comunidadeData.id ? "Comunidade atualizada com sucesso!" : "Comunidade cadastrada com sucesso!",
+        "success"
+      );
+
+    } catch (error) {
+      console.error("❌ Erro ao salvar comunidade:", error);
+      alert("❌ Erro ao salvar comunidade. Tente novamente.");
+      
+      // Reabilita botão
+      btnSubmit.disabled = false;
+      btnSubmit.innerHTML = textoOriginal;
+      if (window.lucide) window.lucide.createIcons();
+    }
+  },
+
+  /**
+   * Desativa uma comunidade
+   */
+  deletarComunidade: async function (id, nome) {
+    if (!confirm(`⚠️ Deseja realmente desativar a comunidade "${nome}"?\n\nEla não será excluída, apenas ficará oculta.`)) {
+      return;
+    }
+
+    try {
+      const result = await window.api.excluirComunidade(id);
+      
+      if (result.error) {
+        alert(`❌ ${result.error.message}`);
+        return;
+      }
+
+      await this.renderizarAbaComunidades();
+      this.mostrarNotificacao("Comunidade desativada com sucesso!", "success");
+
+    } catch (error) {
+      console.error("❌ Erro ao desativar comunidade:", error);
+      alert("❌ Erro ao desativar comunidade. Tente novamente.");
+    }
+  },
+
+  /**
+   * Reativa uma comunidade
+   */
+  reativarComunidade: async function (id, nome) {
+    if (!confirm(`Deseja reativar a comunidade "${nome}"?`)) {
+      return;
+    }
+
+    try {
+      await window.api.reativarComunidade(id);
+      await this.renderizarAbaComunidades();
+      this.mostrarNotificacao("Comunidade reativada com sucesso!", "success");
+
+    } catch (error) {
+      console.error("❌ Erro ao reativar comunidade:", error);
+      alert("❌ Erro ao reativar comunidade. Tente novamente.");
+    }
+  },
+
+  /**
+   * Mostra notificação toast
+   */
+  mostrarNotificacao: function (mensagem, tipo = "info") {
+    const icones = {
+      success: "check-circle",
+      error: "alert-circle",
+      info: "info",
+    };
+
+    const cores = {
+      success: "#22c55e",
+      error: "#ef4444",
+      info: "#3b82f6",
+    };
+
+    const toast = document.createElement("div");
+    toast.className = "toast-notification";
+    toast.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 10000;
+      animation: slideInRight 0.3s ease;
+      border-left: 4px solid ${cores[tipo]};
+    `;
+
+    toast.innerHTML = `
+      <i data-lucide="${icones[tipo]}" style="color: ${cores[tipo]}; width: 20px;"></i>
+      <span style="color: #333;">${mensagem}</span>
+    `;
+
+    document.body.appendChild(toast);
+    if (window.lucide) window.lucide.createIcons();
+
+    setTimeout(() => {
+      toast.style.animation = "slideOutRight 0.3s ease";
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
   },
 };
 

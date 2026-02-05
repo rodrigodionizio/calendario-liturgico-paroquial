@@ -524,6 +524,52 @@ header {
   border-radius: 3px;
 }
 
+/* 🆕 Scroll e estilos para filtro de comunidades */
+#filtro-comunidades {
+  overflow-y: auto;
+  max-height: 300px;
+  padding-right: 5px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--cor-dourado) #eee;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+#filtro-comunidades::-webkit-scrollbar {
+  width: 6px;
+}
+
+#filtro-comunidades::-webkit-scrollbar-track {
+  background: #eee;
+  border-radius: 3px;
+}
+
+#filtro-comunidades::-webkit-scrollbar-thumb {
+  background-color: var(--cor-dourado);
+  border-radius: 3px;
+}
+
+/* Badge de cor da comunidade */
+.community-badge {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+/* Item de filtro ativo */
+.filter-item.active {
+  background: rgba(251, 181, 88, 0.1);
+  padding: 8px;
+  margin: 0 -8px 8px -8px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
 /* ==========================================================================
    10. MODAL DE EDIÇÃO E FORMULÁRIOS
    ========================================================================== */
@@ -2024,9 +2070,91 @@ select:disabled {
   }
 }
 
-/* Dark mode básico (se o usuário preferir) */
-@media (prefers-color-scheme: dark) {
-  /* Apenas um exemplo - ajustar conforme necessário */
+/* ========================================================================
+   COMPONENTES SDS v6.0: FILTRO DE COMUNIDADES (PÚBLICO)
+   ======================================================================== */
+
+/* Wrapper do filtro no header do calendário público */
+#public-community-filter-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Select estilizado seguindo SDS v6.0 */
+.sds-select {
+  min-width: 180px;
+  max-width: 280px;
+  padding: 8px 32px 8px 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #374151;
+  background-color: white;
+  background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg width=%2714%27 height=%278%27 viewBox=%270 0 14 8%27 fill=%27none%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M1 1l6 6 6-6%27 stroke=%27%23a41d31%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3e%3c/svg%3e');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+.sds-select:hover {
+  border-color: var(--cor-vinho);
+  box-shadow: 0 2px 8px rgba(164, 29, 49, 0.1);
+}
+
+.sds-select:focus {
+  outline: none;
+  border-color: var(--cor-dourado);
+  box-shadow: 0 0 0 3px rgba(251, 181, 88, 0.1);
+}
+
+.sds-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #f9fafb;
+}
+
+/* Label do filtro */
+#public-community-filter-wrapper label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--cor-vinho);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Responsividade do filtro público */
+@media (max-width: 768px) {
+  #public-community-filter-wrapper {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .sds-select {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  #public-community-filter-wrapper label {
+    font-size: 0.85rem;
+  }
+  
+  .month-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
   :root {
     --text-main: #e0e0e0;
     --cor-fundo: #1a1a1a;

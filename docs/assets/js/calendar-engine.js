@@ -24,7 +24,7 @@ window.CalendarEngine = {
   // =============================
   // 1 - INÍCIO: init
   // =============================
-  // Argumentos: config (Object) -> { selector, isAdmin, ano, mes }
+  // Argumentos: config (Object) -> { selector, isAdmin, ano, mes, comunidadeId }
   // Descrição: Inicializa as configurações do motor e dispara o carregamento de dados.
   init: async function (config) {
     console.log("🔍 Motor: Sincronizando parâmetros iniciais...");
@@ -33,6 +33,7 @@ window.CalendarEngine = {
     this.isAdmin = config.isAdmin || false;
     this.ano = config.ano || new Date().getFullYear();
     this.mes = config.mes || (new Date().getMonth() + 1);
+    this.comunidadeId = config.comunidadeId || null;
 
     // Dispara o processo de busca e montagem visual
     await this.carregarERenderizar();
@@ -58,7 +59,7 @@ window.CalendarEngine = {
       grid.innerHTML =
         '<div style="grid-column: 1/-1; padding: 50px; text-align: center; color: #999;">Sincronizando agenda...</div>';
 
-      const eventos = await window.api.buscarEventos(this.ano, this.mes);
+      const eventos = await window.api.buscarEventos(this.ano, this.mes, this.comunidadeId);
 
       // MUDANÇA ESTRUTURAL: Agrupamos os eventos em listas (Arrays) dentro do objeto por data
       this.eventosLocal = {};

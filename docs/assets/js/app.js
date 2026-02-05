@@ -26,6 +26,8 @@ const ESTADO = {
   isAdmin: false,
   listaEquipes: [],
   filtrosAtivos: new Set(),
+  comunidadeFiltrada: null, // 🆕 ID da comunidade filtrada (null = todas, 'matriz' = só matriz)
+  listaComunidades: [], // 🆕 Cache de comunidades
 };
 
 let eventoEmEdicao = null;
@@ -79,9 +81,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     (e) => e.tipo_atuacao === "Canto" || e.tipo_atuacao === "Ambos",
   );
 
+  // 🆕 Carregar comunidades
+  ESTADO.listaComunidades = await window.api.listarComunidades();
+
   // 1.3. Interface
   inicializarSidebar();
   renderizarMural();
+  inicializarFiltroComunidades(); // 🆕 Renderizar filtro de comunidades (sidebar)
+  inicializarFiltroComunidadesHeader(); // 🆕 Renderizar filtro no header do calendário
   await carregarMes(ESTADO.anoAtual, ESTADO.mesAtual); // 🟢 Aguarda renderização completa
   configurarBotoesNavegacao();
   
@@ -190,7 +197,8 @@ async function carregarMes(ano, mes) {
     '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#888;">Carregando...</div>';
 
   try {
-    const eventos = await window.api.buscarEventos(ano, mes);
+    // 🆕 Passa filtro de comunidade para a API
+    const eventos = await window.api.buscarEventos(ano, mes, ESTADO.comunidadeFiltrada);
     ESTADO.dadosEventos = {};
     eventos.forEach((ev) => (ESTADO.dadosEventos[ev.data] = ev));
     renderizarGrid(ano, mes, grid, headers);
@@ -259,10 +267,19 @@ function renderizarGrid(ano, mes, gridElement, headersHTML) {
 
       const classeSolenidade = evento.is_solenidade ? "solenidade" : "";
 
+      // 🆕 Badge de comunidade (apenas quando filtro = "Todas" e evento tem comunidade)
+      let badgeComunidade = "";
+      if (!ESTADO.comunidadeFiltrada && evento.comunidade_id) {
+        const comunidade = ESTADO.listaComunidades.find(c => c.id === evento.comunidade_id);
+        if (comunidade) {
+          badgeComunidade = `<span style="font-size: 0.6rem; background: rgba(251,181,88,0.2); color: #a67c00; padding: 2px 6px; border-radius: 4px; margin-left: 4px; font-weight: 600;">🏛️ ${comunidade.nome}</span>`;
+        }
+      }
+
       conteudoHTML = `
         <div class="pill ${classeCategoria} ${classeSolenidade}" ${estiloAdicional} title="${evento.titulo}">
             ${horaShow ? `<span style="font-size: 0.65rem; opacity: 0.8;">${horaShow}</span>` : ""}
-            <span>${icone} ${evento.titulo}</span>
+            <span>${icone} ${evento.titulo}${badgeComunidade}</span>
         </div>`;
 
       // Exibe Escalas Adicionais (Múltiplas Missas)
@@ -308,6 +325,122 @@ async function inicializarSidebar() {
     containerEquipes.appendChild(div);
   });
 }
+
+// ==========================================================================
+// 4.1. FILTROS DE COMUNIDADES
+// Criado em: 05/02/2026
+// ==========================================================================
+function inicializarFiltroComunidades() {
+  const containerComunidades = document.getElementById("filtro-comunidades");
+  if (!containerComunidades) return;
+
+  if (ESTADO.listaComunidades.length === 0) {
+    containerComunidades.innerHTML = `
+      <h3>FILTRAR POR LOCAL</h3>
+      <div class="filter-item">
+        <span>Nenhuma comunidade cadastrada</span>
+      </div>
+    `;
+    return;
+  }
+
+  containerComunidades.innerHTML = `
+    <h3>FILTRAR POR LOCAL</h3>
+    <div class="filter-item active" onclick="filtrarPorComunidade(null, this)">
+      <span class="checkbox-custom checked" id="check-comunidade-todas"></span> 
+      <strong>TODOS OS LOCAIS</strong>
+    </div>
+    <div class="filter-item" onclick="filtrarPorComunidade('matriz', this)">
+      <span class="checkbox-custom" id="check-comunidade-matriz"></span> 
+      MATRIZ / PARÓQUIA
+    </div>
+  `;
+
+  // Adiciona cada comunidade
+  ESTADO.listaComunidades.forEach((com) => {
+    const div = document.createElement("div");
+    div.className = "filter-item";
+    div.onclick = function() { filtrarPorComunidade(com.id, this); };
+    div.innerHTML = `
+      <span class="checkbox-custom" id="check-comunidade-${com.id}"></span>
+      ${com.nome}
+    `;
+    containerComunidades.appendChild(div);
+  });
+}
+
+/**
+ * Inicializa o filtro de comunidades no header do calendário (Nova versão)
+ */
+function inicializarFiltroComunidadesHeader() {
+  const select = document.getElementById("public-community-filter");
+  
+  if (!select) {
+    console.warn("⚠️ Elemento public-community-filter não encontrado");
+    return;
+  }
+
+  // Limpa e recria as opções
+  select.innerHTML = `
+    <option value="">📍 Todas as Comunidades</option>
+    <option value="matriz">⛪ Matriz</option>
+  `;
+
+  // Adiciona comunidades cadastradas
+  ESTADO.listaComunidades.forEach((com) => {
+    const option = document.createElement("option");
+    option.value = com.id;
+    option.textContent = `🏛️ ${com.nome}`;
+    select.appendChild(option);
+  });
+
+  console.log("✅ Filtro de comunidades inicializado no header");
+}
+
+window.filtrarPorComunidade = async function (comunidadeId, divElement) {
+  // Se chamado via select do header (sem divElement)
+  if (!divElement) {
+    const select = document.getElementById("public-community-filter");
+    if (select) {
+      select.value = comunidadeId || "";
+    }
+    
+    // Atualiza estado
+    ESTADO.comunidadeFiltrada = comunidadeId || null;
+    
+    // Recarrega calendário com filtro
+    await carregarMes(ESTADO.anoAtual, ESTADO.mesAtual);
+    return;
+  }
+
+  // Lógica antiga da sidebar (mantida para compatibilidade)
+  // Remove active de todos
+  const todosItens = document.querySelectorAll("#filtro-comunidades .filter-item");
+  todosItens.forEach((item) => {
+    item.classList.remove("active");
+    const check = item.querySelector(".checkbox-custom");
+    if (check) check.classList.remove("checked");
+  });
+
+  // Adiciona active no selecionado
+  divElement.classList.add("active");
+  const check = divElement.querySelector(".checkbox-custom");
+  if (check) check.classList.add("checked");
+
+  // Atualiza estado
+  ESTADO.comunidadeFiltrada = comunidadeId;
+
+  // Recarrega calendário com filtro
+  await carregarMes(ESTADO.anoAtual, ESTADO.mesAtual);
+
+  // Reaplicar destaque do dia atual e filtros de equipes se ativos
+  setTimeout(() => {
+    destacarDiaAtual();
+    if (ESTADO.filtrosAtivos.size > 0) {
+      aplicarFiltrosVisuais();
+    }
+  }, 100);
+};
 
 window.toggleFiltro = function (equipeId, divElement) {
   const check = divElement.querySelector(".checkbox-custom");
@@ -460,6 +593,26 @@ window.abrirModal = function (dataISO) {
     btnAdmin = `<button id="btnEditar" class="btn-admin-action">🛠️ GERENCIAR AGENDA</button>`;
   }
 
+  // 🏛️ Badge de comunidade no modal
+  let infoComunidade = "";
+  if (evento.comunidade_id) {
+    const comunidade = ESTADO.listaComunidades.find(c => c.id === evento.comunidade_id);
+    if (comunidade) {
+      infoComunidade = `
+        <div style="background: linear-gradient(135deg, rgba(251,181,88,0.1) 0%, rgba(164,29,49,0.05) 100%); padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid var(--cor-dourado);">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 1.2rem;">🏛️</span>
+            <div>
+              <p style="margin: 0; font-weight: 700; color: var(--cor-vinho); font-size: 0.9rem;">Local do Evento</p>
+              <p style="margin: 0; color: #666; font-size: 0.85rem;">${comunidade.nome}</p>
+              ${comunidade.endereco ? `<p style="margin: 0; color: #999; font-size: 0.75rem; margin-top: 2px;">${comunidade.endereco}</p>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
   modalContent.innerHTML = `
     <div class="modal-card">
         <button class="btn-close" onclick="fecharModalForce()" aria-label="Fechar">×</button>
@@ -472,6 +625,7 @@ window.abrirModal = function (dataISO) {
             <div id="areaConteudo">
                 <div class="modal-liturgia" style="color:${corTxt}">${evento.tempo_liturgico}</div>
                 <div class="modal-titulo">${evento.titulo}</div>
+                ${infoComunidade}
                 <div class="escala-list">${conteudoHTML}</div>
             
             <!-- ZONA DE CONVENIÊNCIA DO FIEL -->
@@ -1158,6 +1312,15 @@ function gerarHTMLLinhaImpressao(evento) {
   // Se quiser usar a cor litúrgica no dia, descomente abaixo:
   // if (evento.liturgia_cores?.hex_code) corDia = evento.liturgia_cores.hex_code;
 
+  // 🏛️ Identificação de Comunidade no Relatório
+  let badgeComunidade = "";
+  if (evento.comunidade_id) {
+    const comunidade = ESTADO.listaComunidades.find(c => c.id === evento.comunidade_id);
+    if (comunidade) {
+      badgeComunidade = ` <span style="display:inline-block; background: rgba(251,181,88,0.2); color: #a67c00; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-left: 6px;">🏛️ ${comunidade.nome}</span>`;
+    }
+  }
+
   return `
     <tr>
         <td class="col-data">
@@ -1171,7 +1334,7 @@ function gerarHTMLLinhaImpressao(evento) {
              ${evento.tipo_compromisso === "liturgia" ? "✝️" : "📅"}
         </td>
         <td>
-            <div class="print-titulo">${evento.titulo}</div>
+            <div class="print-titulo">${evento.titulo}${badgeComunidade}</div>
             <div class="print-liturgia">${evento.tempo_liturgico || evento.tipo_compromisso}</div>
         </td>
         <td>

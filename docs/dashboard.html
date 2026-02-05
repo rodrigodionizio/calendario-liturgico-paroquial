@@ -75,6 +75,10 @@
         <i data-lucide="users"></i> Gerenciar Equipes
       </div>
 
+      <div class="menu-item" data-tab="comunidades">
+        <i data-lucide="church"></i> Gestão de Comunidades
+      </div>
+
       <!-- Este menu só aparecerá via JS para Admins Nível 1 e 2 -->
       <div
         class="menu-item"
@@ -239,6 +243,41 @@
             >
               ...
             </h2>
+            
+            <!-- Filtro de Comunidades -->
+            <div id="dashboard-community-filter-wrapper" style="display: flex; align-items: center; gap: 12px;">
+              <label for="dashboard-community-filter" style="font-size: 0.95rem; font-weight: 600; color: var(--cor-vinho); white-space: nowrap;">
+                <i data-lucide="map-pin" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 4px;"></i>
+                Local:
+              </label>
+              <select 
+                id="dashboard-community-filter" 
+                class="sds-select"
+                onchange="window.DashboardController.aplicarFiltroComunidade(this.value)"
+                style="
+                  min-width: 180px;
+                  max-width: 280px;
+                  padding: 8px 32px 8px 12px;
+                  border: 2px solid #e5e7eb;
+                  border-radius: 8px;
+                  font-size: 0.95rem;
+                  font-weight: 500;
+                  background-color: white;
+                  background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg width=%2714%27 height=%278%27 viewBox=%270 0 14 8%27 fill=%27none%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M1 1l6 6 6-6%27 stroke=%27%23a41d31%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3e%3c/svg%3e');
+                  background-repeat: no-repeat;
+                  background-position: right 10px center;
+                  cursor: pointer;
+                  transition: all 0.2s;
+                  appearance: none;
+                "
+                onfocus="this.style.borderColor='#fbb558'; this.style.boxShadow='0 0 0 3px rgba(251,181,88,0.1)'"
+                onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'"
+              >
+                <option value="">Todas as Comunidades</option>
+                <!-- Opções serão preenchidas via JavaScript -->
+              </select>
+            </div>
+            
             <div class="nav-buttons">
               <button
                 class="btn-nav"
@@ -271,7 +310,12 @@
         <!-- Injetado por DashboardController.renderizarAbaEquipes -->
       </section>
 
-      <!-- ABA 4: USUÁRIOS (Controle de Acesso) -->
+      <!-- ABA 4: COMUNIDADES (CRUD de Comunidades e Capelas) -->
+      <section id="tab-comunidades" class="tab-content">
+        <!-- Injetado por DashboardController.renderizarAbaComunidades -->
+      </section>
+
+      <!-- ABA 5: USUÁRIOS (Controle de Acesso) -->
       <section id="tab-usuarios" class="tab-content">
         <!-- Injetado por DashboardController.renderizarAbaUsuarios -->
       </section>

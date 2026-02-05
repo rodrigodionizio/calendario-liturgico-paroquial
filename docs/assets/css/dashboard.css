@@ -943,3 +943,306 @@ strong {
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================================
+   11. ESTILOS PARA GESTÃO DE COMUNIDADES
+   Criado em: 05/02/2026
+   ========================================================================== */
+
+/* Container da lista de CRUD */
+.crud-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Item individual da lista */
+.crud-list-item {
+  background: white;
+  border-radius: var(--sys-radius-md);
+  border: 1px solid var(--cor-borda);
+  padding: 20px;
+  transition: all 0.3s ease;
+  box-shadow: var(--sys-shadow-sm);
+}
+
+.crud-list-item:hover {
+  box-shadow: var(--sys-shadow-md);
+  transform: translateY(-2px);
+}
+
+.crud-list-item.inactive {
+  opacity: 0.6;
+  background: #f9f9f9;
+}
+
+/* Header do item com nome e ações */
+.crud-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+/* Badge de cor */
+.color-badge {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: inline-block;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+}
+
+/* Badge de status inativo */
+.badge-inactive {
+  background: #ef4444;
+  color: white;
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Corpo do item com detalhes */
+.crud-item-body {
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.crud-item-body p {
+  margin: 5px 0;
+}
+
+.crud-item-body i {
+  margin-right: 6px;
+  opacity: 0.6;
+}
+
+/* Ações do item (botões) */
+.crud-item-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-icon-edit,
+.btn-icon-delete,
+.btn-icon-success {
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-icon-edit {
+  color: #3b82f6;
+}
+
+.btn-icon-edit:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.btn-icon-delete {
+  color: #ef4444;
+}
+
+.btn-icon-delete:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.btn-icon-success {
+  color: #22c55e;
+}
+
+.btn-icon-success:hover {
+  background: rgba(34, 197, 94, 0.1);
+}
+
+/* Form row para campos lado a lado */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Checkbox label customizado */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+/* Animação de toast */
+@keyframes slideInRight {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+}
+
+/* Loading spinner */
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Mensagem de erro */
+.error-message {
+  text-align: center;
+  padding: 40px;
+  color: #ef4444;
+}
+
+.error-message i {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 15px;
+}
+
+/* Melhorias no form-control para color picker */
+.form-control[type="color"] {
+  cursor: pointer;
+  padding: 5px;
+  border: 2px solid var(--cor-borda);
+}
+
+.form-control[type="color"]:hover {
+  border-color: var(--sys-color-warning);
+}
+
+/* ========================================================================
+   COMPONENTES SDS v6.0: FILTRO DE COMUNIDADES
+   ======================================================================== */
+
+/* Wrapper do filtro no header do calendário */
+#dashboard-community-filter-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Select estilizado seguindo SDS v6.0 */
+.sds-select {
+  min-width: 180px;
+  max-width: 280px;
+  padding: 8px 32px 8px 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #374151;
+  background-color: white;
+  background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg width=%2714%27 height=%278%27 viewBox=%270 0 14 8%27 fill=%27none%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M1 1l6 6 6-6%27 stroke=%27%23a41d31%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3e%3c/svg%3e');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+.sds-select:hover {
+  border-color: var(--cor-vinho);
+  box-shadow: 0 2px 8px rgba(164, 29, 49, 0.1);
+}
+
+.sds-select:focus {
+  outline: none;
+  border-color: var(--cor-dourado);
+  box-shadow: 0 0 0 3px rgba(251, 181, 88, 0.1);
+}
+
+.sds-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #f9fafb;
+}
+
+/* Label do filtro */
+#dashboard-community-filter-wrapper label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--cor-vinho);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Responsividade do filtro */
+@media (max-width: 768px) {
+  #dashboard-community-filter-wrapper {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .sds-select {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  #dashboard-community-filter-wrapper label {
+    font-size: 0.85rem;
+  }
+}
+
+/* Ajustes no header para acomodar o filtro */
+.month-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .month-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

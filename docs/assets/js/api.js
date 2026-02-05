@@ -109,11 +109,13 @@ window.api = {
   },
 
   // =============================
-  // 1 - INÍCIO: buscarEventos (com cache)
+  // 1 - INÍCIO: buscarEventos (com cache e filtro de comunidade)
   // =============================
-  buscarEventos: async function (ano, mes) {
-    // 1. Verifica cache primeiro
-    const cacheKey = `eventos_${ano}_${mes}`;
+  buscarEventos: async function (ano, mes, comunidadeId = null) {
+    // 1. Verifica cache primeiro (ajustado para incluir filtro)
+    const cacheKey = comunidadeId 
+      ? `eventos_${ano}_${mes}_comunidade_${comunidadeId}`
+      : `eventos_${ano}_${mes}`;
     const cached = this.getCache(cacheKey);
 
     if (cached) {
@@ -127,21 +129,42 @@ window.api = {
     const ultimoDia = new Date(ano, mes, 0).getDate();
     const fim = `${ano}-${mesStr}-${ultimoDia}`;
 
-    const { data, error } = await _supabaseClient
+    let query = _supabaseClient
       .from("eventos_base")
       .select(
-        `*, liturgia_cores(hex_code), escalas(*, equipe_leitura:equipes!equipe_leitura_id(nome_equipe), equipe_canto:equipes!equipe_canto_id(nome_equipe), equipe_mep:equipes!equipe_mep_id(nome_equipe))`,
+        `*, 
+         liturgia_cores(hex_code), 
+         comunidade_id,
+         comunidade:comunidades(id, nome, endereco),
+         escalas(*, 
+           equipe_leitura:equipes!equipe_leitura_id(nome_equipe), 
+           equipe_canto:equipes!equipe_canto_id(nome_equipe), 
+           equipe_mep:equipes!equipe_mep_id(nome_equipe)
+         )`,
       )
       .gte("data", inicio)
-      .lte("data", fim)
-      .order("data", { ascending: true });
+      .lte("data", fim);
+
+    // 3. Aplica filtro de comunidade se especificado
+    if (comunidadeId === "matriz") {
+      // Filtro para matriz: eventos sem comunidade_id (null)
+      query = query.is("comunidade_id", null);
+    } else if (comunidadeId && comunidadeId !== "todas") {
+      // Filtro para comunidade específica
+      query = query.eq("comunidade_id", comunidadeId);
+    }
+    // Se comunidadeId === null ou "todas", não aplica filtro (retorna tudo)
+
+    query = query.order("data", { ascending: true });
+
+    const { data, error } = await query;
 
     if (error) {
       console.error("❌ API Error:", error);
       return [];
     }
 
-    // 3. Salva em cache
+    // 4. Salva em cache
     this.setCache(cacheKey, data);
     return data;
   },
@@ -156,7 +179,15 @@ window.api = {
     const { data, error } = await _supabaseClient
       .from("eventos_base")
       .select(
-        `*, liturgia_cores(hex_code), escalas(*, equipe_leitura:equipes!equipe_leitura_id(nome_equipe), equipe_canto:equipes!equipe_canto_id(nome_equipe), equipe_mep:equipes!equipe_mep_id(nome_equipe))`,
+        `*, 
+         liturgia_cores(hex_code), 
+         comunidade_id,
+         comunidade:comunidades(id, nome, endereco),
+         escalas(*, 
+           equipe_leitura:equipes!equipe_leitura_id(nome_equipe), 
+           equipe_canto:equipes!equipe_canto_id(nome_equipe), 
+           equipe_mep:equipes!equipe_mep_id(nome_equipe)
+         )`,
       )
       .gte("data", dataInicio)
       .lte("data", dataFim)
@@ -280,6 +311,172 @@ window.api = {
   excluirUsuario: async function (id) {
     return await _supabaseClient.from("admins_allowlist").delete().eq("id", id);
   },
+
+  // =============================
+  // 5.1 - GESTÃO DE COMUNIDADES
+  // Criado em: 05/02/2026
+  // =============================
+  
+  /**
+   * Lista todas as comunidades cadastradas
+   * @returns {Promise<Array>} Array de objetos comunidade
+   */
+  listarComunidades: async function () {
+    const cacheKey = "comunidades_list";
+    const cached = this.getCache(cacheKey);
+    if (cached) return cached;
+
+    const { data, error } = await _supabaseClient
+      .from("comunidades")
+      .select("*")
+      .eq("ativo", true)
+      .order("nome", { ascending: true });
+
+    if (error) {
+      console.error("❌ Erro ao listar comunidades:", error);
+      return [];
+    }
+
+    this.setCache(cacheKey, data);
+    return data || [];
+  },
+
+  /**
+   * Lista todas as comunidades (incluindo inativas) - Para uso admin
+   * @returns {Promise<Array>} Array completo de comunidades
+   */
+  listarTodasComunidades: async function () {
+    const { data, error } = await _supabaseClient
+      .from("comunidades")
+      .select("*")
+      .order("nome", { ascending: true });
+
+    if (error) {
+      console.error("❌ Erro ao listar todas comunidades:", error);
+      return [];
+    }
+
+    return data || [];
+  },
+
+  /**
+   * Busca uma comunidade específica por ID
+   * @param {string} id - ID da comunidade (UUID)
+   * @returns {Promise<Object|null>} Dados da comunidade
+   */
+  buscarComunidade: async function (id) {
+    const { data, error } = await _supabaseClient
+      .from("comunidades")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      console.error("❌ Erro ao buscar comunidade:", error);
+      return null;
+    }
+
+    return data;
+  },
+
+  /**
+   * Salva (cria ou atualiza) uma comunidade
+   * @param {Object} comunidade - Dados da comunidade
+   * @returns {Promise<Object>} Resultado da operação
+   */
+  salvarComunidade: async function (comunidade) {
+    let result;
+
+    if (comunidade.id) {
+      // UPDATE
+      const { id, created_at, ...dadosAtualizacao } = comunidade;
+      result = await _supabaseClient
+        .from("comunidades")
+        .update(dadosAtualizacao)
+        .eq("id", id)
+        .select()
+        .single();
+    } else {
+      // INSERT
+      const { id, created_at, ...dadosInsercao } = comunidade;
+      result = await _supabaseClient
+        .from("comunidades")
+        .insert(dadosInsercao)
+        .select()
+        .single();
+    }
+
+    if (result.error) {
+      console.error("❌ Erro ao salvar comunidade:", result.error);
+      throw result.error;
+    }
+
+    // Invalida cache
+    sessionStorage.removeItem("comunidades_list");
+    console.log("✅ Comunidade salva com sucesso:", result.data);
+    return result;
+  },
+
+  /**
+   * Exclui uma comunidade (soft delete - marca como inativa)
+   * @param {string} id - ID da comunidade (UUID)
+   * @returns {Promise<Object>} Resultado da operação
+   */
+  excluirComunidade: async function (id) {
+    // Verifica se há eventos vinculados
+    const { data: eventosVinculados } = await _supabaseClient
+      .from("eventos_base")
+      .select("id", { count: "exact", head: true })
+      .eq("comunidade_id", id);
+
+    if (eventosVinculados && eventosVinculados.length > 0) {
+      return {
+        error: {
+          message: `Não é possível excluir esta comunidade pois existem ${eventosVinculados.length} eventos vinculados a ela.`,
+          code: "FOREIGN_KEY_VIOLATION",
+        },
+      };
+    }
+
+    // Soft delete (marca como inativa ao invés de deletar)
+    const result = await _supabaseClient
+      .from("comunidades")
+      .update({ ativo: false })
+      .eq("id", id);
+
+    if (result.error) {
+      console.error("❌ Erro ao excluir comunidade:", result.error);
+      return result;
+    }
+
+    // Invalida cache
+    sessionStorage.removeItem("comunidades_list");
+    console.log("✅ Comunidade marcada como inativa:", id);
+    return result;
+  },
+
+  /**
+   * Reativa uma comunidade previamente desativada
+   * @param {string} id - ID da comunidade (UUID)
+   * @returns {Promise<Object>} Resultado da operação
+   */
+  reativarComunidade: async function (id) {
+    const result = await _supabaseClient
+      .from("comunidades")
+      .update({ ativo: true })
+      .eq("id", id);
+
+    if (result.error) {
+      console.error("❌ Erro ao reativar comunidade:", result.error);
+      return result;
+    }
+
+    // Invalida cache
+    sessionStorage.removeItem("comunidades_list");
+    console.log("✅ Comunidade reativada:", id);
+    return result;
+  },
+
   // =============================
   // 5 - FIM: Gestão CRUD
   // =============================
