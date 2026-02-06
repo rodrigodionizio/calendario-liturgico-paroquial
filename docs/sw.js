@@ -35,6 +35,11 @@ self.addEventListener('fetch', (e) => {
   if (e.request.url.includes('supabase.co')) return;
 
   e.respondWith(
-    caches.match(e.request).then((res) => res || fetch(e.request))
+    caches.match(e.request)
+      .then((res) => res || fetch(e.request))
+      .catch((err) => {
+        console.log('⚠️ [SW] Erro no fetch:', err);
+        return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
+      })
   );
 });

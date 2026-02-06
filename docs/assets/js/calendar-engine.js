@@ -204,10 +204,18 @@ window.CalendarEngine = {
         estiloAdicional = `style="background-color: #2e3fd1ff !important; color: white !important; border: none !important;"`;
       }
 
+      // 🏛️ Badge de comunidade (sincronizado com app.js)
+      let badgeComunidade = "";
+      if (evento.comunidade_id && evento.comunidade) {
+        // 🛡️ Proteção contra undefined com optional chaining e fallback
+        const nomeComunidade = evento.comunidade?.nome || 'Comunidade';
+        badgeComunidade = `<span class="badge-comunidade" style="display: inline-block;">🏛️ ${nomeComunidade}</span>`;
+      }
+
       return `
             <div class="pill ${classeCategoria}" ${estiloAdicional} title="${evento.titulo}">
                 <span style="font-size: 0.65rem; opacity: 0.8;">${horaShow}</span>
-                <span>${icone} ${evento.titulo}</span>
+                <span>${icone} ${evento.titulo}${badgeComunidade}</span>
             </div>
         `;
     }).join("");

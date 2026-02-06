@@ -287,18 +287,24 @@ function renderizarGrid(ano, mes, gridElement, headersHTML) {
 
       const classeSolenidade = evento.is_solenidade ? "solenidade" : "";
 
-      // �️ Badge de comunidade (SEMPRE exibir quando evento tem comunidade)
+      // 🏛️ Badge de comunidade (SEMPRE exibir quando evento tem comunidade)
       let badgeComunidade = "";
       if (evento.comunidade_id) {
         console.log("🔍 [BADGE] Renderizando badge para evento:", evento.id);
         console.log("   Comunidade ID:", evento.comunidade_id);
+        console.log("   Dados API:", evento.comunidade);
         console.log("   Lista disponível:", ESTADO.listaComunidades?.length || 0, "comunidades");
-        const comunidade = ESTADO.listaComunidades.find(c => c.id === evento.comunidade_id);
+        
+        // 🔧 PRIORIZA dados da API (evento.comunidade) ao invés de buscar na lista local
+        const comunidade = evento.comunidade || ESTADO.listaComunidades.find(c => c.id === evento.comunidade_id);
+        
         if (comunidade) {
-          badgeComunidade = `<span class="badge-comunidade" style="display: inline-block;">🏛️ ${comunidade.nome}</span>`;
-          console.log("✅ [BADGE] Badge renderizado para:", comunidade.nome);
+          // 🛡️ Proteção contra undefined com optional chaining e fallback
+          const nomeComunidade = comunidade?.nome || 'Comunidade';
+          badgeComunidade = `<span class="badge-comunidade" style="display: inline-block;">🏛️ ${nomeComunidade}</span>`;
+          console.log("✅ [BADGE] Badge renderizado para:", nomeComunidade);
         } else {
-          console.warn("⚠️ [BADGE] Comunidade não encontrada na lista:", evento.comunidade_id);
+          console.warn("⚠️ [BADGE] Comunidade não encontrada:", evento.comunidade_id);
           console.warn("   IDs disponíveis:", ESTADO.listaComunidades?.map(c => c.id));
           badgeComunidade = `<span class="badge-comunidade badge-comunidade-erro" style="display: inline-block;">⚠️ Comunidade</span>`;
         }
@@ -386,12 +392,15 @@ function inicializarFiltroComunidades() {
 
   // Adiciona cada comunidade
   ESTADO.listaComunidades.forEach((com) => {
+    // 🛡️ Validação defensiva para prevenir undefined
+    if (!com || !com.id) return;
+    
     const div = document.createElement("div");
     div.className = "filter-item";
     div.onclick = function() { filtrarPorComunidade(com.id, this); };
     div.innerHTML = `
       <span class="checkbox-custom" id="check-comunidade-${com.id}"></span>
-      ${com.nome}
+      ${com.nome || 'Comunidade'}
     `;
     containerComunidades.appendChild(div);
   });
@@ -427,10 +436,13 @@ function inicializarFiltroComunidadesHeader() {
     select.appendChild(option);
   } else {
     ESTADO.listaComunidades.forEach((com) => {
+      // 🛡️ Validação defensiva para prevenir undefined
+      if (!com || !com.id) return;
+      
       console.log("  ➕ [FILTRO] Adicionando:", com.nome, "(ID:", com.id, ")");
       const option = document.createElement("option");
       option.value = com.id;
-      option.textContent = `🏛️ ${com.nome}`;
+      option.textContent = `🏛️ ${com.nome || 'Comunidade'}`;
       select.appendChild(option);
     });
   }
@@ -638,21 +650,28 @@ window.abrirModal = function (dataISO) {
   let infoComunidade = "";
   if (evento.comunidade_id) {
     console.log("🔍 DEBUG Modal:", { eventoId: evento.id, comunidadeId: evento.comunidade_id });
-    const comunidade = ESTADO.listaComunidades.find(c => c.id === evento.comunidade_id);
+    
+    // 🔧 PRIORIZA dados da API (evento.comunidade) ao invés de buscar na lista local
+    const comunidade = evento.comunidade || ESTADO.listaComunidades.find(c => c.id === evento.comunidade_id);
+    
     if (comunidade) {
+      // 🛡️ Proteção contra undefined com optional chaining e fallback
+      const nomeComunidade = comunidade?.nome || 'Comunidade';
+      const enderecoComunidade = comunidade?.endereco || '';
+      
       infoComunidade = `
         <div style="background: linear-gradient(135deg, rgba(251,181,88,0.1) 0%, rgba(164,29,49,0.05) 100%); padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid var(--cor-dourado);">
           <div style="display: flex; align-items: center; gap: 8px;">
             <span style="font-size: 1.2rem;">🏛️</span>
             <div>
               <p style="margin: 0; font-weight: 700; color: var(--cor-vinho); font-size: 0.9rem;">Capela</p>
-              <p style="margin: 0; color: #666; font-size: 0.85rem;">${comunidade.nome}</p>
-              ${comunidade.endereco ? `<p style="margin: 0; color: #999; font-size: 0.75rem; margin-top: 2px;">${comunidade.endereco}</p>` : ''}
+              <p style="margin: 0; color: #666; font-size: 0.85rem;">${nomeComunidade}</p>
+              ${enderecoComunidade ? `<p style="margin: 0; color: #999; font-size: 0.75rem; margin-top: 2px;">${enderecoComunidade}</p>` : ''}
             </div>
           </div>
         </div>
       `;
-      console.log("✅ Card modal renderizado para:", comunidade.nome);
+      console.log("✅ Card modal renderizado para:", nomeComunidade);
     } else {
       console.warn("⚠️ Comunidade não encontrada no modal:", evento.comunidade_id);
     }
@@ -1360,10 +1379,14 @@ function gerarHTMLLinhaImpressao(evento) {
   // 🏛️ Identificação de Comunidade no Relatório (SEMPRE exibir)
   let badgeComunidade = "";
   if (evento.comunidade_id) {
-    const comunidade = ESTADO.listaComunidades.find(c => c.id === evento.comunidade_id);
+    // 🔧 PRIORIZA dados da API (evento.comunidade) ao invés de buscar na lista local
+    const comunidade = evento.comunidade || ESTADO.listaComunidades.find(c => c.id === evento.comunidade_id);
+    
     if (comunidade) {
-      badgeComunidade = ` <span style="display:inline-block; background: rgba(251,181,88,0.2); color: #a67c00; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-left: 6px;">🏛️ ${comunidade.nome}</span>`;
-      console.log("✅ Badge impressão para:", comunidade.nome);
+      // 🛡️ Proteção contra undefined com optional chaining e fallback
+      const nomeComunidade = comunidade?.nome || 'Comunidade';
+      badgeComunidade = ` <span style="display:inline-block; background: rgba(251,181,88,0.2); color: #a67c00; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-left: 6px;">🏛️ ${nomeComunidade}</span>`;
+      console.log("✅ Badge impressão para:", nomeComunidade);
     } else {
       console.warn("⚠️ Comunidade não encontrada no relatório:", evento.comunidade_id);
     }

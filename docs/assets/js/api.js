@@ -364,13 +364,19 @@ window.api = {
       
       // 🛠️ FILTRO MANUAL: Filtra apenas ativas no JavaScript (workaround RLS)
       const comunidadesAtivas = data ? data.filter(c => {
-        // Aceita boolean true ou string "true"
-        const isAtivo = c.ativo === true || c.ativo === "true" || c.ativo === 1;
+        // 🔧 APRIMORADO: Usa Boolean() para cobrir mais casos (true, "true", 1, "1", etc.)
+        const isAtivo = Boolean(c.ativo) && c.ativo !== "false" && c.ativo !== 0;
         console.log(`  🔹 ${c.nome}: ativo=${c.ativo} (tipo: ${typeof c.ativo}) -> ${isAtivo ? "✅" : "❌"}`);
         return isAtivo;
       }) : [];
       
       console.log("✅ [API] Comunidades ATIVAS filtradas:", comunidadesAtivas.length, "itens");
+      
+      // 🚨 ALERTA se nenhuma comunidade foi encontrada
+      if (comunidadesAtivas.length === 0 && data && data.length > 0) {
+        console.warn("⚠️ [API] ATENÇÃO: Todas as comunidades estão marcadas como inativas!");
+        console.warn("📊 [API] Total no banco:", data.length, "| Ativas:", comunidadesAtivas.length);
+      }
 
       this.setCache(cacheKey, comunidadesAtivas);
       return comunidadesAtivas;
