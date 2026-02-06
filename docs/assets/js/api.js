@@ -133,6 +133,8 @@ window.api = {
       .from("eventos_base")
       .select(
         `id, titulo, data, tipo_compromisso, tipo_celebracao, descricao, cor_id, comunidade_id,
+         tempo_liturgico, is_solenidade, is_festa, hora_inicio, local, responsavel,
+         mural_destaque, mural_prioridade, status,
          liturgia_cores(hex_code), 
          comunidade:comunidades!comunidade_id(id, nome, endereco),
          escalas(*, 
@@ -179,6 +181,8 @@ window.api = {
       .from("eventos_base")
       .select(
         `id, titulo, data, tipo_compromisso, tipo_celebracao, descricao, cor_id, comunidade_id,
+         tempo_liturgico, is_solenidade, is_festa, hora_inicio, local, responsavel,
+         mural_destaque, mural_prioridade, status,
          liturgia_cores(hex_code), 
          comunidade:comunidades!comunidade_id(id, nome, endereco),
          escalas(*, 
