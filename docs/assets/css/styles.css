@@ -657,6 +657,11 @@ header {
 /* ==========================================================================
    6. MURAL DE AVISOS (NOVA FEATURE)
    ========================================================================== */
+.mural-avisos-wrapper {
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
 .mural-container {
   display: flex;
   flex-direction: column;
@@ -700,6 +705,7 @@ header {
   border-left: 4px solid #ccc;
   transition: transform 0.2s;
   cursor: default;
+  position: relative; /* Para posicionar "Ler Mais" absoluto */
 }
 
 .aviso-card:hover {
@@ -761,6 +767,59 @@ header {
   display: flex;
   align-items: center;
   gap: 5px;
+}
+
+/* Descrição truncada com "Ler Mais" */
+.aviso-descricao {
+  font-size: 0.85rem;
+  color: #666;
+  max-height: 70px;
+  overflow: hidden;
+  margin-top: 6px;
+  line-height: 1.5;
+  padding-bottom: 25px; /* Espaço para o link "Ler Mais" */
+}
+
+.aviso-ler-mais {
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+  font-size: 0.75rem;
+  color: var(--cor-vinho);
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.aviso-ler-mais:hover {
+  color: var(--cor-cereja);
+  text-decoration: underline;
+}
+
+/* Botão "Ver Todos os Avisos" */
+.btn-ver-todos {
+  width: 100%;
+  padding: 10px;
+  background: var(--cor-vinho);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-family: "Neulis", sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+}
+
+.btn-ver-todos:hover {
+  background: var(--cor-cereja);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 @keyframes pulse {

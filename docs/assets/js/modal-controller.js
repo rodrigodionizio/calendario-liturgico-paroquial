@@ -477,6 +477,226 @@ window.ModalController = {
       modalContent.innerHTML = html;
       modalOverlay.classList.add('active');
     }
+  },
+
+  // =============================
+  // MODAL: DETALHES DE UM AVISO
+  // =============================
+  /**
+   * Abre modal com detalhes completos de um aviso específico
+   * @param {number} avisoId - ID do aviso no banco de dados
+   */
+  abrirDetalhesAviso: async function(avisoId) {
+    try {
+      console.log(`📢 Abrindo detalhes do aviso: ${avisoId}`);
+      
+      // Busca aviso específico no Supabase
+      const { data: aviso, error } = await window.supabase
+        .from('eventos_base')
+        .select('*')
+        .eq('id', avisoId)
+        .single();
+      
+      if (error || !aviso) {
+        console.error('❌ Erro ao carregar aviso:', error);
+        alert('Não foi possível carregar os detalhes deste aviso.');
+        return;
+      }
+      
+      // Formata data
+      const dataEvento = new Date(aviso.data + 'T12:00:00');
+      const dataFormatada = dataEvento.toLocaleDateString('pt-BR', {
+        weekday: 'long',
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      });
+      
+      // Hora formatada
+      const horaHTML = aviso.hora_inicio 
+        ? `<p><strong>🕐 Horário:</strong> ${aviso.hora_inicio.substring(0, 5)}</p>` 
+        : '';
+      
+      // Descrição completa
+      const descricaoHTML = aviso.descricao 
+        ? `<div style="margin-top: 16px; padding: 16px; background: #f9f9f9; border-radius: 8px; line-height: 1.6;">
+             ${aviso.descricao.replace(/\n/g, '<br>')}
+           </div>` 
+        : '<p style="color: #999; font-style: italic;">Sem descrição adicional.</p>';
+      
+      // Badge de prioridade
+      let badgePrioridade = '';
+      if (aviso.mural_prioridade === 1) {
+        badgePrioridade = '<span style="display: inline-block; padding: 4px 8px; background: var(--cor-cereja); color: white; border-radius: 4px; font-size: 0.75rem; font-weight: 700; margin-bottom: 12px;">🔥 URGENTE</span>';
+      } else if (aviso.mural_prioridade === 2) {
+        badgePrioridade = '<span style="display: inline-block; padding: 4px 8px; background: var(--cor-dourado); color: white; border-radius: 4px; font-size: 0.75rem; font-weight: 700; margin-bottom: 12px;">⚠️ IMPORTANTE</span>';
+      }
+      
+      const html = `
+        <div class="modal-card" style="max-width: 600px;">
+          <button class="btn-close" onclick="ModalController.fechar()">×</button>
+          <div class="modal-sidebar-color" style="background-color: var(--cor-vinho)"></div>
+          <div class="modal-body">
+            <div class="modal-header" style="border-bottom: 2px solid var(--cor-vinho); padding-bottom: 12px; margin-bottom: 16px;">
+              <div style="font-size: 0.85rem; color: #666; font-weight: 600; text-transform: uppercase;">
+                📅 ${dataFormatada}
+              </div>
+            </div>
+            ${badgePrioridade}
+            <div style="font-size: 1.5rem; font-weight: 700; color: #333; margin-bottom: 16px;">
+              ${aviso.titulo}
+            </div>
+            <div style="color: #555; margin-bottom: 16px;">
+              <p><strong>📍 Local:</strong> ${aviso.local || 'Paróquia'}</p>
+              ${horaHTML}
+            </div>
+            <div style="border-top: 1px solid #eee; padding-top: 16px;">
+              <strong style="color: var(--cor-vinho);">Detalhes:</strong>
+              ${descricaoHTML}
+            </div>
+          </div>
+        </div>
+      `;
+      
+      const modalContent = document.getElementById('modalContent');
+      const modalOverlay = document.getElementById('modalOverlay');
+      
+      if (modalContent && modalOverlay) {
+        modalContent.innerHTML = html;
+        modalOverlay.classList.add('active');
+      }
+      
+    } catch (err) {
+      console.error('❌ Erro ao abrir detalhes do aviso:', err);
+      alert('Erro ao carregar detalhes do aviso.');
+    }
+  },
+
+  // =============================
+  // MODAL: TODOS OS AVISOS
+  // =============================
+  /**
+   * Abre modal com lista completa de todos os avisos futuros
+   */
+  abrirAvisosCompletos: async function() {
+    try {
+      console.log('📋 Abrindo modal: Todos os Avisos');
+      
+      // Busca TODOS os avisos futuros
+      const avisos = await window.api.buscarTodosAvisos();
+      
+      if (!avisos || avisos.length === 0) {
+        const html = `
+          <div class="modal-card" style="max-width: 700px;">
+            <button class="btn-close" onclick="ModalController.fechar()">×</button>
+            <div class="modal-sidebar-color" style="background-color: var(--cor-vinho)"></div>
+            <div class="modal-body">
+              <div class="modal-header" style="border-bottom: 2px solid var(--cor-vinho); padding-bottom: 12px; margin-bottom: 20px;">
+                <div style="font-size: 1.3rem; font-weight: 700; color: var(--cor-vinho);">
+                  📢 Todos os Avisos Paroquiais
+                </div>
+              </div>
+              <div class="c-alert" style="padding: 16px; background: #f5f5f5; border-radius: 8px; text-align: center;">
+                <p style="margin: 0; color: #666;">📭 Nenhum aviso cadastrado no momento.</p>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        const modalContent = document.getElementById('modalContent');
+        const modalOverlay = document.getElementById('modalOverlay');
+        
+        if (modalContent && modalOverlay) {
+          modalContent.innerHTML = html;
+          modalOverlay.classList.add('active');
+        }
+        return;
+      }
+      
+      // Gera HTML da lista de avisos
+      let avisosHTML = '';
+      
+      avisos.forEach((aviso) => {
+        const dataEvento = new Date(aviso.data + 'T12:00:00');
+        const dataFormatada = dataEvento.toLocaleDateString('pt-BR', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        });
+        
+        const horaShow = aviso.hora_inicio 
+          ? ` • ${aviso.hora_inicio.substring(0, 5)}` 
+          : '';
+        
+        let prioClass = '';
+        let prioLabel = '';
+        
+        if (aviso.mural_prioridade === 1) {
+          prioClass = 'background: #fff5f5; border-left: 4px solid var(--cor-cereja);';
+          prioLabel = '<span style="font-size: 0.7rem; color: var(--cor-cereja); font-weight: 700;">🔥 URGENTE</span>';
+        } else if (aviso.mural_prioridade === 2) {
+          prioClass = 'border-left: 4px solid var(--cor-dourado);';
+          prioLabel = '<span style="font-size: 0.7rem; color: var(--cor-dourado); font-weight: 700;">⚠️ IMPORTANTE</span>';
+        } else {
+          prioClass = 'border-left: 4px solid #2196f3;';
+        }
+        
+        avisosHTML += `
+          <div style="padding: 14px; background: white; border-radius: 8px; margin-bottom: 12px; ${prioClass} box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: transform 0.2s;" 
+               onmouseover="this.style.transform='translateX(4px)'" 
+               onmouseout="this.style.transform='translateX(0)'">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              ${prioLabel}
+              <span style="font-size: 0.75rem; color: #666;">${dataFormatada}${horaShow}</span>
+            </div>
+            <div style="font-weight: 700; font-size: 1rem; color: #333; margin-bottom: 4px;">
+              ${aviso.titulo}
+            </div>
+            <div style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">
+              📍 ${aviso.local || 'Paróquia'}
+            </div>
+            <button onclick="ModalController.abrirDetalhesAviso(${aviso.id})" 
+                    style="padding: 6px 12px; background: var(--cor-vinho); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 600;">
+              Ver Detalhes
+            </button>
+          </div>
+        `;
+      });
+      
+      const html = `
+        <div class="modal-card" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+          <button class="btn-close" onclick="ModalController.fechar()">×</button>
+          <div class="modal-sidebar-color" style="background-color: var(--cor-vinho)"></div>
+          <div class="modal-body">
+            <div class="modal-header" style="border-bottom: 2px solid var(--cor-vinho); padding-bottom: 12px; margin-bottom: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 1.3rem; font-weight: 700; color: var(--cor-vinho);">
+                  📢 Todos os Avisos Paroquiais
+                </div>
+                <span style="background: var(--cor-cereja); color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 700;">
+                  ${avisos.length} ${avisos.length === 1 ? 'aviso' : 'avisos'}
+                </span>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column;">
+              ${avisosHTML}
+            </div>
+          </div>
+        </div>
+      `;
+      
+      const modalContent = document.getElementById('modalContent');
+      const modalOverlay = document.getElementById('modalOverlay');
+      
+      if (modalContent && modalOverlay) {
+        modalContent.innerHTML = html;
+        modalOverlay.classList.add('active');
+      }
+      
+    } catch (err) {
+      console.error('❌ Erro ao abrir lista completa de avisos:', err);
+      alert('Erro ao carregar lista de avisos.');
+    }
   }
 };
 

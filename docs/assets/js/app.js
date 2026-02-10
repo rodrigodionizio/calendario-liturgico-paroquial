@@ -122,15 +122,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // ==========================================================================
-// 2. MURAL DE AVISOS (SIDEBAR)
+// 2. MURAL DE AVISOS (ABAIXO DO CALENDÁRIO)
 // ==========================================================================
 async function renderizarMural() {
-  const container = document.querySelector(".mini-calendar");
+  const container = document.querySelector(".mural-avisos-wrapper");
   if (!container) return;
 
   container.innerHTML =
     '<div style="padding:20px; color:#888; font-size:0.8rem;">Carregando avisos...</div>';
-  container.className = "";
 
   try {
     const avisos = await window.api.buscarAvisos();
@@ -177,6 +176,11 @@ async function renderizarMural() {
         ? ` • ${aviso.hora_inicio.substring(0, 5)}`
         : "";
 
+      // Descrição truncada (se existir)
+      const descricaoHTML = aviso.descricao 
+        ? `<div class="aviso-descricao">${aviso.descricao}</div>` 
+        : '';
+
       html += `
             <div class="aviso-card prio-${aviso.mural_prioridade}">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -185,11 +189,46 @@ async function renderizarMural() {
                 </div>
                 <div class="aviso-titulo">${aviso.titulo}</div>
                 <div class="aviso-meta">📍 ${aviso.local || "Paróquia"}</div>
+                ${descricaoHTML}
+                ${aviso.descricao ? `<a class="aviso-ler-mais" onclick="ModalController.abrirDetalhesAviso(${aviso.id})">Ler Mais</a>` : ''}
             </div>`;
     });
 
-    html += "</div>";
+    html += `
+        </div>
+        <button onclick="ModalController.abrirAvisosCompletos()" style="
+              width: 100%;
+              padding: 12px;
+              background-color: var(--cor-vinho);
+              color: #fff;
+              border: none;
+              border-radius: 8px;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              gap: 10px;
+              font-family: 'AntennaCond', sans-serif;
+              font-weight: bold;
+              font-size: 1rem;
+              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+              transition: transform 0.2s;
+              margin-top: 10px;
+            " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+          <!-- Ícone Megafone/Mural SVG -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+          </svg>
+          VER TODOS OS AVISOS (${avisos.length})
+        </button>`;
+    
     container.innerHTML = html;
+    
+    // Inicializa os ícones Lucide (caso existam no HTML)
+    if (typeof lucide !== 'undefined' && lucide.createIcons) {
+      lucide.createIcons();
+    }
   } catch (err) {
     console.error(err);
     container.innerHTML =

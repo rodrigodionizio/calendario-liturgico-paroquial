@@ -104,6 +104,9 @@
       });
     }
   </script>
+  
+  <!-- Lucide Icons (para ícones do mural e sistema) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body>
@@ -133,9 +136,6 @@
   <div class="app-layout">
     <!-- SIDEBAR: FILTROS E NAVEGAÇÃO SECUNDÁRIA -->
     <aside class="sidebar">
-      <!-- Mockup de Mini Calendário -->
-      <div class="mini-calendar">Mini Calendar</div>
-
       <!-- Botão de Impressão (Estilo Oficial) -->
       <div class="filter-group" style="margin-top: 20px">
         <button onclick="abrirOpcoesImpressao()" style="
@@ -248,6 +248,12 @@
             Buscando dados litúrgicos...
           </div>
         </div>
+
+        <!-- ==========================================================================
+                     MURAL DE AVISOS PAROQUIAIS
+                     Posicionado abaixo do calendário principal
+                ========================================================================== -->
+        <div class="mural-avisos-wrapper"></div>
 
         <!-- ==========================================================================
                      RODAPÉ (FOOTER)

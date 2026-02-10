@@ -204,20 +204,46 @@ window.api = {
   // 2 - INÍCIO: buscarAvisos
   // =============================
   // Argumentos: Nenhum
-  // Descrição: Busca eventos em destaque para o mural lateral (Público).
+  // Descrição: Busca eventos em destaque para o mural (Público) - limitado aos próximos 30 dias.
   buscarAvisos: async function () {
-    const hoje = new Date().toISOString().split("T")[0];
+    const hoje = new Date();
+    const trintaDiasDepois = new Date(hoje);
+    trintaDiasDepois.setDate(hoje.getDate() + 30);
+    const trintaDiasDepoisISO = trintaDiasDepois.toISOString().split("T")[0];
+    
     const { data, error } = await _supabaseClient
       .from("eventos_base")
-      .select("id, titulo, data, local, mural_prioridade, hora_inicio")
+      .select("id, titulo, data, local, mural_prioridade, hora_inicio, descricao")
       .eq("mural_destaque", true)
-      .gte("data", hoje)
+      .gte("data", hoje.toISOString().split("T")[0])
+      .lte("data", trintaDiasDepoisISO)
+      .order("mural_prioridade", { ascending: true })
       .order("data", { ascending: true })
-      .limit(5);
+      .limit(4);
     return error ? [] : data;
   },
   // =============================
   // 2 - FIM: buscarAvisos
+  // =============================
+
+  // =============================
+  // 2.1 - INÍCIO: buscarTodosAvisos
+  // =============================
+  // Argumentos: Nenhum
+  // Descrição: Busca TODOS os eventos futuros em destaque (sem limite de 30 dias) para o modal "Ver Todos".
+  buscarTodosAvisos: async function () {
+    const hoje = new Date().toISOString().split("T")[0];
+    const { data, error } = await _supabaseClient
+      .from("eventos_base")
+      .select("id, titulo, data, local, mural_prioridade, hora_inicio, descricao")
+      .eq("mural_destaque", true)
+      .gte("data", hoje)
+      .order("mural_prioridade", { ascending: true })
+      .order("data", { ascending: true });
+    return error ? [] : data;
+  },
+  // =============================
+  // 2.1 - FIM: buscarTodosAvisos
   // =============================
 
   // =============================
