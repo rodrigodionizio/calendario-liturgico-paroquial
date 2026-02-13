@@ -88,7 +88,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="assets/img/icon-180.png" />
   <link rel="apple-touch-icon" sizes="167x167" href="assets/img/icon-167.png" />
 
-  <!-- Script de Registro do Service Worker -->
+  <!-- Script de Registro do Service Worker com Detecção de Update -->
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
@@ -96,8 +96,42 @@
         if (location.protocol === 'http:' || location.protocol === 'https:') {
           navigator.serviceWorker
             .register("./sw.js")
-            .then((reg) => console.log("✅ PWA: Service Worker Ativo!", reg.scope))
+            .then((reg) => {
+              console.log("✅ PWA: Service Worker Ativo!", reg.scope);
+              
+              // Detecta quando há uma nova versão disponível
+              reg.addEventListener('updatefound', () => {
+                const newWorker = reg.installing;
+                console.log("🔄 PWA: Nova versão detectada, baixando...");
+                
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    // Nova versão pronta - mostra toast
+                    window.dispatchEvent(new CustomEvent('sacristia:swUpdate', { 
+                      detail: { registration: reg } 
+                    }));
+                  }
+                });
+              });
+              
+              // Verifica se já tem uma versão esperando
+              if (reg.waiting) {
+                window.dispatchEvent(new CustomEvent('sacristia:swUpdate', { 
+                  detail: { registration: reg } 
+                }));
+              }
+            })
             .catch((err) => console.error("❌ PWA: Erro no registro", err));
+          
+          // Recarrega quando o SW assumir controle (após update)
+          let refreshing = false;
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (!refreshing) {
+              refreshing = true;
+              console.log("🚀 PWA: Nova versão ativa - recarregando...");
+              window.location.reload();
+            }
+          });
         } else {
           console.log("⚠️ PWA: Service Worker desabilitado (ambiente local)");
         }

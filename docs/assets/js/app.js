@@ -28,6 +28,264 @@ const ESTADO = {
   filtrosAtivos: new Set(),
   comunidadeFiltrada: null, // 🆕 ID da comunidade filtrada (null = todas, 'matriz' = só matriz)
   listaComunidades: [], // 🆕 Cache de comunidades
+  ultimaSync: null, // 🆕 Timestamp da última sincronização
+  syncInterval: null, // 🆕 Referência do intervalo de sync
+};
+
+// ==========================================================================
+// 0.1. SISTEMA DE SINCRONIZAÇÃO INTELIGENTE (PWA)
+// ==========================================================================
+const SyncManager = {
+  SYNC_INTERVAL_MS: 5 * 60 * 1000, // 5 minutos
+  MIN_REVALIDATE_MS: 2 * 60 * 1000, // 2 minutos mínimo entre revalidações
+  
+  /**
+   * Inicializa o sistema de sincronização
+   */
+  init: function() {
+    console.log('🔄 [SYNC] Inicializando sistema de sincronização...');
+    
+    // Recupera timestamp da última sync do localStorage
+    ESTADO.ultimaSync = window.api.getLastSyncTime();
+    
+    // Configura listeners
+    this.setupVisibilityListener();
+    this.setupOnlineListener();
+    this.setupSwUpdateListener();
+    this.setupForceRefreshListener();
+    
+    // Inicia intervalo de sync automático
+    this.startAutoSync();
+    
+    // Renderiza indicador de status
+    this.renderSyncIndicator();
+    
+    console.log('✅ [SYNC] Sistema de sincronização ativo');
+  },
+  
+  /**
+   * Detecta quando o app volta do background
+   */
+  setupVisibilityListener: function() {
+    document.addEventListener('visibilitychange', async () => {
+      if (document.visibilityState === 'visible') {
+        console.log('👁️ [SYNC] App voltou ao foco');
+        const tempoDesdeUltimaSync = Date.now() - (ESTADO.ultimaSync || 0);
+        
+        if (tempoDesdeUltimaSync > this.MIN_REVALIDATE_MS) {
+          console.log(`🔄 [SYNC] Revalidando dados (última sync: ${Math.round(tempoDesdeUltimaSync / 60000)}min atrás)`);
+          await this.syncData();
+        }
+      }
+    });
+  },
+  
+  /**
+   * Detecta quando o dispositivo reconecta à internet
+   */
+  setupOnlineListener: function() {
+    window.addEventListener('online', async () => {
+      console.log('🌐 [SYNC] Conexão reestabelecida');
+      this.showToast('Conexão reestabelecida. Atualizando dados...', 'info');
+      await this.syncData();
+    });
+    
+    window.addEventListener('offline', () => {
+      console.log('📴 [SYNC] Dispositivo offline');
+      this.showToast('Você está offline. Dados em cache serão utilizados.', 'warning');
+      this.updateSyncIndicator('offline');
+    });
+  },
+  
+  /**
+   * Detecta quando o Service Worker tem update
+   */
+  setupSwUpdateListener: function() {
+    window.addEventListener('sacristia:swUpdate', (e) => {
+      console.log('🆕 [SYNC] Nova versão do app disponível');
+      this.showUpdateBanner(e.detail.registration);
+    });
+  },
+  
+  /**
+   * Listener para forçar refresh (chamado de api.forceRefresh)
+   */
+  setupForceRefreshListener: function() {
+    window.addEventListener('sacristia:forceRefresh', async () => {
+      await this.syncData();
+    });
+  },
+  
+  /**
+   * Inicia intervalo de sync automático
+   */
+  startAutoSync: function() {
+    if (ESTADO.syncInterval) {
+      clearInterval(ESTADO.syncInterval);
+    }
+    
+    ESTADO.syncInterval = setInterval(async () => {
+      if (navigator.onLine && document.visibilityState === 'visible') {
+        console.log('⏰ [SYNC] Auto-sync disparado');
+        await this.syncData(true); // silencioso
+      }
+    }, this.SYNC_INTERVAL_MS);
+  },
+  
+  /**
+   * Executa sincronização de dados
+   */
+  syncData: async function(silent = false) {
+    if (!navigator.onLine) {
+      console.log('📴 [SYNC] Offline - usando cache');
+      return;
+    }
+    
+    try {
+      if (!silent) {
+        this.updateSyncIndicator('syncing');
+      }
+      
+      // Limpa cache para forçar busca fresca
+      window.api.clearCache();
+      
+      // Recarrega o mês atual
+      await carregarMes(ESTADO.anoAtual, ESTADO.mesAtual);
+      
+      // Atualiza mural
+      await renderizarMural();
+      
+      ESTADO.ultimaSync = Date.now();
+      this.updateSyncIndicator('synced');
+      
+      if (!silent) {
+        this.showToast('Dados atualizados', 'success');
+      }
+      
+      console.log('✅ [SYNC] Sincronização concluída');
+    } catch (err) {
+      console.error('❌ [SYNC] Erro na sincronização:', err);
+      this.updateSyncIndicator('error');
+    }
+  },
+  
+  /**
+   * Renderiza indicador visual de status no header
+   */
+  renderSyncIndicator: function() {
+    // Verifica se já existe
+    if (document.getElementById('sync-indicator')) return;
+    
+    const header = document.querySelector('header');
+    if (!header) return;
+    
+    const indicator = document.createElement('div');
+    indicator.id = 'sync-indicator';
+    indicator.className = 'sync-indicator';
+    indicator.innerHTML = `
+      <span class="sync-icon">●</span>
+      <span class="sync-text">Sincronizado</span>
+    `;
+    indicator.title = 'Status da sincronização de dados';
+    indicator.onclick = () => this.syncData();
+    
+    header.appendChild(indicator);
+    this.updateSyncIndicator(navigator.onLine ? 'synced' : 'offline');
+  },
+  
+  /**
+   * Atualiza o indicador visual de sync
+   */
+  updateSyncIndicator: function(status) {
+    const indicator = document.getElementById('sync-indicator');
+    if (!indicator) return;
+    
+    const icon = indicator.querySelector('.sync-icon');
+    const text = indicator.querySelector('.sync-text');
+    
+    indicator.className = `sync-indicator sync-${status}`;
+    
+    switch(status) {
+      case 'syncing':
+        icon.textContent = '↻';
+        text.textContent = 'Sincronizando...';
+        break;
+      case 'synced':
+        icon.textContent = '●';
+        const minutos = ESTADO.ultimaSync 
+          ? Math.round((Date.now() - ESTADO.ultimaSync) / 60000)
+          : 0;
+        text.textContent = minutos > 0 ? `Há ${minutos}min` : 'Atualizado';
+        break;
+      case 'offline':
+        icon.textContent = '○';
+        text.textContent = 'Offline';
+        break;
+      case 'error':
+        icon.textContent = '!';
+        text.textContent = 'Erro';
+        break;
+    }
+  },
+  
+  /**
+   * Mostra banner de atualização do app
+   */
+  showUpdateBanner: function(registration) {
+    // Remove banner existente
+    const existing = document.getElementById('update-banner');
+    if (existing) existing.remove();
+    
+    const banner = document.createElement('div');
+    banner.id = 'update-banner';
+    banner.className = 'update-banner';
+    banner.innerHTML = `
+      <div class="update-content">
+        <span>🆕 Nova versão disponível!</span>
+        <button id="btn-update-app">Atualizar agora</button>
+        <button id="btn-dismiss-update" class="btn-dismiss">✕</button>
+      </div>
+    `;
+    
+    document.body.prepend(banner);
+    
+    // Handler para atualizar
+    document.getElementById('btn-update-app').onclick = () => {
+      if (registration.waiting) {
+        registration.waiting.postMessage('skipWaiting');
+      }
+      banner.remove();
+    };
+    
+    // Handler para dispensar
+    document.getElementById('btn-dismiss-update').onclick = () => {
+      banner.remove();
+    };
+  },
+  
+  /**
+   * Mostra toast de notificação
+   */
+  showToast: function(message, type = 'info') {
+    // Remove toast existente
+    const existing = document.querySelector('.sync-toast');
+    if (existing) existing.remove();
+    
+    const toast = document.createElement('div');
+    toast.className = `sync-toast sync-toast-${type}`;
+    toast.textContent = message;
+    
+    document.body.appendChild(toast);
+    
+    // Anima entrada
+    setTimeout(() => toast.classList.add('show'), 10);
+    
+    // Remove após 3 segundos
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
 };
 
 let eventoEmEdicao = null;
@@ -117,8 +375,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     destacarDiaAtual();
   }, 150); // Delay para garantir que renderização finalizou
 
-  // 1.4. Auto-Refresh desabilitado temporariamente
-  // TODO: Implementar com Supabase Realtime se necessário
+  // 1.4. Sistema de Sincronização Inteligente PWA
+  SyncManager.init();
 });
 
 // ==========================================================================

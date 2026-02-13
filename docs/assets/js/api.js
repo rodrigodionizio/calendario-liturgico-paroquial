@@ -24,28 +24,48 @@ window.api = {
   client: _supabaseClient,
 
   // =============================
-  // SISTEMA DE CACHE
+  // SISTEMA DE CACHE v2.0 (localStorage + TTL Inteligente)
   // =============================
+  
+  // Constantes de TTL
+  TTL_REVALIDATE: 2 * 60 * 1000,  // 2 minutos - quando buscar dados frescos
+  TTL_STALE: 24 * 60 * 60 * 1000, // 24 horas - fallback offline máximo
+  
   /**
-   * Obtém dados do cache se ainda válidos
+   * Obtém dados do cache com estratégia stale-while-revalidate
    * @param {string} key - Chave do cache
-   * @returns {*|null} Dados em cache ou null se expirado
+   * @param {boolean} acceptStale - Se true, retorna dados mesmo se TTL expirado (para offline)
+   * @returns {{data: *, isStale: boolean}|null} Dados e flag de stale, ou null se não existe
    */
-  getCache: function (key) {
+  getCache: function (key, acceptStale = false) {
     try {
-      const item = sessionStorage.getItem(key);
+      const item = localStorage.getItem(key);
       if (!item) return null;
 
       const { data, timestamp, ttl } = JSON.parse(item);
       const age = Date.now() - timestamp;
 
-      if (age > ttl) {
-        sessionStorage.removeItem(key);
+      // Se muito antigo (> 24h), remove
+      if (age > this.TTL_STALE) {
+        localStorage.removeItem(key);
         return null;
       }
 
-      console.log(`📦 Cache hit: ${key} (idade: ${Math.round(age / 1000)}s)`);
-      return data;
+      // Se dentro do TTL de revalidação, retorna como fresh
+      if (age <= ttl) {
+        console.log(`📦 Cache fresh: ${key} (idade: ${Math.round(age / 1000)}s)`);
+        return { data, isStale: false };
+      }
+
+      // Se expirado mas acceptStale=true (offline), retorna como stale
+      if (acceptStale) {
+        console.log(`📦 Cache stale (offline): ${key} (idade: ${Math.round(age / 60000)}min)`);
+        return { data, isStale: true };
+      }
+
+      // Expirado e online - retorna null para forçar refresh
+      console.log(`⏰ Cache expirado: ${key} (idade: ${Math.round(age / 1000)}s)`);
+      return null;
     } catch (e) {
       console.warn("Erro ao ler cache:", e);
       return null;
@@ -53,14 +73,22 @@ window.api = {
   },
 
   /**
+   * Versão compatível com código legado (retorna só data)
+   */
+  getCacheLegacy: function (key) {
+    const result = this.getCache(key, !navigator.onLine);
+    return result ? result.data : null;
+  },
+
+  /**
    * Salva dados no cache com TTL
    * @param {string} key - Chave do cache
    * @param {*} data - Dados a cachear
-   * @param {number} ttl - Tempo de vida em milissegundos (padrão: 5 minutos)
+   * @param {number} ttl - Tempo de vida em milissegundos (padrão: 2 minutos)
    */
-  setCache: function (key, data, ttl = 5 * 60 * 1000) {
+  setCache: function (key, data, ttl = this.TTL_REVALIDATE) {
     try {
-      sessionStorage.setItem(
+      localStorage.setItem(
         key,
         JSON.stringify({
           data,
@@ -69,9 +97,11 @@ window.api = {
         }),
       );
       console.log(`💾 Cache salvo: ${key} (TTL: ${ttl / 1000}s)`);
+      
+      // Atualiza timestamp da última sync
+      localStorage.setItem('sacristia_last_sync', Date.now().toString());
     } catch (e) {
       console.warn("Cache storage full ou erro:", e);
-      // Se o storage estiver cheio, limpa caches antigos
       this.cleanOldCache();
     }
   },
@@ -80,29 +110,48 @@ window.api = {
    * Limpa cache de eventos (útil após modificações)
    */
   clearCache: function () {
-    Object.keys(sessionStorage).forEach((key) => {
-      if (key.startsWith("eventos_")) {
-        sessionStorage.removeItem(key);
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith("eventos_") || key.startsWith("comunidades_")) {
+        localStorage.removeItem(key);
       }
     });
     console.log("🗑️ Cache de eventos limpo");
   },
 
   /**
+   * Força refresh completo dos dados (limpa cache e recarrega)
+   */
+  forceRefresh: async function () {
+    console.log("🔄 Forçando refresh de dados...");
+    this.clearCache();
+    // Dispara evento customizado para que app.js possa reagir
+    window.dispatchEvent(new CustomEvent('sacristia:forceRefresh'));
+    return true;
+  },
+
+  /**
+   * Retorna timestamp da última sincronização
+   */
+  getLastSyncTime: function () {
+    const ts = localStorage.getItem('sacristia_last_sync');
+    return ts ? parseInt(ts, 10) : null;
+  },
+
+  /**
    * Remove caches antigos para liberar espaço
    */
   cleanOldCache: function () {
-    Object.keys(sessionStorage).forEach((key) => {
-      if (key.startsWith("eventos_")) {
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith("eventos_") || key.startsWith("comunidades_")) {
         try {
-          const item = JSON.parse(sessionStorage.getItem(key));
+          const item = JSON.parse(localStorage.getItem(key));
           const age = Date.now() - item.timestamp;
-          // Remove se tiver mais de 10 minutos
-          if (age > 10 * 60 * 1000) {
-            sessionStorage.removeItem(key);
+          // Remove se tiver mais de 24 horas
+          if (age > this.TTL_STALE) {
+            localStorage.removeItem(key);
           }
         } catch (e) {
-          sessionStorage.removeItem(key);
+          localStorage.removeItem(key);
         }
       }
     });
@@ -116,7 +165,7 @@ window.api = {
     const cacheKey = comunidadeId 
       ? `eventos_${ano}_${mes}_comunidade_${comunidadeId}`
       : `eventos_${ano}_${mes}`;
-    const cached = this.getCache(cacheKey);
+    const cached = this.getCacheLegacy(cacheKey);
 
     if (cached) {
       return cached;

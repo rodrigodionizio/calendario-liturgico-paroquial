@@ -2219,3 +2219,214 @@ select:disabled {
     --cor-fundo: #1a1a1a;
   }
 }
+
+/* ==========================================================================
+   14. PWA SYNC STATUS - Indicadores de Sincronização
+   ========================================================================== */
+
+/* Indicador de status no header */
+.sync-indicator {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 100;
+  border: 1px solid #e0e0e0;
+}
+
+.sync-indicator:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.sync-indicator .sync-icon {
+  font-size: 0.9rem;
+  transition: transform 0.3s ease;
+}
+
+/* Estados do indicador */
+.sync-indicator.sync-synced {
+  color: #10b981;
+  border-color: #d1fae5;
+}
+
+.sync-indicator.sync-syncing {
+  color: var(--cor-dourado);
+  border-color: #fef3c7;
+}
+
+.sync-indicator.sync-syncing .sync-icon {
+  animation: spin 1s linear infinite;
+}
+
+.sync-indicator.sync-offline {
+  color: #6b7280;
+  border-color: #e5e7eb;
+  background: #f9fafb;
+}
+
+.sync-indicator.sync-error {
+  color: #ef4444;
+  border-color: #fecaca;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Toast de notificação */
+.sync-toast {
+  position: fixed;
+  bottom: 70px;
+  right: 20px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  z-index: 1001;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+  max-width: 300px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.sync-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.sync-toast-success {
+  background: #10b981;
+  color: #fff;
+}
+
+.sync-toast-info {
+  background: var(--cor-vinho);
+  color: #fff;
+}
+
+.sync-toast-warning {
+  background: #f59e0b;
+  color: #fff;
+}
+
+.sync-toast-error {
+  background: #ef4444;
+  color: #fff;
+}
+
+/* Banner de atualização do app */
+.update-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, var(--cor-vinho) 0%, #7b1429 100%);
+  color: #fff;
+  padding: 12px 20px;
+  z-index: 2000;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  animation: slideDown 0.4s ease;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.update-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.update-content span {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+#btn-update-app {
+  background: #fff;
+  color: var(--cor-vinho);
+  border: none;
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#btn-update-app:hover {
+  background: var(--cor-dourado);
+  color: #fff;
+  transform: scale(1.05);
+}
+
+.btn-dismiss {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.2s ease;
+}
+
+.btn-dismiss:hover {
+  color: #fff;
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .sync-indicator {
+    bottom: 15px;
+    right: 15px;
+    padding: 6px 12px;
+    font-size: 0.7rem;
+  }
+  
+  .sync-toast {
+    left: 15px;
+    right: 15px;
+    bottom: 60px;
+    max-width: none;
+  }
+  
+  .update-banner {
+    padding: 10px 15px;
+  }
+  
+  .update-content {
+    gap: 10px;
+  }
+  
+  .update-content span {
+    font-size: 0.8rem;
+  }
+  
+  #btn-update-app {
+    padding: 6px 14px;
+    font-size: 0.8rem;
+  }
+}
