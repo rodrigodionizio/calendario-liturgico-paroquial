@@ -1246,3 +1246,338 @@ strong {
     align-items: stretch;
   }
 }
+
+/* ==========================================================================
+   12. ESTILOS RESPONSIVOS PARA EDITOR DE ESCALAS
+   Melhoria UX/UI: Labels visíveis e layout mobile-friendly
+   Criado em: 13/02/2026
+   ========================================================================== */
+
+/* Header com labels das colunas */
+.escala-header-labels {
+  display: grid;
+  grid-template-columns: 85px 1fr 1fr 1fr 30px;
+  gap: 8px;
+  padding: 8px 8px 4px 8px;
+  margin-bottom: 8px;
+  background: linear-gradient(to bottom, rgba(164, 29, 49, 0.05), transparent);
+  border-radius: 8px 8px 0 0;
+}
+
+.escala-header-labels span {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--cor-vinho);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Linha de edição de escala */
+.row-escala-edit {
+  display: grid;
+  grid-template-columns: 85px 1fr 1fr 1fr 30px;
+  gap: 8px;
+  margin-bottom: 8px;
+  background: #f9f9f9;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  transition: all 0.2s ease;
+}
+
+.row-escala-edit:hover {
+  border-color: var(--cor-dourado);
+  box-shadow: 0 2px 8px rgba(251, 181, 88, 0.1);
+}
+
+/* Campos dentro da linha de escala */
+.row-escala-edit input,
+.row-escala-edit select {
+  border: none;
+  background: none;
+  font-size: 0.8rem;
+  width: 100%;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.row-escala-edit input:focus,
+.row-escala-edit select:focus {
+  background-color: white;
+  outline: 2px solid var(--cor-dourado);
+  outline-offset: -2px;
+}
+
+.row-escala-edit .esc-hora {
+  font-weight: bold;
+  color: var(--cor-vinho);
+}
+
+/* Campos extras (MESCE e Coroinhas) */
+.escala-extras {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 8px;
+  background: #f0f0f0;
+  border-radius: 8px;
+}
+
+.escala-extras label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #666;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.escala-extras input {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  transition: border-color 0.2s ease;
+}
+
+.escala-extras input:focus {
+  border-color: var(--cor-dourado);
+  outline: none;
+}
+
+/* =============================================
+   RESPONSIVO MOBILE - EDITOR DE ESCALAS
+   ============================================= */
+@media (max-width: 768px) {
+  /* Header com labels - versão mobile empilhada */
+  .escala-header-labels {
+    display: none; /* Oculta labels de coluna no mobile */
+  }
+
+  /* Linha de escala - versão mobile em cards */
+  .row-escala-edit {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+    position: relative;
+  }
+
+  /* Botão de remover no canto superior */
+  .row-escala-edit button[onclick*="remove"] {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    background: #fef2f2 !important;
+    border-radius: 50%;
+    border: 1px solid #fecaca !important;
+  }
+
+  /* Campos com labels inline no mobile */
+  .row-escala-edit input,
+  .row-escala-edit select {
+    width: 100%;
+    padding: 10px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 0.9rem;
+  }
+
+  /* Labels antes de cada campo no mobile */
+  .row-escala-edit .esc-hora {
+    order: -1;
+    font-size: 1.1rem;
+    padding: 12px;
+    text-align: center;
+    background: linear-gradient(135deg, var(--cor-vinho) 0%, #8b1526 100%);
+    color: white;
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+
+  .row-escala-edit .esc-leitura,
+  .row-escala-edit .esc-canto,
+  .row-escala-edit .esc-celebrante,
+  .row-escala-edit .esc-mep {
+    position: relative;
+    padding-left: 100px;
+  }
+
+  /* Pseudo-labels para mobile */
+  .row-escala-edit .esc-leitura::before,
+  .row-escala-edit .esc-canto::before,
+  .row-escala-edit .esc-celebrante::before,
+  .row-escala-edit .esc-mep::before {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #666;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+
+  .row-escala-edit .esc-leitura::before {
+    content: "📖 Leitores";
+  }
+
+  .row-escala-edit .esc-canto::before {
+    content: "🎵 Canto";
+  }
+
+  .row-escala-edit .esc-celebrante::before {
+    content: "✝️ Celebrante";
+  }
+
+  .row-escala-edit .esc-mep::before {
+    content: "📖 MEP";
+  }
+
+  /* Campos extras no mobile - stack vertical */
+  .escala-extras {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .escala-extras input {
+    padding: 10px;
+    font-size: 0.85rem;
+  }
+}
+
+/* Telas muito pequenas */
+@media (max-width: 375px) {
+  .row-escala-edit {
+    padding: 10px;
+  }
+
+  .row-escala-edit .esc-hora {
+    font-size: 1rem;
+    padding: 10px;
+  }
+
+  .escala-extras label {
+    font-size: 0.65rem;
+  }
+}
+
+/* ==========================================================================
+   13. CORREÇÕES MOBILE - AGENDA DO DIA (Gerenciador de Eventos)
+   Fix: Cards cortados na lateral direita
+   Criado em: 13/02/2026
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Modal Card - garantir 100% de largura sem overflow */
+  .modal-card.o-surface-card {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Modal Body - padding seguro para não cortar conteúdo */
+  .modal-card .modal-body {
+    padding: 15px !important;
+    padding-bottom: 100px !important;
+    overflow-x: hidden !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Lista de eventos no gerenciador de agenda */
+  #lista-eventos-dia {
+    width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  /* Item da lista de eventos - layout responsivo */
+  #lista-eventos-dia .list-item {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 12px !important;
+    gap: 10px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Conteúdo do evento - ocupar toda largura */
+  #lista-eventos-dia .list-item .list-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+
+  #lista-eventos-dia .list-item .list-content strong {
+    display: block;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    word-break: break-word;
+  }
+
+  /* Botões de ação - posicionados abaixo do conteúdo */
+  #lista-eventos-dia .list-item > div[style*="display:flex; gap:10px"] {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 15px !important;
+    padding-top: 8px !important;
+    border-top: 1px dashed #eee !important;
+    margin-top: 5px !important;
+  }
+
+  #lista-eventos-dia .list-item button {
+    padding: 8px 12px !important;
+    font-size: 1rem !important;
+    background: #f5f5f5 !important;
+    border-radius: 6px !important;
+  }
+
+  /* Botão de adicionar novo compromisso */
+  #lista-eventos-dia + .btn-ver-todas,
+  .modal-body > .btn-ver-todas {
+    width: 100% !important;
+    padding: 14px !important;
+    font-size: 0.9rem !important;
+    margin-top: 15px !important;
+  }
+
+  /* Título e data do modal */
+  .modal-card .modal-body h2 {
+    font-size: 1.3rem !important;
+    margin-bottom: 5px !important;
+  }
+
+  .modal-card .modal-body > p[style*="color:#888"] {
+    font-size: 0.85rem !important;
+    margin-bottom: 15px !important;
+  }
+}
+
+/* Telas muito pequenas (iPhone SE, etc) */
+@media (max-width: 375px) {
+  .modal-card .modal-body {
+    padding: 12px !important;
+  }
+
+  #lista-eventos-dia .list-item {
+    padding: 10px !important;
+  }
+
+  #lista-eventos-dia .list-item .list-content strong {
+    font-size: 0.85rem;
+  }
+
+  #lista-eventos-dia .list-item .list-content small {
+    font-size: 0.75rem;
+  }
+}

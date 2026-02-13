@@ -235,12 +235,12 @@ window.DashboardController = {
     );
 
     container.innerHTML = `
-            <div class="modal-card o-surface-card" style="max-width: 600px; flex-direction: column;">
-                <div class="modal-body" style="padding: 30px;">
+            <div class="modal-card o-surface-card" style="max-width: 600px; flex-direction: column; width: 100%; box-sizing: border-box;">
+                <div class="modal-body" style="padding: 30px; box-sizing: border-box; overflow-x: hidden;">
                     <button class="btn-close" onclick="window.DashboardController.fecharModal()">×</button>
-                    <h2 style="font-family:'Neulis'; color:var(--cor-vinho);">Agenda do Dia</h2>
+                    <h2 style="font-family:'Neulis'; color:var(--cor-vinho); padding-right: 40px;">Agenda do Dia</h2>
                     <p style="color:#888; margin-bottom:20px;">${dataFmt}</p>
-                    <div id="lista-eventos-dia" style="margin-bottom:25px;">
+                    <div id="lista-eventos-dia" style="margin-bottom:25px; width: 100%;">
                         ${
                           eventosDia.length > 0
                             ? eventosDia
@@ -248,24 +248,24 @@ window.DashboardController = {
                                   (ev) => `
                             <div class="list-item o-surface-card" style="border-left:5px solid ${
                               ev.liturgia_cores?.hex_code || "#64748b"
-                            }">
-                                <div class="list-content">
-                                    <strong>${(
+                            }; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                                <div class="list-content" style="flex: 1; min-width: 0;">
+                                    <strong style="word-break: break-word; display: block;">${(
                                       ev.hora_inicio || "--:--"
                                     ).substring(0, 5)} | ${ev.titulo}</strong>
-                                    <br><small>${ev.local || "Paróquia"}</small>
+                                    <small style="color: #888;">${ev.local || "Paróquia"}</small>
                                 </div>
-                                <div style="display:flex; gap:10px;">
+                                <div class="list-actions" style="display:flex; gap:10px; flex-shrink: 0;">
                                     <button onclick="window.DashboardController.renderizarFormulario('${
                                       ev.data
                                     }', '${
                                       ev.id
-                                    }')" style="background:none; border:none; cursor:pointer; font-size:1.2rem;">✏️</button>
+                                    }')" style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:6px; cursor:pointer; font-size:1.1rem; padding: 6px 10px;" title="Editar">✏️</button>
                                     <button onclick="window.DashboardController.confirmarExclusao('${
                                       ev.id
                                     }', '${ev.data}', '${
                                       ev.titulo
-                                    }')" style="background:none; border:none; cursor:pointer; font-size:1.2rem; color:var(--cor-cereja);">🗑️</button>
+                                    }')" style="background:#fef2f2; border:1px solid #fecaca; border-radius:6px; cursor:pointer; font-size:1.1rem; color:var(--cor-cereja); padding: 6px 10px;" title="Excluir">🗑️</button>
                                 </div>
                             </div>`,
                                 )
@@ -383,7 +383,7 @@ window.DashboardController = {
                              }>🟣 Roxo</option>
                         </select>
                         
-                        <!-- NEW: Tipo de Celebração -->
+                        <!-- NEW: Tipo de Celebração com explicação -->
                         <div style="margin-bottom: 15px;">
                             <label style="font-size: 0.85rem; font-weight: 700; color: #666; display: block; margin-bottom: 5px;">
                                 Tipo de Celebração
@@ -396,13 +396,24 @@ window.DashboardController = {
                                     📖 Celebração da Palavra (com MEP)
                                 </option>
                             </select>
+                            <p id="tipo-celebracao-hint" style="margin-top: 6px; font-size: 0.75rem; color: #888; font-style: italic;">
+                                ${!evento.tipo_celebracao || evento.tipo_celebracao === "missa" 
+                                    ? '💡 <strong>Santa Missa:</strong> Mostra campo para nome do Celebrante (Padre) e MESCE.'
+                                    : '💡 <strong>Celebração da Palavra:</strong> Mostra seletor de MEP (Ministro Extraordinário da Palavra).'}
+                            </p>
+                        </div>
+                        
+                        <!-- Seção de Escalas com título visual -->
+                        <div style="margin-bottom: 10px; padding: 10px; background: linear-gradient(135deg, rgba(164, 29, 49, 0.05) 0%, transparent 100%); border-radius: 8px; border-left: 3px solid var(--cor-vinho);">
+                            <span style="font-size: 0.8rem; font-weight: 700; color: var(--cor-vinho); text-transform: uppercase;">📋 Escalas de Ministérios</span>
+                            <p style="margin: 4px 0 0 0; font-size: 0.7rem; color: #666;">Configure os horários e equipes para esta celebração</p>
                         </div>
                         
                         <div id="lista-escalas-editor">${this.gerarLinhasEscalaEditor(
                           evento.escalas,
                           evento.tipo_celebracao || "missa",
                         )}</div>
-                        <button onclick="window.DashboardController.adicionarLinhaEscala()" style="width:100%; background:none; border:1px dashed #ccc; padding:10px; margin-top:10px; cursor:pointer;">＋ Novo Horário</button>
+                        <button onclick="window.DashboardController.adicionarLinhaEscala()" style="width:100%; background:none; border:1px dashed #ccc; padding:10px; margin-top:10px; cursor:pointer; border-radius: 8px; font-weight: 600; color: #666; transition: all 0.2s;" onmouseover="this.style.borderColor='var(--cor-dourado)'; this.style.color='var(--cor-vinho)';" onmouseout="this.style.borderColor='#ccc'; this.style.color='#666';">＋ Adicionar Novo Horário</button>
                     </div>
 
                     <div id="campos-agenda" class="form-section" style="display: ${
@@ -781,8 +792,8 @@ window.DashboardController = {
       console.warn("⚠️ Nenhuma equipe MEP encontrada no cache. Verifique o cadastro de equipes.");
     }
 
-    const build = (l, s) =>
-      `<option value="">--</option>` +
+    const build = (l, s, placeholder = "Selecionar...") =>
+      `<option value="">${placeholder}</option>` +
       l
         .map(
           (e) =>
@@ -793,37 +804,52 @@ window.DashboardController = {
         .join("");
     if (!escalas || escalas.length === 0)
       escalas = [{ hora_celebracao: "19:00" }];
-    return escalas
+    
+    // 🎯 NOVO: Cabeçalho com labels visíveis para identificar cada campo
+    const labelCelebrante = tipoCelebracao === "missa" ? "✠️ Celebrante" : "📖 MEP";
+    const headerHTML = `
+      <div class="escala-header-labels" style="display: grid; grid-template-columns: 85px 1fr 1fr 1fr 30px; gap: 8px; margin-bottom: 8px; padding: 8px 8px 4px 8px;">
+        <span style="font-size: 0.7rem; font-weight: 700; color: var(--cor-vinho); text-transform: uppercase;">⏰ Hora</span>
+        <span style="font-size: 0.7rem; font-weight: 700; color: var(--cor-vinho); text-transform: uppercase;">📖 Leitores</span>
+        <span style="font-size: 0.7rem; font-weight: 700; color: var(--cor-vinho); text-transform: uppercase;">🎵 Canto</span>
+        <span style="font-size: 0.7rem; font-weight: 700; color: var(--cor-vinho); text-transform: uppercase;">${labelCelebrante}</span>
+        <span></span>
+      </div>
+    `;
+    
+    const rowsHTML = escalas
       .map(
         (esc) => `
-            <div class="row-escala-edit" style="display: grid; grid-template-columns: 85px 1fr 1fr ${tipoCelebracao === "missa" ? "1fr" : "1fr"} 30px; gap:8px; margin-bottom:8px; background:#f9f9f9; padding:8px; border-radius:8px; border:1px solid #eee;">
+            <div class="row-escala-edit" style="display: grid; grid-template-columns: 85px 1fr 1fr 1fr 30px; gap:8px; margin-bottom:8px; background:#f9f9f9; padding:8px; border-radius:8px; border:1px solid #eee;">
                 <input type="time" class="esc-hora" value="${
                   esc.hora_celebracao?.substring(0, 5) || "19:00"
-                }" style="border:none; background:none; font-weight:bold;">
-                <select class="esc-leitura" style="width:100%; border:none; background:none; font-size:0.8rem;">${build(
+                }" style="border:none; background:none; font-weight:bold;" title="Horário da Celebração">
+                <select class="esc-leitura" style="width:100%; border:none; background:none; font-size:0.8rem;" title="Equipe de Leitura">${build(
                   eL,
                   esc.equipe_leitura_id || esc.equipe_leitura?.id,
+                  "📖 Leitores..."
                 )}</select>
-                <select class="esc-canto" style="width:100%; border:none; background:none; font-size:0.8rem;">${build(
+                <select class="esc-canto" style="width:100%; border:none; background:none; font-size:0.8rem;" title="Equipe de Canto">${build(
                   eC,
                   esc.equipe_canto_id || esc.equipe_canto?.id,
+                  "🎵 Canto..."
                 )}</select>
                 
                 ${
                   tipoCelebracao === "missa"
                     ? `
-                    <input type="text" class="esc-celebrante" value="${esc.celebrante_nome || ""}" placeholder="Nome do Padre" style="width:100%; border:none; background:none; font-size:0.8rem; padding: 4px;">
+                    <input type="text" class="esc-celebrante" value="${esc.celebrante_nome || ""}" placeholder="✠️ Nome do Padre" style="width:100%; border:none; background:none; font-size:0.8rem; padding: 4px;" title="Nome do Celebrante">
                 `
                     : `
-                    <select class="esc-mep" style="width:100%; border:none; background:none; font-size:0.8rem;">${build(eM, esc.equipe_mep_id || esc.equipe_mep?.id)}</select>
+                    <select class="esc-mep" style="width:100%; border:none; background:none; font-size:0.8rem;" title="Ministro Extraordinário da Palavra">${build(eM, esc.equipe_mep_id || esc.equipe_mep?.id, "📖 MEP...")}</select>
                 `
                 }
                 
-                <button onclick="this.parentElement.remove()" style="background:none; border:none; color:red; cursor:pointer;">×</button>
+                <button onclick="this.closest('.escala-item-container')?.remove() || this.parentElement.nextElementSibling?.remove() || this.parentElement.remove()" style="background:none; border:none; color:red; cursor:pointer;" title="Remover horário">×</button>
             </div>
             
             <!-- Campos MESCE e Coroinhas (sempre visíveis) -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; padding: 8px; background: #f0f0f0; border-radius: 8px;">
+            <div class="escala-extras" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; padding: 8px; background: #f0f0f0; border-radius: 8px;">
                 <div>
                     <label style="font-size: 0.7rem; font-weight: 700; color: #666; display: block; margin-bottom: 4px;">✨ MESCE (separar por vírgula)</label>
                     <input type="text" class="esc-mesce-lista" value="${Array.isArray(esc.lista_mesce) ? esc.lista_mesce.join(", ") : ""}" placeholder="Maria, José, Pedro" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.75rem;">
@@ -836,6 +862,8 @@ window.DashboardController = {
         `,
       )
       .join("");
+    
+    return headerHTML + rowsHTML;
   },
 
   adicionarLinhaEscala: function () {
@@ -852,6 +880,16 @@ window.DashboardController = {
     const tipoCelebracao =
       document.getElementById("edit-tipo-celebracao")?.value || "missa";
     const container = document.getElementById("lista-escalas-editor");
+
+    // 🆕 Atualiza o hint explicativo
+    const hintElement = document.getElementById("tipo-celebracao-hint");
+    if (hintElement) {
+      if (tipoCelebracao === "missa") {
+        hintElement.innerHTML = '💡 <strong>Santa Missa:</strong> Mostra campo para nome do Celebrante (Padre) e MESCE.';
+      } else {
+        hintElement.innerHTML = '💡 <strong>Celebração da Palavra:</strong> Mostra seletor de MEP (Ministro Extraordinário da Palavra).';
+      }
+    }
 
     // Capturar dados atuais antes de regerendar
     const escalasAtuais = [];

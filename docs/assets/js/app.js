@@ -258,8 +258,18 @@ async function carregarMes(ano, mes) {
   try {
     // 🆕 Passa filtro de comunidade para a API
     const eventos = await window.api.buscarEventos(ano, mes, ESTADO.comunidadeFiltrada);
+    
+    // 🔧 FIX: Agrupar eventos em arrays por data (corrige bug de sobrescrita)
+    // Antes: ESTADO.dadosEventos[ev.data] = ev (sobrescrevia eventos do mesmo dia)
+    // Agora: Agrupa em array para suportar múltiplos eventos na mesma data
     ESTADO.dadosEventos = {};
-    eventos.forEach((ev) => (ESTADO.dadosEventos[ev.data] = ev));
+    eventos.forEach((ev) => {
+      if (!ESTADO.dadosEventos[ev.data]) {
+        ESTADO.dadosEventos[ev.data] = [];
+      }
+      ESTADO.dadosEventos[ev.data].push(ev);
+    });
+    
     renderizarGrid(ano, mes, grid, headers);
     aplicarFiltrosVisuais();
   } catch (erro) {
@@ -284,11 +294,14 @@ function renderizarGrid(ano, mes, gridElement, headersHTML) {
     const dataISO = `${ano}-${String(mes).padStart(2, "0")}-${String(
       dia,
     ).padStart(2, "0")}`;
-    const evento = ESTADO.dadosEventos[dataISO];
+    
+    // 🔧 FIX: Agora dadosEventos[dataISO] é um array de eventos
+    const eventosNoDia = ESTADO.dadosEventos[dataISO] || [];
     let conteudoHTML = "";
     let clickAttr = `onclick="abrirModal('${dataISO}')"`;
 
-    if (evento) {
+    // Itera sobre todos os eventos do dia
+    eventosNoDia.forEach((evento) => {
       // Lógica de Categoria (SDS v6.6 - Consistência Visual)
       let classeCategoria = "pill--liturgia";
       let icone = "";
@@ -329,11 +342,6 @@ function renderizarGrid(ano, mes, gridElement, headersHTML) {
       // 🏛️ Badge de comunidade (SEMPRE exibir quando evento tem comunidade)
       let badgeComunidade = "";
       if (evento.comunidade_id) {
-        console.log("🔍 [BADGE] Renderizando badge para evento:", evento.id);
-        console.log("   Comunidade ID:", evento.comunidade_id);
-        console.log("   Dados API:", evento.comunidade);
-        console.log("   Lista disponível:", ESTADO.listaComunidades?.length || 0, "comunidades");
-        
         // 🔧 PRIORIZA dados da API (evento.comunidade) ao invés de buscar na lista local
         const comunidade = evento.comunidade || ESTADO.listaComunidades.find(c => c.id === evento.comunidade_id);
         
@@ -341,28 +349,28 @@ function renderizarGrid(ano, mes, gridElement, headersHTML) {
           // 🛡️ Proteção contra undefined com optional chaining e fallback
           const nomeComunidade = comunidade?.nome || 'Comunidade';
           badgeComunidade = `<span class="badge-comunidade" style="display: inline-block;">🏛️ ${nomeComunidade}</span>`;
-          console.log("✅ [BADGE] Badge renderizado para:", nomeComunidade);
         } else {
-          console.warn("⚠️ [BADGE] Comunidade não encontrada:", evento.comunidade_id);
-          console.warn("   IDs disponíveis:", ESTADO.listaComunidades?.map(c => c.id));
           badgeComunidade = `<span class="badge-comunidade badge-comunidade-erro" style="display: inline-block;">⚠️ Comunidade</span>`;
         }
       }
 
-      conteudoHTML = `
+      conteudoHTML += `
         <div class="pill ${classeCategoria} ${classeSolenidade}" ${estiloAdicional} title="${evento.titulo}">
             ${horaShow ? `<span style="font-size: 0.65rem; opacity: 0.8;">${horaShow}</span>` : ""}
             <span>${icone} ${evento.titulo}${badgeComunidade}</span>
         </div>`;
 
-      // Exibe Escalas Adicionais (Múltiplas Missas)
+      // Exibe Escalas Adicionais (Múltiplas Missas do MESMO evento)
       if (evento.escalas && evento.escalas.length > 1) {
         evento.escalas.slice(1).forEach((esc) => {
-          const hora = esc.hora_celebracao.substring(0, 5);
-          conteudoHTML += `<div class="pill pill--liturgia" style="border-left: 4px solid ${corLiturgica} !important; font-size: 0.7rem;">${hora} Missa</div>`;
+          const hora = esc.hora_celebracao?.substring(0, 5) || "";
+          if (hora) {
+            conteudoHTML += `<div class="pill pill--liturgia" style="border-left: 4px solid ${corLiturgica} !important; font-size: 0.7rem;">${hora} Missa</div>`;
+          }
         });
       }
-    }
+    });
+    
     html += `<div class="day-cell" data-iso="${dataISO}" ${clickAttr}><span class="day-number">${dia}</span>${conteudoHTML}</div>`;
   }
 
@@ -606,20 +614,21 @@ function aplicarFiltrosVisuais() {
 // 5. MODAL DE DETALHES
 // ==========================================================================
 window.abrirModal = function (dataISO) {
-  let evento = ESTADO.dadosEventos[dataISO];
-
-  if (!evento) {
-    evento = {
+  // 🔧 FIX: Agora dadosEventos[dataISO] é um array
+  let eventosNoDia = ESTADO.dadosEventos[dataISO] || [];
+  
+  // Se não houver eventos, cria um placeholder
+  if (eventosNoDia.length === 0) {
+    eventosNoDia = [{
       id: null,
       data: dataISO,
       titulo: "Dia sem Evento",
       tempo_liturgico: "Paroquial",
       liturgia_cores: { hex_code: "#CCCCCC" },
       escalas: [],
-    };
+    }];
   }
 
-  eventoEmEdicao = JSON.parse(JSON.stringify(evento));
   const modalContent = document.getElementById("modalContent");
   const modalOverlay = document.getElementById("modalOverlay");
 
@@ -631,11 +640,15 @@ window.abrirModal = function (dataISO) {
     .replace(".", "");
   const diaSemana = dataObj.toLocaleString("pt-BR", { weekday: "long" });
 
+  // Usa o primeiro evento para cor do modal (ou gera lista se múltiplos)
+  const eventoDestaque = eventosNoDia[0];
+  eventoEmEdicao = JSON.parse(JSON.stringify(eventoDestaque));
+
   // Cores Padronizadas por Categoria (SDS v6.6 - Consistência Visual)
   let corHex = "#2e7d32"; // Default: Verde Litúrgico
   let corTxt = "#2e7d32";
 
-  switch (evento.tipo_compromisso) {
+  switch (eventoDestaque.tipo_compromisso) {
     case "atendimento":
       corHex = "#2e3fd1ff"; // Blue (Padre)
       corTxt = "#2e3fd1ff";
@@ -651,7 +664,7 @@ window.abrirModal = function (dataISO) {
     case "liturgia":
     default:
       // Mantém a cor litúrgica dinâmica para celebrações
-      corHex = evento.liturgia_cores?.hex_code || "#2e7d32";
+      corHex = eventoDestaque.liturgia_cores?.hex_code || "#2e7d32";
       corTxt = corHex;
       if (corHex.toLowerCase() === "#ffffff") {
         corHex = "#ccc";
@@ -659,61 +672,84 @@ window.abrirModal = function (dataISO) {
       }
   }
 
-  // HTML diferente para Reunião vs Liturgia
-  let conteudoHTML = "";
-  if (evento.tipo_compromisso && evento.tipo_compromisso !== "liturgia") {
-    // Exibe Horário e Local
-    const horaShow = evento.hora_inicio
-      ? evento.hora_inicio.substring(0, 5)
-      : "--:--";
-    conteudoHTML = `
-            <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:10px;">
-                <p><strong>Horário:</strong> ${horaShow}</p>
-                <p><strong>Local:</strong> ${
-                  evento.local || "Não informado"
-                }</p>
-                <p><strong>Responsável:</strong> ${
-                  evento.responsavel || "Não informado"
-                }</p>
-            </div>`;
-  } else {
-    conteudoHTML = gerarHTMLLeitura(evento);
-  }
+  // 🆕 Gera HTML para TODOS os eventos do dia
+  let todosEventosHTML = "";
+  
+  eventosNoDia.forEach((evento, index) => {
+    // Badge de comunidade
+    let infoComunidade = "";
+    if (evento.comunidade_id) {
+      const comunidade = evento.comunidade || ESTADO.listaComunidades.find(c => c.id === evento.comunidade_id);
+      if (comunidade) {
+        const nomeComunidade = comunidade?.nome || 'Comunidade';
+        const enderecoComunidade = comunidade?.endereco || '';
+        infoComunidade = `
+          <div style="background: linear-gradient(135deg, rgba(251,181,88,0.1) 0%, rgba(164,29,49,0.05) 100%); padding: 10px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid var(--cor-dourado);">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 1rem;">🏛️</span>
+              <div>
+                <p style="margin: 0; font-weight: 700; color: var(--cor-vinho); font-size: 0.85rem;">${nomeComunidade}</p>
+                ${enderecoComunidade ? `<p style="margin: 0; color: #999; font-size: 0.7rem;">${enderecoComunidade}</p>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // Cor do evento individual
+    let corEvento = evento.liturgia_cores?.hex_code || "#2e7d32";
+    if (evento.tipo_compromisso === "atendimento") corEvento = "#2e3fd1ff";
+    if (evento.tipo_compromisso === "reuniao") corEvento = "#475569";
+    if (evento.tipo_compromisso === "evento") corEvento = "#bfa15f";
+    if (corEvento.toLowerCase() === "#ffffff") corEvento = "#ccc";
+
+    // Conteúdo do evento
+    let conteudoEvento = "";
+    if (evento.tipo_compromisso && evento.tipo_compromisso !== "liturgia") {
+      const horaShow = evento.hora_inicio ? evento.hora_inicio.substring(0, 5) : "--:--";
+      conteudoEvento = `
+        <div style="background:#f9f9f9; padding:12px; border-radius:8px;">
+          <p style="margin: 0 0 5px 0;"><strong>Horário:</strong> ${horaShow}</p>
+          <p style="margin: 0 0 5px 0;"><strong>Local:</strong> ${evento.local || "Não informado"}</p>
+          <p style="margin: 0;"><strong>Responsável:</strong> ${evento.responsavel || "Não informado"}</p>
+        </div>`;
+    } else {
+      conteudoEvento = gerarHTMLLeitura(evento);
+    }
+
+    // Se houver múltiplos eventos, adiciona separador visual
+    const separador = (index > 0) ? `<hr style="border: none; border-top: 2px dashed #e5e7eb; margin: 20px 0;">` : "";
+    const headerMultiplo = (eventosNoDia.length > 1) ? `
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <span style="background: ${corEvento}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;">${index + 1}</span>
+        <span style="font-size: 0.75rem; color: #666; text-transform: uppercase;">Evento ${index + 1} de ${eventosNoDia.length}</span>
+      </div>
+    ` : "";
+
+    todosEventosHTML += `
+      ${separador}
+      <div class="evento-item-modal" data-evento-id="${evento.id || 'null'}">
+        ${headerMultiplo}
+        <div class="modal-liturgia" style="color:${corEvento}">${evento.tempo_liturgico || 'Paroquial'}</div>
+        <div class="modal-titulo" style="font-size: ${eventosNoDia.length > 1 ? '1rem' : '1.2rem'};">${evento.titulo}</div>
+        ${infoComunidade}
+        <div class="escala-list">${conteudoEvento}</div>
+      </div>
+    `;
+  });
+
+  // Indicador de múltiplos eventos
+  const badgeMultiplos = (eventosNoDia.length > 1) ? `
+    <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #f59e0b; padding: 8px 12px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+      <span style="font-size: 1.2rem;">📋</span>
+      <span style="font-size: 0.85rem; font-weight: 600; color: #92400e;">${eventosNoDia.length} eventos neste dia</span>
+    </div>
+  ` : "";
 
   let btnAdmin = "";
   if (ESTADO.isAdmin) {
     btnAdmin = `<button id="btnEditar" class="btn-admin-action">🛠️ GERENCIAR AGENDA</button>`;
-  }
-
-  // 🏛️ Badge de comunidade no modal (SEMPRE exibir)
-  let infoComunidade = "";
-  if (evento.comunidade_id) {
-    console.log("🔍 DEBUG Modal:", { eventoId: evento.id, comunidadeId: evento.comunidade_id });
-    
-    // 🔧 PRIORIZA dados da API (evento.comunidade) ao invés de buscar na lista local
-    const comunidade = evento.comunidade || ESTADO.listaComunidades.find(c => c.id === evento.comunidade_id);
-    
-    if (comunidade) {
-      // 🛡️ Proteção contra undefined com optional chaining e fallback
-      const nomeComunidade = comunidade?.nome || 'Comunidade';
-      const enderecoComunidade = comunidade?.endereco || '';
-      
-      infoComunidade = `
-        <div style="background: linear-gradient(135deg, rgba(251,181,88,0.1) 0%, rgba(164,29,49,0.05) 100%); padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid var(--cor-dourado);">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 1.2rem;">🏛️</span>
-            <div>
-              <p style="margin: 0; font-weight: 700; color: var(--cor-vinho); font-size: 0.9rem;">Capela</p>
-              <p style="margin: 0; color: #666; font-size: 0.85rem;">${nomeComunidade}</p>
-              ${enderecoComunidade ? `<p style="margin: 0; color: #999; font-size: 0.75rem; margin-top: 2px;">${enderecoComunidade}</p>` : ''}
-            </div>
-          </div>
-        </div>
-      `;
-      console.log("✅ Card modal renderizado para:", nomeComunidade);
-    } else {
-      console.warn("⚠️ Comunidade não encontrada no modal:", evento.comunidade_id);
-    }
   }
 
   modalContent.innerHTML = `
@@ -726,10 +762,8 @@ window.abrirModal = function (dataISO) {
                 <div class="modal-meta"><div class="modal-weekday">${diaSemana}</div></div>
             </div>
             <div id="areaConteudo">
-                <div class="modal-liturgia" style="color:${corTxt}">${evento.tempo_liturgico}</div>
-                <div class="modal-titulo">${evento.titulo}</div>
-                ${infoComunidade}
-                <div class="escala-list">${conteudoHTML}</div>
+                ${badgeMultiplos}
+                ${todosEventosHTML}
             
             <!-- ZONA DE CONVENIÊNCIA DO FIEL -->
             <div style="margin-top: 20px; border-top: 1px dashed #eee; padding-top: 15px;">
@@ -745,8 +779,8 @@ window.abrirModal = function (dataISO) {
                     </select>
                 </div>
                 <div class="c-sync-group">
-                    <button onclick="CalendarEngine.syncGoogle('${evento.titulo}', '${evento.data}', '${evento.hora_inicio}')" class="c-sync-button">📅 Google</button>
-                    <button onclick="CalendarEngine.syncApple('${evento.titulo}', '${evento.data}', '${evento.hora_inicio}')" class="c-sync-button">🍎 iPhone</button>
+                    <button onclick="CalendarEngine.syncGoogle('${eventoDestaque.titulo}', '${eventoDestaque.data}', '${eventoDestaque.hora_inicio}')" class="c-sync-button">📅 Google</button>
+                    <button onclick="CalendarEngine.syncApple('${eventoDestaque.titulo}', '${eventoDestaque.data}', '${eventoDestaque.hora_inicio}')" class="c-sync-button">🍎 iPhone</button>
                 </div>
             </div>
 
@@ -758,7 +792,7 @@ window.abrirModal = function (dataISO) {
   modalOverlay.classList.add("active");
   if (ESTADO.isAdmin) {
     document.getElementById("btnEditar").onclick = () =>
-      ativarModoEdicao(evento);
+      ativarModoEdicao(eventoDestaque);
   }
 };
 
