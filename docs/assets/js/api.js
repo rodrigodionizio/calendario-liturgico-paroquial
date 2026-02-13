@@ -406,14 +406,13 @@ window.api = {
     // 🔧 Invalidar cache se forçado (para debug)
     if (window.__FORCE_RELOAD_COMUNIDADES) {
       console.warn("⚠️ [API] Cache de comunidades forçadamente invalidado");
-      this.clearCache(cacheKey);
+      localStorage.removeItem(cacheKey);
       window.__FORCE_RELOAD_COMUNIDADES = false;
     }
     
-    const cached = this.getCache(cacheKey);
+    const cached = this.getCacheLegacy(cacheKey);
     if (cached) {
       console.log("✅ [API] Comunidades retornadas do CACHE:", cached.length, "itens");
-      console.log("📋 [API] Cache data:", JSON.stringify(cached));
       return cached;
     }
 
