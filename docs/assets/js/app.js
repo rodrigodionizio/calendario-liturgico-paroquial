@@ -500,9 +500,11 @@ async function carregarMes(ano, mes) {
   );
   const headers = headersMatch ? headersMatch.join("") : "";
 
-  grid.innerHTML =
-    headers +
-    '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#888;">Carregando...</div>';
+  // UX-005: skeleton loading estruturado enquanto dados carregam
+  const skeletonCells = Array.from({ length: 35 }, (_, i) =>
+    `<div class="day-cell skeleton-cell" style="--sk-i:${i}"><span class="skeleton-day-num"></span></div>`
+  ).join('');
+  grid.innerHTML = headers + skeletonCells;
 
   try {
     // 🆕 Passa filtro de comunidade para a API
@@ -521,6 +523,8 @@ async function carregarMes(ano, mes) {
     
     renderizarGrid(ano, mes, grid, headers);
     aplicarFiltrosVisuais();
+    // UX-008: atualiza dropdown de comunidades desabilitando as sem eventos no mês
+    _atualizarEstadoDropdownComunidades(eventos);
     // PERF-001: pré-carrega meses adjacentes silenciosamente após render
     _prefetchMesesAdjacentes(ano, mes);
   } catch (erro) {
@@ -540,6 +544,27 @@ function _prefetchMesesAdjacentes(ano, mes) {
     window.api.buscarEventos(proximo.a,  proximo.m,  ESTADO.comunidadeFiltrada).catch(() => {});
     window.api.buscarEventos(anterior.a, anterior.m, ESTADO.comunidadeFiltrada).catch(() => {});
   }, 1500);
+}
+
+// UX-008: desabilita no dropdown as comunidades que não têm eventos no mês carregado
+function _atualizarEstadoDropdownComunidades(eventos) {
+  const select = document.getElementById('public-community-filter');
+  if (!select) return;
+
+  const comunidadesComEventos = new Set(
+    eventos.filter(e => e.comunidade_id).map(e => e.comunidade_id)
+  );
+  // 'matriz' = eventos sem comunidade_id
+  const temMatriz = eventos.some(e => !e.comunidade_id);
+
+  Array.from(select.options).forEach(opt => {
+    if (!opt.value) return; // "Todas" nunca desabilita
+    const temEventos = opt.value === 'matriz' ? temMatriz : comunidadesComEventos.has(opt.value);
+    opt.disabled = !temEventos;
+    const baseText = opt.dataset.nomeComunidade || opt.textContent.replace(' (sem eventos)', '');
+    opt.dataset.nomeComunidade = baseText;
+    opt.textContent = temEventos ? baseText : `${baseText} (sem eventos)`;
+  });
 }
 
 function renderizarGrid(ano, mes, gridElement, headersHTML) {
@@ -1620,8 +1645,22 @@ window.gerarRelatorio = async function (tipo) {
         eventos.push(...evMes);
       }
       eventos.sort((a, b) => (a.data > b.data ? 1 : -1));
+    } else if (tipo === "mes_atual") {
+      // BUG-006: buscarEventos respeita ESTADO.comunidadeFiltrada; buscarEventosRange não
+      eventos = await window.api.buscarEventos(ano, mes, ESTADO.comunidadeFiltrada);
     } else {
-      eventos = await window.api.buscarEventosRange(dataInicio, dataFim);
+      // trimestre: com filtro ativo itera meses para aplicar filtro; sem filtro usa range
+      if (ESTADO.comunidadeFiltrada) {
+        eventos = [];
+        for (let i = 0; i < 3; i++) {
+          const m = ((mes - 1 + i) % 12) + 1;
+          const a = ano + Math.floor((mes - 1 + i) / 12);
+          eventos.push(...await window.api.buscarEventos(a, m, ESTADO.comunidadeFiltrada));
+        }
+        eventos.sort((a, b) => (a.data > b.data ? 1 : -1));
+      } else {
+        eventos = await window.api.buscarEventosRange(dataInicio, dataFim);
+      }
     }
 
     // Atualiza cabeçalho do PDF
@@ -1918,6 +1957,22 @@ function adicionarBotaoLogout() {
 
 function configurarBotoesNavegacao() {
   const btns = document.querySelectorAll(".btn-nav");
+
+  // UX-004: swipe horizontal no grid do calendário para navegar entre meses
+  const calWrapper = document.querySelector('.calendar-wrapper');
+  if (calWrapper) {
+    let _swipeStartX = 0;
+    calWrapper.addEventListener('touchstart', (e) => {
+      _swipeStartX = e.touches[0].clientX;
+    }, { passive: true });
+    calWrapper.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].clientX - _swipeStartX;
+      if (Math.abs(dx) < 60) return;
+      if (dx < 0) btns[2].onclick(); // esquerda → próximo mês
+      else btns[0].onclick();        // direita → mês anterior
+    }, { passive: true });
+  }
+
   btns[0].onclick = () => {
     ESTADO.mesAtual--;
     if (ESTADO.mesAtual < 1) {

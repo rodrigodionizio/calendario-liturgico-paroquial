@@ -43,6 +43,15 @@ window.DashboardController = {
         .select("*")
         .eq("email", session.user.email)
         .single();
+
+      // BUG-007: email autenticado ausente da allowlist → acesso negado
+      if (!perfil) {
+        console.error('[BUG-007] Perfil não encontrado para:', session.user.email);
+        window.ErrorHandler?.showToUser('Acesso não autorizado. Contate o administrador.', 'error');
+        await window.api.client.auth.signOut();
+        window.location.href = 'admin.html';
+        return;
+      }
       this.meuPerfil = perfil;
 
       if (document.getElementById("user-name")) {
@@ -78,10 +87,38 @@ window.DashboardController = {
 
       await this.atualizarVisaoGeral();
       this.configurarNavegacao();
+      this._setupAtalhosGlobais();
       console.log("✅ SDS Engine: Prontidão confirmada.");
     } catch (e) {
       console.error("Erro Init:", e);
     }
+  },
+
+  // UX-007: atalhos globais de teclado para o dashboard admin
+  _setupAtalhosGlobais: function() {
+    document.addEventListener('keydown', (e) => {
+      // Não interfere quando foco está em input/select/textarea
+      if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+      // Ctrl+N → nova agenda (vai para a tab agenda-total)
+      if (e.ctrlKey && e.key === 'n') {
+        e.preventDefault();
+        document.querySelector('.menu-item[data-tab="agenda-total"]')?.click();
+      }
+      // Ctrl+F → foca campo de busca (se existir)
+      if (e.ctrlKey && e.key === 'f') {
+        e.preventDefault();
+        const busca = document.getElementById('busca-evento') || document.querySelector('input[type="search"]');
+        busca?.focus();
+      }
+      // Escape → fecha modal aberto
+      if (e.key === 'Escape') {
+        this.fecharModal();
+      }
+      // ← → para navegar entre meses quando na aba agenda
+      if (e.key === 'ArrowLeft' && !e.ctrlKey) this.navegarAgenda(-1);
+      if (e.key === 'ArrowRight' && !e.ctrlKey) this.navegarAgenda(1);
+    });
   },
 
   // ==========================================================================
@@ -324,7 +361,9 @@ window.DashboardController = {
                         </select>
                         <input type="text" id="edit-titulo" value="${
                           evento.titulo
-                        }" placeholder="Título/Assunto" class="o-surface-card" style="width:100%; padding:12px; border:1px solid #ddd; font-weight:bold;">
+                        }" placeholder="Título/Assunto" class="o-surface-card" style="width:100%; padding:12px; border:1px solid #ddd; font-weight:bold;"
+                               aria-describedby="erro-titulo" aria-required="true">
+                        <span id="erro-titulo" class="campo-erro" role="alert" style="display:none; color:#c62828; font-size:0.75rem; margin-top:4px; display:block; min-height:1em;"></span>
                         
                         <!-- NEW: Seletor de Comunidade -->
                         <div style="margin-top: 10px;">
@@ -450,6 +489,50 @@ window.DashboardController = {
                     </div>
                 </div>
             </div>`;
+
+    // UX-003: validação inline do campo título após injeção do HTML
+    this._setupValidacaoFormTitulo();
+  },
+
+  // UX-003: valida título em tempo real (blur) e bloqueia save com campo vazio
+  _setupValidacaoFormTitulo: function() {
+    const campo = document.getElementById('edit-titulo');
+    const erro = document.getElementById('erro-titulo');
+    if (!campo || !erro) return;
+
+    const validar = () => {
+      const val = campo.value.trim();
+      if (!val) {
+        erro.textContent = 'Título obrigatório';
+        campo.style.borderColor = '#c62828';
+        campo.setAttribute('aria-invalid', 'true');
+        return false;
+      } else if (val.length < 3) {
+        erro.textContent = 'Mínimo 3 caracteres';
+        campo.style.borderColor = '#e65100';
+        campo.setAttribute('aria-invalid', 'true');
+        return false;
+      }
+      erro.textContent = '';
+      campo.style.borderColor = '#4caf50';
+      campo.setAttribute('aria-invalid', 'false');
+      return true;
+    };
+
+    campo.addEventListener('blur', validar);
+    campo.addEventListener('input', () => {
+      if (campo.getAttribute('aria-invalid') === 'true') validar();
+    });
+
+    // Impede save se título inválido
+    const btnSave = document.getElementById('btn-save-agenda');
+    if (btnSave) {
+      const originalOnclick = btnSave.onclick;
+      btnSave.onclick = (e) => {
+        if (!validar()) { campo.focus(); return; }
+        if (originalOnclick) originalOnclick.call(btnSave, e);
+      };
+    }
   },
 
   // ==========================================================================

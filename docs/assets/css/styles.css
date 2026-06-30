@@ -146,14 +146,59 @@
   font-weight: 600;
 }
 
-/* Área de toque expandida para dots mobile — 44×44px mínimo (prévia UX-001) */
+/* UX-001: área de toque expandida nos dots mobile — mínimo 44×44px (Google Material / Apple HIG) */
 .event-dot-wrapper {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 18px 6px;
-  margin: -18px -6px;
+  padding: 18px 10px;
+  margin: -18px -10px;
   cursor: pointer;
+}
+
+/* UX-005: skeleton loading do grid de calendário */
+.skeleton-cell {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface, #f3f4f6) 25%,
+    var(--color-surface-hover, #e5e7eb) 50%,
+    var(--color-surface, #f3f4f6) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s infinite;
+  animation-delay: calc(var(--sk-i, 0) * 25ms);
+  border-radius: 4px;
+  min-height: 60px;
+}
+
+.skeleton-day-num {
+  display: block;
+  width: 24px;
+  height: 16px;
+  background: rgba(0,0,0,0.08);
+  border-radius: 3px;
+  margin: 6px 0 0 6px;
+}
+
+@keyframes skeleton-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+/* UX-006: fade-out na borda inferior do mural indicando mais conteúdo */
+.mural-avisos-wrapper {
+  position: relative;
+}
+
+.mural-avisos-wrapper::after {
+  content: '';
+  position: absolute;
+  bottom: 48px; /* acima do botão "Ver Todos" */
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(transparent, var(--color-background, #f8f9fa));
+  pointer-events: none;
 }
 
 /* ==========================================================================

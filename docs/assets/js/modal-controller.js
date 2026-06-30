@@ -479,7 +479,44 @@ window.ModalController = {
     modalOverlay.setAttribute('aria-label', ariaLabel || 'Diálogo');
     modalOverlay.setAttribute('aria-hidden', 'false');
     modalOverlay.classList.add('active');
-    requestAnimationFrame(() => this._ativarFocoModal());
+    requestAnimationFrame(() => {
+      this._ativarFocoModal();
+      // UX-002: swipe para baixo fecha o modal (gesto universal mobile)
+      this._setupSwipeToClose(modalContent.firstElementChild);
+    });
+  },
+
+  // UX-002: instala listeners de swipe no card do modal
+  _setupSwipeToClose: function(cardEl) {
+    if (!cardEl) return;
+    let startY = 0;
+
+    cardEl.addEventListener('touchstart', (e) => {
+      startY = e.touches[0].clientY;
+      cardEl.style.transition = '';
+    }, { passive: true });
+
+    cardEl.addEventListener('touchmove', (e) => {
+      const dy = e.touches[0].clientY - startY;
+      if (dy > 0) {
+        cardEl.style.transform = `translateY(${dy}px)`;
+        cardEl.style.opacity = String(1 - dy / 300);
+      }
+    }, { passive: true });
+
+    cardEl.addEventListener('touchend', (e) => {
+      const dy = e.changedTouches[0].clientY - startY;
+      cardEl.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+      if (dy > 100) {
+        cardEl.style.transform = 'translateY(100%)';
+        cardEl.style.opacity = '0';
+        setTimeout(() => this.fechar(), 280);
+      } else {
+        cardEl.style.transform = '';
+        cardEl.style.opacity = '';
+        setTimeout(() => { cardEl.style.transition = ''; }, 300);
+      }
+    }, { passive: true });
   },
 
   /**
