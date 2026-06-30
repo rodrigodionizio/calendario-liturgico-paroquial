@@ -488,6 +488,13 @@ async function renderizarMural() {
 // ==========================================================================
 // 3. CALENDÁRIO & GRID
 // ==========================================================================
+/**
+ * Carrega e renderiza o grid do calendário para um mês específico.
+ * Aplica filtro de comunidade ativo (ESTADO.comunidadeFiltrada) e dispara prefetch dos meses adjacentes.
+ * @param {number} ano - Ano (ex: 2026)
+ * @param {number} mes - Mês 1-12
+ * @returns {Promise<void>}
+ */
 async function carregarMes(ano, mes) {
   const nomeMes = new Date(ano, mes - 1).toLocaleString("pt-BR", {
     month: "long",
@@ -510,9 +517,6 @@ async function carregarMes(ano, mes) {
     // 🆕 Passa filtro de comunidade para a API
     const eventos = await window.api.buscarEventos(ano, mes, ESTADO.comunidadeFiltrada);
     
-    // 🔧 FIX: Agrupar eventos em arrays por data (corrige bug de sobrescrita)
-    // Antes: ESTADO.dadosEventos[ev.data] = ev (sobrescrevia eventos do mesmo dia)
-    // Agora: Agrupa em array para suportar múltiplos eventos na mesma data
     ESTADO.dadosEventos = {};
     eventos.forEach((ev) => {
       if (!ESTADO.dadosEventos[ev.data]) {
@@ -583,7 +587,6 @@ function renderizarGrid(ano, mes, gridElement, headersHTML) {
       dia,
     ).padStart(2, "0")}`;
     
-    // 🔧 FIX: Agora dadosEventos[dataISO] é um array de eventos
     const eventosNoDia = ESTADO.dadosEventos[dataISO] || [];
     let conteudoHTML = "";
     let clickAttr = `onclick="abrirModal('${dataISO}')"`;
@@ -642,10 +645,11 @@ function renderizarGrid(ano, mes, gridElement, headersHTML) {
         }
       }
 
+      const _t = window.api.escapeHtml;
       conteudoHTML += `
-        <div class="pill ${classeCategoria} ${classeSolenidade}" ${estiloAdicional} title="${evento.titulo}">
-            ${horaShow ? `<span style="font-size: 0.65rem; opacity: 0.8;">${horaShow}</span>` : ""}
-            <span>${icone} ${evento.titulo}${badgeComunidade}</span>
+        <div class="pill ${classeCategoria} ${classeSolenidade}" ${estiloAdicional} title="${_t(evento.titulo)}">
+            ${horaShow ? `<span style="font-size: 0.65rem; opacity: 0.8;">${_t(horaShow)}</span>` : ""}
+            <span>${icone} ${_t(evento.titulo)}${badgeComunidade}</span>
         </div>`;
 
       // Exibe Escalas Adicionais (Múltiplas Missas do MESMO evento)
@@ -804,6 +808,12 @@ function inicializarFiltroComunidadesHeader() {
   console.log("✅ [FILTRO] Filtro de comunidades inicializado no header com", select.options.length, "opções");
 }
 
+/**
+ * Aplica filtro de comunidade no calendário e recarrega o mês.
+ * @param {string|null} comunidadeId - UUID da comunidade, 'matriz', ou null (todas)
+ * @param {HTMLElement|null} divElement - Item da sidebar clicado, ou null quando chamado via select do header
+ * @returns {Promise<void>}
+ */
 window.filtrarPorComunidade = async function (comunidadeId, divElement) {
   // Se chamado via select do header (sem divElement)
   if (!divElement) {
@@ -949,7 +959,6 @@ function aplicarFiltrosVisuais() {
 // 5. MODAL DE DETALHES
 // ==========================================================================
 window.abrirModal = function (dataISO) {
-  // 🔧 FIX: Agora dadosEventos[dataISO] é um array
   let eventosNoDia = ESTADO.dadosEventos[dataISO] || [];
   
   // Se não houver eventos, cria um placeholder
@@ -1007,7 +1016,6 @@ window.abrirModal = function (dataISO) {
       }
   }
 
-  // 🆕 Gera HTML para TODOS os eventos do dia
   let todosEventosHTML = "";
   
   eventosNoDia.forEach((evento, index) => {
@@ -1066,8 +1074,8 @@ window.abrirModal = function (dataISO) {
       ${separador}
       <div class="evento-item-modal" data-evento-id="${evento.id || 'null'}">
         ${headerMultiplo}
-        <div class="modal-liturgia" style="color:${corEvento}">${evento.tempo_liturgico || 'Paroquial'}</div>
-        <div class="modal-titulo" style="font-size: ${eventosNoDia.length > 1 ? '1rem' : '1.2rem'};">${evento.titulo}</div>
+        <div class="modal-liturgia" style="color:${corEvento}">${window.api.escapeHtml(evento.tempo_liturgico || 'Paroquial')}</div>
+        <div class="modal-titulo" style="font-size: ${eventosNoDia.length > 1 ? '1rem' : '1.2rem'};">${window.api.escapeHtml(evento.titulo)}</div>
         ${infoComunidade}
         <div class="escala-list">${conteudoEvento}</div>
       </div>
@@ -1547,6 +1555,7 @@ window.salvarEdicoes = async function () {
 /**
  * Abre o Modal de Opções de Impressão
  */
+/** Abre o modal de seleção de período para geração de relatório PDF. */
 window.abrirOpcoesImpressao = function () {
   const modalContent = document.getElementById("modalContent");
   const modalOverlay = document.getElementById("modalOverlay");
@@ -1597,6 +1606,11 @@ window.abrirOpcoesImpressao = function () {
 
 /**
  * Motor de Geração de Relatório
+ */
+/**
+ * Gera e imprime relatório de eventos em formato A4.
+ * @param {'mes_atual'|'trimestre'|'ano_completo'} tipo - Período do relatório
+ * @returns {Promise<void>}
  */
 window.gerarRelatorio = async function (tipo) {
   // Feedback visual

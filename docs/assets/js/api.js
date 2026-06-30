@@ -36,9 +36,10 @@ window.AppState = {
    */
   setEquipes: function(todasEquipes) {
     if (!Array.isArray(todasEquipes) || todasEquipes.length === 0) return;
-    this.equipes.leitura = todasEquipes.filter(e => e.tipo_atuacao !== 'Canto');
-    this.equipes.canto   = todasEquipes.filter(e => e.tipo_atuacao !== 'Leitura');
-    this.equipes.mep     = todasEquipes.filter(e => e.tipo_atuacao === 'MEP' || e.tipo_atuacao === 'Ambos');
+    const T = window.SDS?.TIPOS_EQUIPE ?? { LEITURA: 'Leitura', CANTO: 'Canto', MEP: 'MEP', AMBOS: 'Ambos' };
+    this.equipes.leitura = todasEquipes.filter(e => e.tipo_atuacao !== T.CANTO);
+    this.equipes.canto   = todasEquipes.filter(e => e.tipo_atuacao !== T.LEITURA);
+    this.equipes.mep     = todasEquipes.filter(e => e.tipo_atuacao === T.MEP || e.tipo_atuacao === T.AMBOS);
   },
 };
 
@@ -46,12 +47,32 @@ window.api = {
   client: _supabaseClient,
 
   // =============================
+  // CODE-002: SANITIZAÇÃO HTML (anti-XSS)
+  // Usar em toda inserção de dados do banco em innerHTML.
+  // =============================
+
+  /**
+   * Escapa caracteres HTML para prevenir XSS em templates de string.
+   * @param {*} val - Valor a escapar (não-string é convertido para '')
+   * @returns {string} String segura para inserção em innerHTML
+   */
+  escapeHtml: function(val) {
+    if (typeof val !== 'string') return '';
+    return val
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;');
+  },
+
+  // =============================
   // SISTEMA DE CACHE v2.0 (localStorage + TTL Inteligente)
   // =============================
   
-  // Constantes de TTL
-  TTL_REVALIDATE: 2 * 60 * 1000,  // 2 minutos - quando buscar dados frescos
-  TTL_STALE: 24 * 60 * 60 * 1000, // 24 horas - fallback offline máximo
+  // Constantes de TTL — valores canônicos definidos em constants.js (SDS.TTL)
+  TTL_REVALIDATE: window.SDS?.TTL.EVENTOS_MES  ?? 2  * 60 * 1000,
+  TTL_STALE:      window.SDS?.TTL.STALE_MAX    ?? 24 * 60 * 60 * 1000,
   
   /**
    * Obtém dados do cache com estratégia stale-while-revalidate

@@ -27,6 +27,12 @@ window.DashboardController = {
   // =============================
   // 1 - INÍCIO: init
   // =============================
+  /**
+   * Ponto de entrada do dashboard. Verifica sessão, carrega perfil admin,
+   * inicializa equipes/comunidades, configura navegação e atalhos.
+   * Redireciona para admin.html se não autenticado ou sem perfil na allowlist.
+   * @returns {Promise<void>}
+   */
   init: async function () {
     console.log("🛠️ SDS Engine: Sincronizando sistema...");
     try {
@@ -259,6 +265,12 @@ window.DashboardController = {
     }
   },
 
+  /**
+   * Abre o modal de gerenciamento de compromissos de um dia.
+   * Lista eventos existentes com botões de edição/exclusão e opção de novo.
+   * @param {string} dataISO - Data no formato YYYY-MM-DD
+   * @returns {Promise<void>}
+   */
   abrirGerenciadorAgenda: async function (dataISO) {
     const eventosDia = await window.api.buscarEventosDia(dataISO);
     const container = document.getElementById("modalContent");
@@ -316,6 +328,13 @@ window.DashboardController = {
   // 4. EDITOR DE COMPROMISSO (FORMULÁRIO SDS)
   // ==========================================================================
 
+  /**
+   * Renderiza o formulário de criação ou edição de compromisso.
+   * Após injeção do HTML, instala validação inline no campo título (UX-003).
+   * @param {string} dataISO - Data do compromisso (YYYY-MM-DD)
+   * @param {string|null} eventoId - UUID do evento para edição, ou null para novo
+   * @returns {Promise<void>}
+   */
   renderizarFormulario: async function (dataISO, eventoId = null) {
     let evento = {
       data: dataISO,

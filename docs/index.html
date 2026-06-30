@@ -400,10 +400,13 @@
          SCRIPTS (ORDEM OBRIGATÓRIA: LIB -> API -> CONTROLLERS -> APP)
     ========================================================================== -->
 
-  <!-- 1. Error Handler (Sistema de tratamento de erros) -->
+  <!-- 1. Constantes de negócio centralizadas (CODE-001) -->
+  <script src="assets/js/constants.js"></script>
+
+  <!-- 2. Error Handler (Sistema de tratamento de erros) -->
   <script src="assets/js/error-handler.js"></script>
 
-  <!-- 2. Módulo de Conexão (Cria window.api com cache) -->
+  <!-- 3. Módulo de Conexão (Cria window.api com cache) -->
   <script src="assets/js/api.js"></script>
 
   <!-- 3. Modal Controller (Sistema unificado de modais) -->
