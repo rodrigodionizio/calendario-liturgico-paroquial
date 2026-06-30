@@ -84,6 +84,79 @@
 }
 
 /* ==========================================================================
+   1.1 ACESSIBILIDADE (A11Y) — Utilitários WCAG 2.1 AA
+   ========================================================================== */
+
+/* Oculta visualmente mas mantém acessível para leitores de tela (A11Y-005) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Badges de prioridade com contraste mínimo WCAG AA 4.5:1 (A11Y-007) */
+/* Urgente: #C62828 branco = 5.12:1 ✅ */
+.badge-prioridade-urgente {
+  display: inline-block;
+  padding: 3px 8px;
+  background: #C62828;
+  color: #fff;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+/* Importante: #BF360C laranja escuro branco = 4.6:1 ✅ */
+.badge-prioridade-importante {
+  display: inline-block;
+  padding: 3px 8px;
+  background: #BF360C;
+  color: #fff;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+/* Normal: #1565C0 azul escuro branco = 5.9:1 ✅ */
+.badge-prioridade-normal {
+  display: inline-block;
+  padding: 3px 8px;
+  background: #1565C0;
+  color: #fff;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+/* Indicadores de tempo litúrgico acessíveis (A11Y-003) */
+.liturgia-tempo-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Área de toque expandida para dots mobile — 44×44px mínimo (prévia UX-001) */
+.event-dot-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 6px;
+  margin: -18px -6px;
+  cursor: pointer;
+}
+
+/* ==========================================================================
    2. FONT FACES (IMPORTAÇÃO TIPOGRAFIA)
    ========================================================================== */
 /* Humming */

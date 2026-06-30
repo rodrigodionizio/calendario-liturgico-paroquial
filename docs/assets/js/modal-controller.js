@@ -25,6 +25,11 @@ window.ModalController = {
     currentDate: null
   },
 
+  // A11Y-002: referência ao elemento que abriu o modal (para restaurar foco ao fechar)
+  _previousFocus: null,
+  // A11Y-002: listener de trap de foco (precisa ser removido ao fechar)
+  _trapFocusHandler: null,
+
   // =============================
   // INICIALIZAÇÃO
   // =============================
@@ -61,6 +66,58 @@ window.ModalController = {
   },
 
   // =============================
+  // A11Y-002: GERENCIAMENTO DE FOCO
+  // =============================
+  /**
+   * Move o foco para o primeiro elemento focável do modal e instala trap de foco.
+   */
+  _ativarFocoModal: function() {
+    const overlay = document.getElementById('modalOverlay');
+    if (!overlay) return;
+
+    const seletor = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+    const focaveis = Array.from(overlay.querySelectorAll(seletor));
+    if (focaveis.length) focaveis[0].focus();
+
+    // Instala trap de foco — Tab/Shift+Tab ficam presos dentro do modal
+    this._trapFocusHandler = (e) => {
+      if (e.key !== 'Tab') return;
+      const elementos = Array.from(overlay.querySelectorAll(seletor));
+      if (!elementos.length) return;
+      const primeiro = elementos[0];
+      const ultimo = elementos[elementos.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === primeiro) {
+          e.preventDefault();
+          ultimo.focus();
+        }
+      } else {
+        if (document.activeElement === ultimo) {
+          e.preventDefault();
+          primeiro.focus();
+        }
+      }
+    };
+    overlay.addEventListener('keydown', this._trapFocusHandler);
+  },
+
+  /**
+   * Remove trap de foco e restaura foco ao elemento que abriu o modal.
+   */
+  _desativarFocoModal: function() {
+    const overlay = document.getElementById('modalOverlay');
+    if (overlay && this._trapFocusHandler) {
+      overlay.removeEventListener('keydown', this._trapFocusHandler);
+      this._trapFocusHandler = null;
+    }
+    if (this._previousFocus && typeof this._previousFocus.focus === 'function') {
+      this._previousFocus.focus();
+    }
+    this._previousFocus = null;
+  },
+
+  // =============================
   // ABERTURA DO MODAL
   // =============================
   /**
@@ -70,36 +127,40 @@ window.ModalController = {
    */
   abrir: async function(dataISO, mode = 'view') {
     try {
-      console.log(`📅 Abrindo modal: ${dataISO} | Modo: ${mode}`);
-      
-      // Busca dados (com cache)
+      // A11Y-002: salva foco atual antes de abrir o modal
+      this._previousFocus = document.activeElement;
+
       const eventos = await this.carregarDados(dataISO);
-      
-      // Gera HTML baseado no modo
       const html = this.gerarHTML(eventos, dataISO, mode);
-      
-      // Renderiza
+
       const modalContent = document.getElementById('modalContent');
       const modalOverlay = document.getElementById('modalOverlay');
-      
+
       if (!modalContent || !modalOverlay) {
         console.error('❌ Elementos do modal não encontrados');
         return;
       }
-      
+
       modalContent.innerHTML = html;
+
+      // A11Y-002: atualiza aria-label com data do evento antes de abrir
+      const dataObj = new Date(dataISO + 'T12:00:00');
+      const dataFormatada = dataObj.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+      modalOverlay.setAttribute('aria-label', `Eventos de ${dataFormatada}`);
+      modalOverlay.setAttribute('aria-hidden', 'false');
       modalOverlay.classList.add('active');
-      
-      // Configura handlers específicos do modo
+
       if (mode === 'edit') {
         this.setupEditHandlers();
       }
-      
-      // Atualiza estado
+
       this.state.currentData = eventos;
       this.state.currentMode = mode;
       this.state.currentDate = dataISO;
-      
+
+      // A11Y-002: move foco para dentro do modal após render
+      requestAnimationFrame(() => this._ativarFocoModal());
+
     } catch (error) {
       this.mostrarErro(error);
     }
@@ -353,48 +414,74 @@ window.ModalController = {
    * @returns {string} HTML das escalas
    */
   gerarEscalasLiturgicas: function(escala) {
-    let html = '<div class="modal-escalas" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0;">';
-    html += '<h4 style="margin: 0 0 12px 0; font-size: 1rem; color: var(--cor-vinho);">📋 Escalas do Dia</h4>';
-    
+    // A11Y-004: estrutura semântica role="table" para leitores de tela
+    const linhas = [];
+
     if (escala.celebrante) {
-      html += `
-        <div class="escala-item" style="margin: 8px 0;">
-          <strong>🐑 Celebrante:</strong> ${escala.celebrante}
-        </div>
-      `;
+      linhas.push({ papel: 'Celebrante', equipe: escala.celebrante, icone: '🐑' });
     }
-    
     if (escala.equipe_leitura?.nome_equipe) {
-      html += `
-        <div class="escala-item" style="margin: 8px 0;">
-          <strong>📖 Leitura:</strong> ${escala.equipe_leitura.nome_equipe}
-        </div>
-      `;
+      linhas.push({ papel: 'Leitura', equipe: escala.equipe_leitura.nome_equipe, icone: '📖' });
     }
-    
     if (escala.equipe_canto?.nome_equipe) {
-      html += `
-        <div class="escala-item" style="margin: 8px 0;">
-          <strong>🎵 Canto:</strong> ${escala.equipe_canto.nome_equipe}
-        </div>
-      `;
+      linhas.push({ papel: 'Canto', equipe: escala.equipe_canto.nome_equipe, icone: '🎵' });
     }
-    
     if (escala.equipe_mep?.nome_equipe) {
-      html += `
-        <div class="escala-item" style="margin: 8px 0;">
-          <strong>📜 MEP:</strong> ${escala.equipe_mep.nome_equipe}
-        </div>
-      `;
+      linhas.push({ papel: 'MEP', equipe: escala.equipe_mep.nome_equipe, icone: '📜' });
     }
-    
-    html += '</div>';
-    return html;
+
+    if (linhas.length === 0) return '';
+
+    const linhasHTML = linhas.map(l => `
+      <div role="row" style="display:flex;gap:12px;padding:6px 0;border-bottom:1px solid #f0f0f0;align-items:center;">
+        <div role="rowheader" style="min-width:90px;font-weight:700;font-size:0.85rem;color:var(--cor-vinho);">
+          <span aria-hidden="true">${l.icone}</span> ${l.papel}
+        </div>
+        <div role="cell" style="font-size:0.9rem;color:#333;">${l.equipe}</div>
+      </div>
+    `).join('');
+
+    return `
+      <div class="modal-escalas" style="margin-top:20px;padding-top:20px;border-top:1px solid #e0e0e0;">
+        <h4 style="margin:0 0 12px 0;font-size:1rem;color:var(--cor-vinho);">
+          <span aria-hidden="true">📋</span> Escalas do Dia
+        </h4>
+        <div role="table" aria-label="Escala de servidores">
+          <div role="rowgroup">
+            <div role="row" class="sr-only">
+              <div role="columnheader">Função</div>
+              <div role="columnheader">Servidor / Equipe</div>
+            </div>
+          </div>
+          <div role="rowgroup">
+            ${linhasHTML}
+          </div>
+        </div>
+      </div>
+    `;
   },
 
   // =============================
   // AÇÕES DO MODAL
   // =============================
+  /**
+   * A11Y-002: helper interno — monta o overlay com aria correto e move foco.
+   * Usar em todos os pontos que abrem o modal diretamente (não via abrir()).
+   */
+  _abrirOverlay: function(html, ariaLabel) {
+    const modalContent = document.getElementById('modalContent');
+    const modalOverlay = document.getElementById('modalOverlay');
+    if (!modalContent || !modalOverlay) return;
+
+    if (!this._previousFocus) this._previousFocus = document.activeElement;
+
+    modalContent.innerHTML = html;
+    modalOverlay.setAttribute('aria-label', ariaLabel || 'Diálogo');
+    modalOverlay.setAttribute('aria-hidden', 'false');
+    modalOverlay.classList.add('active');
+    requestAnimationFrame(() => this._ativarFocoModal());
+  },
+
   /**
    * Alterna entre modo view e edit
    */
@@ -418,14 +505,16 @@ window.ModalController = {
     const modalOverlay = document.getElementById('modalOverlay');
     if (modalOverlay) {
       modalOverlay.classList.remove('active');
+      // A11Y-002: esconde do árvor de acessibilidade quando fechado
+      modalOverlay.setAttribute('aria-hidden', 'true');
     }
-    
-    // Limpa estado
+
+    // A11Y-002: remove trap de foco e restaura foco ao elemento original
+    this._desativarFocoModal();
+
     this.state.currentData = null;
     this.state.currentMode = 'view';
     this.state.currentDate = null;
-    
-    console.log('✅ Modal fechado');
   },
 
   /**
@@ -470,13 +559,7 @@ window.ModalController = {
       </div>
     `;
     
-    const modalContent = document.getElementById('modalContent');
-    const modalOverlay = document.getElementById('modalOverlay');
-    
-    if (modalContent && modalOverlay) {
-      modalContent.innerHTML = html;
-      modalOverlay.classList.add('active');
-    }
+    this._abrirOverlay(html, 'Erro ao carregar eventos');
   },
 
   // =============================
@@ -524,12 +607,12 @@ window.ModalController = {
            </div>` 
         : '<p style="color: #999; font-style: italic;">Sem descrição adicional.</p>';
       
-      // Badge de prioridade
+      // A11Y-007: badges com contraste WCAG AA (classes definidas em styles.css)
       let badgePrioridade = '';
       if (aviso.mural_prioridade === 1) {
-        badgePrioridade = '<span style="display: inline-block; padding: 4px 8px; background: var(--cor-cereja); color: white; border-radius: 4px; font-size: 0.75rem; font-weight: 700; margin-bottom: 12px;">🔥 URGENTE</span>';
+        badgePrioridade = '<span class="badge-prioridade-urgente" style="margin-bottom:12px;" aria-label="Prioridade urgente"><span aria-hidden="true">🔥</span> URGENTE</span>';
       } else if (aviso.mural_prioridade === 2) {
-        badgePrioridade = '<span style="display: inline-block; padding: 4px 8px; background: var(--cor-dourado); color: white; border-radius: 4px; font-size: 0.75rem; font-weight: 700; margin-bottom: 12px;">⚠️ IMPORTANTE</span>';
+        badgePrioridade = '<span class="badge-prioridade-importante" style="margin-bottom:12px;" aria-label="Prioridade importante"><span aria-hidden="true">⚠️</span> IMPORTANTE</span>';
       }
       
       const html = `
@@ -558,14 +641,8 @@ window.ModalController = {
         </div>
       `;
       
-      const modalContent = document.getElementById('modalContent');
-      const modalOverlay = document.getElementById('modalOverlay');
-      
-      if (modalContent && modalOverlay) {
-        modalContent.innerHTML = html;
-        modalOverlay.classList.add('active');
-      }
-      
+      this._abrirOverlay(html, `Detalhes do aviso: ${aviso.titulo}`);
+
     } catch (err) {
       console.error('❌ Erro ao abrir detalhes do aviso:', err);
       alert('Erro ao carregar detalhes do aviso.');
@@ -603,16 +680,10 @@ window.ModalController = {
           </div>
         `;
         
-        const modalContent = document.getElementById('modalContent');
-        const modalOverlay = document.getElementById('modalOverlay');
-        
-        if (modalContent && modalOverlay) {
-          modalContent.innerHTML = html;
-          modalOverlay.classList.add('active');
-        }
+        this._abrirOverlay(html, 'Avisos Paroquiais — lista vazia');
         return;
       }
-      
+
       // Gera HTML da lista de avisos
       let avisosHTML = '';
       
@@ -631,14 +702,15 @@ window.ModalController = {
         let prioClass = '';
         let prioLabel = '';
         
+        // A11Y-007: badges com contraste WCAG AA
         if (aviso.mural_prioridade === 1) {
-          prioClass = 'background: #fff5f5; border-left: 4px solid var(--cor-cereja);';
-          prioLabel = '<span style="font-size: 0.7rem; color: var(--cor-cereja); font-weight: 700;">🔥 URGENTE</span>';
+          prioClass = 'background: #fff5f5; border-left: 4px solid #C62828;';
+          prioLabel = '<span class="badge-prioridade-urgente" aria-label="Urgente"><span aria-hidden="true">🔥</span> URGENTE</span>';
         } else if (aviso.mural_prioridade === 2) {
-          prioClass = 'border-left: 4px solid var(--cor-dourado);';
-          prioLabel = '<span style="font-size: 0.7rem; color: var(--cor-dourado); font-weight: 700;">⚠️ IMPORTANTE</span>';
+          prioClass = 'border-left: 4px solid #BF360C;';
+          prioLabel = '<span class="badge-prioridade-importante" aria-label="Importante"><span aria-hidden="true">⚠️</span> IMPORTANTE</span>';
         } else {
-          prioClass = 'border-left: 4px solid #2196f3;';
+          prioClass = 'border-left: 4px solid #1565C0;';
         }
         
         avisosHTML += `
@@ -685,14 +757,8 @@ window.ModalController = {
         </div>
       `;
       
-      const modalContent = document.getElementById('modalContent');
-      const modalOverlay = document.getElementById('modalOverlay');
-      
-      if (modalContent && modalOverlay) {
-        modalContent.innerHTML = html;
-        modalOverlay.classList.add('active');
-      }
-      
+      this._abrirOverlay(html, 'Todos os Avisos Paroquiais');
+
     } catch (err) {
       console.error('❌ Erro ao abrir lista completa de avisos:', err);
       alert('Erro ao carregar lista de avisos.');

@@ -14,6 +14,25 @@
  * VERSÃO: 12.0
  */
 
+// A11Y-003: mapeamento de ícones e labels por cor litúrgica
+const ICONES_LITURGICOS = {
+  '#2e7d32': { icon: '🌿', label: 'Tempo Comum' },
+  '#4caf50': { icon: '🌿', label: 'Tempo Comum' },
+  '#6a1b9a': { icon: '✝️', label: 'Advento / Quaresma' },
+  '#9c27b0': { icon: '✝️', label: 'Advento / Quaresma' },
+  '#f5f5f5': { icon: '☀️', label: 'Natal / Páscoa' },
+  '#ffffff': { icon: '☀️', label: 'Natal / Páscoa' },
+  '#d32f2f': { icon: '🕊️', label: 'Pentecostes / Mártires' },
+  '#f44336': { icon: '🕊️', label: 'Pentecostes / Mártires' },
+  '#e91e63': { icon: '🌸', label: 'Gaudete / Laetare' },
+  '#ec407a': { icon: '🌸', label: 'Gaudete / Laetare' },
+};
+
+function _labelLiturgico(hexCode) {
+  const hex = (hexCode || '').toLowerCase();
+  return ICONES_LITURGICOS[hex] || { icon: '📅', label: 'Celebração' };
+}
+
 window.CalendarEngine = {
   ano: 2026,
   mes: 1,
@@ -92,18 +111,21 @@ window.CalendarEngine = {
     const ultimoDia = new Date(this.ano, this.mes, 0).getDate();
     const ultimoDiaMesAnt = new Date(this.ano, this.mes - 1, 0).getDate();
 
-    // 3.2. Template de Cabeçalho
+    // 3.2. Template de Cabeçalho — A11Y-001: scope="col" para leitores de tela
     let html = `
-            <div class="day-header">Dom</div><div class="day-header">Seg</div>
-            <div class="day-header">Ter</div><div class="day-header">Qua</div>
-            <div class="day-header">Qui</div><div class="day-header">Sex</div>
-            <div class="day-header">Sáb</div>
+            <div class="day-header" role="columnheader" scope="col" aria-label="Domingo">Dom</div>
+            <div class="day-header" role="columnheader" scope="col" aria-label="Segunda-feira">Seg</div>
+            <div class="day-header" role="columnheader" scope="col" aria-label="Terça-feira">Ter</div>
+            <div class="day-header" role="columnheader" scope="col" aria-label="Quarta-feira">Qua</div>
+            <div class="day-header" role="columnheader" scope="col" aria-label="Quinta-feira">Qui</div>
+            <div class="day-header" role="columnheader" scope="col" aria-label="Sexta-feira">Sex</div>
+            <div class="day-header" role="columnheader" scope="col" aria-label="Sábado">Sáb</div>
         `;
 
     // 3.3. Preenchimento de dias do mês anterior
     for (let i = primeiroDia - 1; i >= 0; i--) {
       const diaResiduo = ultimoDiaMesAnt - i;
-      html += `<div class="day-cell other-month"><span class="day-number">${diaResiduo}</span></div>`;
+      html += `<div class="day-cell other-month" aria-hidden="true"><span class="day-number">${diaResiduo}</span></div>`;
     }
 
     // 3.4. Renderização dos dias do mês atual
@@ -116,15 +138,28 @@ window.CalendarEngine = {
       // Busca a lista de eventos para este dia específico (Sempre retorna um Array)
       const listaEventosDia = this.eventosLocal[dataISO] || [];
 
-      // CORREÇÃO: Definição dinâmica do atributo de clique conforme privilégio
+      // A11Y-001: aria-label descritivo com data e quantidade de eventos
+      const nomesMeses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+      const qtdEventos = listaEventosDia.length;
+      const ariaLabelDia = qtdEventos > 0
+        ? `${dia} de ${nomesMeses[this.mes - 1]}, ${qtdEventos} ${qtdEventos === 1 ? 'evento' : 'eventos'}`
+        : `${dia} de ${nomesMeses[this.mes - 1]}, sem eventos`;
+
+      // Definição dinâmica do atributo de clique conforme privilégio
       const clickAttr = this.isAdmin
         ? `onclick="window.DashboardController.abrirGerenciadorAgenda('${dataISO}')"`
         : `onclick="window.CalendarUI.abrirModal('${dataISO}')"`;
 
+      // A11Y-001: role="button" + tabindex + onkeydown para navegação por teclado
+      const onkeydown = this.isAdmin
+        ? `onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.DashboardController.abrirGerenciadorAgenda('${dataISO}')}"`
+        : `onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.CalendarUI.abrirModal('${dataISO}')}"`;
+
       html += `
-        <div class="day-cell" data-iso="${dataISO}" ${clickAttr}>
-            <span class="day-number">${dia}</span>
-            ${this.gerarPilulas(listaEventosDia)} 
+        <div class="day-cell" data-iso="${dataISO}" ${clickAttr} ${onkeydown}
+             role="button" tabindex="0" aria-label="${ariaLabelDia}">
+            <span class="day-number" aria-hidden="true">${dia}</span>
+            ${this.gerarPilulas(listaEventosDia)}
         </div>`;
     }
 
@@ -154,19 +189,30 @@ window.CalendarEngine = {
 
     const isMobile = window.innerWidth <= 768;
     if (isMobile) {
-      // Mantendo lógica de dots para mobile pois pills quebrariam o layout mensal
+      // A11Y-001 + A11Y-003: dots com role="img" e aria-label descritivo
       return listaEventos.map(ev => {
         let cor = ev.tipo_compromisso === "liturgia"
           ? ev.liturgia_cores?.hex_code || "#2e7d32"
           : "#64748b";
 
-        // Ajuste de cores para dots baseados nas categorias novas
-        if (ev.tipo_compromisso === 'atendimento') cor = "#2e3fd1ff"; // Blue
-        if (ev.tipo_compromisso === 'reuniao') cor = "#475569"; // Slate
-        if (ev.tipo_compromisso === 'evento') cor = "#bfa15f"; // Dourado Escuro
+        if (ev.tipo_compromisso === 'atendimento') cor = "#2e3fd1ff";
+        if (ev.tipo_compromisso === 'reuniao') cor = "#475569";
+        if (ev.tipo_compromisso === 'evento') cor = "#bfa15f";
 
         if (cor.toLowerCase() === "#ffffff") cor = "#ccc";
-        return `<span style="display:inline-block; width:8px; height:8px; background-color:${cor}; border-radius:50%; margin-right:4px;"></span>`;
+
+        // A11Y-003: label do tempo litúrgico para daltonismo
+        const liturgico = ev.tipo_compromisso === 'liturgia'
+          ? _labelLiturgico(ev.liturgia_cores?.hex_code)
+          : null;
+        const labelAcessivel = liturgico
+          ? `${liturgico.label} — ${ev.titulo}`
+          : ev.titulo;
+
+        return `<span class="event-dot-wrapper" aria-hidden="true">` +
+          `<span role="img" aria-label="${labelAcessivel}" title="${labelAcessivel}" ` +
+          `style="display:inline-block;width:8px;height:8px;background-color:${cor};border-radius:50%;margin-right:4px;"></span>` +
+          `</span>`;
       }).join("");
     }
 
@@ -195,8 +241,15 @@ window.CalendarEngine = {
       let horaShow = evento.hora_inicio ? evento.hora_inicio.substring(0, 5) :
         (evento.escalas?.[0]?.hora_celebracao.substring(0, 5) || "--:--");
 
-      // Para Liturgia, a borda é a cor litúrgica. Para Outros, a classe CSS resolve.
-      // EXCLUSIVO: Atendimento recebe box colorido sólido (v6.8)
+      // A11Y-003: ícone litúrgico para daltonismo
+      let iconeTempoLiturgico = '';
+      let labelTempoLiturgico = '';
+      if (evento.tipo_compromisso === 'liturgia') {
+        const liturgico = _labelLiturgico(corLiturgica);
+        iconeTempoLiturgico = `<span aria-hidden="true" title="${liturgico.label}">${liturgico.icon}</span>`;
+        labelTempoLiturgico = liturgico.label;
+      }
+
       let estiloAdicional = "";
       if (evento.tipo_compromisso === 'liturgia') {
         estiloAdicional = `style="border-left: 4px solid ${corLiturgica} !important;"`;
@@ -204,18 +257,25 @@ window.CalendarEngine = {
         estiloAdicional = `style="background-color: #2e3fd1ff !important; color: white !important; border: none !important;"`;
       }
 
-      // 🏛️ Badge de comunidade (sincronizado com app.js)
+      // Badge de comunidade
       let badgeComunidade = "";
       if (evento.comunidade_id && evento.comunidade) {
-        // 🛡️ Proteção contra undefined com optional chaining e fallback
         const nomeComunidade = evento.comunidade?.nome || 'Comunidade';
-        badgeComunidade = `<span class="badge-comunidade" style="display: inline-block;">🏛️ ${nomeComunidade}</span>`;
+        badgeComunidade = `<span class="badge-comunidade" style="display: inline-block;" aria-label="Comunidade: ${nomeComunidade}">🏛️ ${nomeComunidade}</span>`;
       }
 
+      // A11Y-001: aria-label descritivo na pill
+      const ariaLabelPill = labelTempoLiturgico
+        ? `${evento.titulo}, ${horaShow}, ${labelTempoLiturgico}`
+        : `${evento.titulo}, ${horaShow}`;
+
       return `
-            <div class="pill ${classeCategoria}" ${estiloAdicional} title="${evento.titulo}">
-                <span style="font-size: 0.65rem; opacity: 0.8;">${horaShow}</span>
-                <span>${icone} ${evento.titulo}${badgeComunidade}</span>
+            <div class="pill ${classeCategoria}" ${estiloAdicional}
+                 title="${evento.titulo}"
+                 aria-label="${ariaLabelPill}"
+                 aria-hidden="true">
+                <span style="font-size: 0.65rem; opacity: 0.8;" aria-hidden="true">${horaShow}</span>
+                <span>${iconeTempoLiturgico}${icone} ${evento.titulo}${badgeComunidade}</span>
             </div>
         `;
     }).join("");

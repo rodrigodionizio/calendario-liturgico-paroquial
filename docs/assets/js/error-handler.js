@@ -272,7 +272,10 @@ class ErrorHandler {
     `;
     
     document.body.appendChild(toast);
-    
+
+    // A11Y-005: anuncia a mensagem para leitores de tela
+    ErrorHandler.announce(error.userMessage);
+
     // Animação de entrada
     setTimeout(() => toast.classList.add('show'), 10);
     
@@ -285,6 +288,17 @@ class ErrorHandler {
     }
   }
   
+  /**
+   * A11Y-005: anuncia uma mensagem para leitores de tela via aria-live.
+   * @param {string} msg - Mensagem a anunciar
+   */
+  static announce(msg) {
+    const announcer = document.getElementById('aria-announcer');
+    if (!announcer) return;
+    announcer.textContent = '';
+    requestAnimationFrame(() => { announcer.textContent = msg; });
+  }
+
   /**
    * Utilitário para aguardar (async sleep)
    * @param {number} ms - Milissegundos

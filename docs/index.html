@@ -252,10 +252,10 @@
             </select>
           </div>
           
-          <div class="nav-buttons">
-            <button class="btn-nav" aria-label="Mês Anterior">&lt;</button>
-            <button class="btn-nav">Hoje</button>
-            <button class="btn-nav" aria-label="Próximo Mês">&gt;</button>
+          <div class="nav-buttons" role="group" aria-label="Navegação do calendário">
+            <button class="btn-nav" aria-label="Mês Anterior" onclick="mesAnterior()">&lt;</button>
+            <button class="btn-nav" aria-label="Ir para hoje" onclick="irParaHoje()">Hoje</button>
+            <button class="btn-nav" aria-label="Próximo Mês" onclick="proximoMes()">&gt;</button>
           </div>
         </div>
 
@@ -348,7 +348,10 @@
          MODAL OVERLAY (POPUP DE DETALHES)
          O conteúdo é injetado via JavaScript
     ========================================================================== -->
-  <div class="modal-overlay" id="modalOverlay">
+  <!-- Região ARIA Live — anuncia mensagens para leitores de tela (A11Y-005) -->
+  <div id="aria-announcer" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-label="Detalhes do evento" aria-hidden="true">
     <div id="modalContent"></div>
   </div>
   <!-- MÁSCARA ESCURA PARA FECHAR MENU MOBILE -->

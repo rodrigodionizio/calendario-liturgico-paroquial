@@ -640,18 +640,37 @@ async function inicializarSidebar() {
   const containerEquipes = document.getElementById("filtro-equipes");
   if (!containerEquipes) return;
 
-  containerEquipes.innerHTML = `<h3>FILTRAR POR EQUIPE</h3>
-        <div class="filter-item" onclick="limparFiltros()">
-            <span class="checkbox-custom checked" id="check-all"></span> <strong>TODAS AS EQUIPES</strong>
-        </div>`;
+  // A11Y-006: role="group" + aria-labelledby para o grupo de filtros
+  containerEquipes.innerHTML = `
+    <h3 id="label-filtro-equipes">FILTRAR POR EQUIPE</h3>
+    <div class="filter-item" onclick="limparFiltros()"
+         role="checkbox" aria-checked="true" aria-label="Todas as equipes" tabindex="0"
+         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();limparFiltros()}">
+      <span class="checkbox-custom checked" id="check-all" aria-hidden="true"></span>
+      <strong>TODAS AS EQUIPES</strong>
+    </div>`;
+
+  // A11Y-006: group container
+  containerEquipes.setAttribute('role', 'group');
+  containerEquipes.setAttribute('aria-labelledby', 'label-filtro-equipes');
 
   ESTADO.listaEquipes.forEach((eq) => {
     const div = document.createElement("div");
     div.className = "filter-item";
+    div.setAttribute('role', 'checkbox');
+    div.setAttribute('aria-checked', 'false');
+    div.setAttribute('aria-label', eq.nome_equipe);
+    div.setAttribute('tabindex', '0');
     div.addEventListener("click", function () {
       window.toggleFiltro(eq.id, this);
     });
-    div.innerHTML = `<span class="checkbox-custom" data-id="${eq.id}"></span> ${eq.nome_equipe}`;
+    div.addEventListener("keydown", function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        window.toggleFiltro(eq.id, this);
+      }
+    });
+    div.innerHTML = `<span class="checkbox-custom" data-id="${eq.id}" aria-hidden="true"></span> ${eq.nome_equipe}`;
     containerEquipes.appendChild(div);
   });
 }
@@ -798,25 +817,39 @@ window.toggleFiltro = function (equipeId, divElement) {
   if (ESTADO.filtrosAtivos.has(equipeId)) {
     ESTADO.filtrosAtivos.delete(equipeId);
     check.classList.remove("checked");
+    // A11Y-006: atualiza aria-checked no item
+    divElement.setAttribute('aria-checked', 'false');
   } else {
     ESTADO.filtrosAtivos.add(equipeId);
     check.classList.add("checked");
+    divElement.setAttribute('aria-checked', 'true');
   }
 
   if (ESTADO.filtrosAtivos.size === 0) {
     checkAll.classList.add("checked");
+    document.querySelector('[id^="check-all"]')?.closest('[role="checkbox"]')
+      ?.setAttribute('aria-checked', 'true');
   } else {
     checkAll.classList.remove("checked");
+    document.querySelector('[id^="check-all"]')?.closest('[role="checkbox"]')
+      ?.setAttribute('aria-checked', 'false');
   }
   aplicarFiltrosVisuais();
 };
 
 window.limparFiltros = function () {
   ESTADO.filtrosAtivos.clear();
-  document.querySelectorAll(".filter-item .checkbox-custom").forEach((el) => {
-    if (el.id !== "check-all") el.classList.remove("checked");
+  // A11Y-006: reseta aria-checked em todos os itens de equipe
+  document.querySelectorAll("#filtro-equipes [role='checkbox']").forEach((el) => {
+    const check = el.querySelector(".checkbox-custom");
+    if (check && check.id !== "check-all") {
+      check.classList.remove("checked");
+      el.setAttribute('aria-checked', 'false');
+    }
   });
   document.getElementById("check-all").classList.add("checked");
+  document.querySelector("#filtro-equipes [role='checkbox']")
+    ?.setAttribute('aria-checked', 'true');
   aplicarFiltrosVisuais();
 };
 
@@ -857,6 +890,20 @@ function aplicarFiltrosVisuais() {
       cel.classList.remove("highlight-filter");
     }
   });
+
+  // A11Y-006: anuncia o resultado do filtro para leitores de tela
+  const diasVisiveis = document.querySelectorAll(".day-cell.highlight-filter").length;
+  const nomeEquipes = [...ESTADO.filtrosAtivos].map(id => {
+    const eq = ESTADO.listaEquipes?.find(e => e.id === id);
+    return eq ? eq.nome_equipe : '';
+  }).filter(Boolean).join(', ');
+
+  if (window.ErrorHandler?.announce) {
+    const msg = diasVisiveis > 0
+      ? `Filtro ativo: ${nomeEquipes}. ${diasVisiveis} ${diasVisiveis === 1 ? 'dia com evento' : 'dias com eventos'} encontrados.`
+      : `Filtro ativo: ${nomeEquipes}. Nenhum evento encontrado neste mês.`;
+    window.ErrorHandler.announce(msg);
+  }
 }
 
 // ==========================================================================
