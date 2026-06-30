@@ -665,11 +665,24 @@ window.DashboardController = {
   },
 
   executarExclusao: async function (id, dataISO) {
-    await window.api.client.from("eventos_base").delete().eq("id", id);
+    // SEC-003: soft delete — requer migração 002_soft_delete_eventos.sql no Supabase.
+    // Se a coluna deleted_at ainda não existir, cai para DELETE permanente como fallback.
+    const userEmail = this.meuPerfil?.email || 'desconhecido';
+    const { error: softErr } = await window.api.client
+      .from("eventos_base")
+      .update({ deleted_at: new Date().toISOString(), deleted_by: userEmail })
+      .eq("id", id);
+
+    if (softErr && softErr.code === 'PGRST204') {
+      // Coluna não existe ainda (migração pendente) — DELETE permanente como fallback
+      console.warn('[SEC-003] Soft delete indisponível (coluna ausente). Usando DELETE permanente.');
+      await window.api.client.from("eventos_base").delete().eq("id", id);
+    }
+
     // BUG-004 / RISCO-2: invalidar ambas as camadas de cache
     window.api.clearCache();                          // limpa eventos_* no localStorage
     window.ModalController?.invalidarCache(dataISO); // limpa sessionStorage do modal
-    import('./wordpress-sync.js').then(m => m.notificarWP('excluido', id)); // fix: era 'eventoId' (undefined)
+    import('./wordpress-sync.js').then(m => m.notificarWP('excluido', id));
     this.abrirGerenciadorAgenda(dataISO);
     window.CalendarEngine.carregarERenderizar();
   },

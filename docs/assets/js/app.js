@@ -521,11 +521,25 @@ async function carregarMes(ano, mes) {
     
     renderizarGrid(ano, mes, grid, headers);
     aplicarFiltrosVisuais();
+    // PERF-001: pré-carrega meses adjacentes silenciosamente após render
+    _prefetchMesesAdjacentes(ano, mes);
   } catch (erro) {
     console.error(erro);
     grid.innerHTML =
       headers + '<div style="padding:20px; color:red;">Erro de conexão.</div>';
   }
+}
+
+// PERF-001: pre-fetch silencioso dos meses anterior e próximo para eliminar
+// latência de ~500-800ms ao navegar entre meses. Os resultados ficam no cache
+// localStorage da api.js e são servidos instantaneamente na navegação.
+function _prefetchMesesAdjacentes(ano, mes) {
+  const proximo  = mes === 12 ? { m: 1,      a: ano + 1 } : { m: mes + 1, a: ano };
+  const anterior = mes === 1  ? { m: 12,     a: ano - 1 } : { m: mes - 1, a: ano };
+  setTimeout(() => {
+    window.api.buscarEventos(proximo.a,  proximo.m,  ESTADO.comunidadeFiltrada).catch(() => {});
+    window.api.buscarEventos(anterior.a, anterior.m, ESTADO.comunidadeFiltrada).catch(() => {});
+  }, 1500);
 }
 
 function renderizarGrid(ano, mes, gridElement, headersHTML) {
@@ -1592,7 +1606,23 @@ window.gerarRelatorio = async function (tipo) {
   }
 
   try {
-    const eventos = await window.api.buscarEventosRange(dataInicio, dataFim);
+    // PERF-004: ano completo carrega mês a mês (evita query única de 600+ registros)
+    // para os outros tipos mantém buscarEventosRange (único request, já é eficiente)
+    let eventos;
+    if (tipo === "ano_completo") {
+      if (modalBody) modalBody.innerHTML =
+        '<div style="text-align:center; padding:40px;"><p>🔄 Carregando 12 meses...</p><small id="print-progress">Mês 0 de 12</small></div>';
+      eventos = [];
+      for (let m = 1; m <= 12; m++) {
+        const progEl = document.getElementById("print-progress");
+        if (progEl) progEl.textContent = `Mês ${m} de 12`;
+        const evMes = await window.api.buscarEventos(ano, m, ESTADO.comunidadeFiltrada);
+        eventos.push(...evMes);
+      }
+      eventos.sort((a, b) => (a.data > b.data ? 1 : -1));
+    } else {
+      eventos = await window.api.buscarEventosRange(dataInicio, dataFim);
+    }
 
     // Atualiza cabeçalho do PDF
     document.getElementById("print-month-name").textContent = tituloRelatorio;

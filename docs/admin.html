@@ -254,7 +254,8 @@
 
         if (error) {
           msg.style.color = "red";
-          msg.textContent = "Erro: " + error.message;
+          // SEC-002: mensagem genérica para não revelar se o email existe no sistema
+          msg.textContent = "Email ou senha incorretos.";
           btn.disabled = false;
           btn.textContent = "ENTRAR";
         } else {

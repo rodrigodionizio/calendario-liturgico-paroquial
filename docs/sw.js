@@ -1,8 +1,10 @@
 /* sw.js - Motor de Cache Sacristia Digital v3.0 */
 /* Estratégia: Stale-While-Revalidate para assets, Network-Only para API */
 
-const CACHE_NAME = 'sacristia-v3';
-const CACHE_VERSION = '3.0.0';
+// PERF-003: incrementar CACHE_NAME a cada deploy para forçar reinstalação
+// O activate event limpa caches com nome diferente automaticamente.
+const CACHE_NAME = 'sacristia-v3.2';
+const CACHE_VERSION = '3.2.0';
 
 // Assets essenciais para funcionamento offline
 const ASSETS = [
@@ -84,36 +86,51 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // 3. Assets locais: Stale-While-Revalidate
-  // Serve do cache imediatamente, mas busca atualização em background
+  // PERF-003: JS e CSS usam network-first — garante código atualizado após
+  // cada deploy sem aguardar expiração do SW. Em offline, serve do cache.
+  const isScript = url.pathname.endsWith('.js') || url.pathname.endsWith('.css');
+  if (isScript) {
+    e.respondWith(
+      fetch(e.request)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            caches.open(CACHE_NAME).then(cache => cache.put(e.request, networkResponse.clone()));
+          }
+          return networkResponse;
+        })
+        .catch(() => caches.match(e.request).then(cached => {
+          if (cached) return cached;
+          return new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain' } });
+        }))
+    );
+    return;
+  }
+
+  // 3. HTML e outros assets locais: Stale-While-Revalidate
+  // Serve do cache imediatamente, busca atualização em background
   e.respondWith(
     caches.open(CACHE_NAME).then(async (cache) => {
       const cachedResponse = await cache.match(e.request);
-      
-      // Busca atualização em background (não bloqueia)
+
       const fetchPromise = fetch(e.request).then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200) {
           cache.put(e.request, networkResponse.clone());
         }
         return networkResponse;
       }).catch(() => null);
-      
-      // Se tem cache, retorna imediatamente
+
       if (cachedResponse) {
-        console.log(`📦 [SW] Servindo do cache: ${url.pathname}`);
         return cachedResponse;
       }
-      
-      // Se não tem cache, espera a rede
+
       const networkResponse = await fetchPromise;
       if (networkResponse) {
         return networkResponse;
       }
-      
-      // Fallback offline
+
       console.log('⚠️ [SW] Offline e sem cache:', url.pathname);
-      return new Response('Offline - Conteúdo não disponível', { 
-        status: 503, 
+      return new Response('Offline - Conteúdo não disponível', {
+        status: 503,
         statusText: 'Service Unavailable',
         headers: { 'Content-Type': 'text/plain; charset=utf-8' }
       });
