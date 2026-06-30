@@ -697,7 +697,14 @@ async function inicializarSidebar() {
   containerEquipes.setAttribute('role', 'group');
   containerEquipes.setAttribute('aria-labelledby', 'label-filtro-equipes');
 
-  ESTADO.listaEquipes.forEach((eq) => {
+  // Apenas equipes de Canto, Ambos e MEP aparecem no filtro da sidebar.
+  // Leitura é exibida no modal e no PDF, mas não é critério de filtragem visual.
+  const T = window.SDS?.TIPOS_EQUIPE ?? { LEITURA: 'Leitura' };
+  const equipesFiltraveis = ESTADO.listaEquipes.filter(
+    (eq) => eq.tipo_atuacao !== T.LEITURA
+  );
+
+  equipesFiltraveis.forEach((eq) => {
     const div = document.createElement("div");
     div.className = "filter-item";
     div.setAttribute('role', 'checkbox');
@@ -914,19 +921,22 @@ function aplicarFiltrosVisuais() {
 
   celulas.forEach((cel) => {
     const dataISO = cel.getAttribute("data-iso");
-    const evento = ESTADO.dadosEventos[dataISO];
+    // dadosEventos[data] é um array — OR entre todos os eventos do dia
+    const eventosNoDia = ESTADO.dadosEventos[dataISO] || [];
     let match = false;
 
-    if (evento && evento.escalas) {
-      for (let esc of evento.escalas) {
-        const idLeit = esc.equipe_leitura?.id || esc.equipe_leitura_id;
+    outer: for (const ev of eventosNoDia) {
+      if (!ev.escalas) continue;
+      for (const esc of ev.escalas) {
+        // Filtra por Canto, Ambos e MEP. Leitura não é critério de destaque.
         const idCant = esc.equipe_canto?.id || esc.equipe_canto_id;
+        const idMep  = esc.equipe_mep?.id  || esc.equipe_mep_id;
         if (
-          ESTADO.filtrosAtivos.has(idLeit) ||
-          ESTADO.filtrosAtivos.has(idCant)
+          ESTADO.filtrosAtivos.has(idCant) ||
+          ESTADO.filtrosAtivos.has(idMep)
         ) {
           match = true;
-          break;
+          break outer;
         }
       }
     }
