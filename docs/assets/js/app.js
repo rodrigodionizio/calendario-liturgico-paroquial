@@ -339,17 +339,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     (e) => e.tipo_atuacao === "Canto" || e.tipo_atuacao === "Ambos",
   );
 
-  // 🆕 Carregar comunidades
-  console.log("🔍 [APP] Iniciando carregamento de comunidades...");
-  
-  // 🔧 Forçar reload de cache (DEBUG - REMOVER APÓS TESTES)
-  window.__FORCE_RELOAD_COMUNIDADES = true; // ⚠️ ATIVADO PARA DEBUG
-  
+  // BUG-001: flag __FORCE_RELOAD_COMUNIDADES removida — filtro .eq("ativo", true) corrigido no banco
   ESTADO.listaComunidades = await window.api.listarComunidades();
-  
-  console.log("📋 [APP] Comunidades carregadas:", ESTADO.listaComunidades);
-  console.log("📊 [APP] Total de comunidades:", ESTADO.listaComunidades?.length || 0);
-  console.log("🔹 [APP] IDs:", ESTADO.listaComunidades?.map(c => `${c.nome} (${c.id})`));
   
   if (!ESTADO.listaComunidades || ESTADO.listaComunidades.length === 0) {
     console.error("⚠️ [APP] ATENÇÃO: Nenhuma comunidade foi carregada!");

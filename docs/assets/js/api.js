@@ -20,6 +20,28 @@ const SUPABASE_KEY =
 
 const _supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// Logging condicional — silencioso em produção
+const IS_DEV = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const _log = (...args) => IS_DEV && console.log(...args);
+
+// Estado centralizado — substitui mutações diretas em window.api
+window.AppState = {
+  equipes: { leitura: [], canto: [], mep: [] },
+  comunidades: [],
+  perfil: null,
+
+  /**
+   * Categoriza equipes a partir da lista completa retornada pelo banco.
+   * @param {Array} todasEquipes
+   */
+  setEquipes: function(todasEquipes) {
+    if (!Array.isArray(todasEquipes) || todasEquipes.length === 0) return;
+    this.equipes.leitura = todasEquipes.filter(e => e.tipo_atuacao !== 'Canto');
+    this.equipes.canto   = todasEquipes.filter(e => e.tipo_atuacao !== 'Leitura');
+    this.equipes.mep     = todasEquipes.filter(e => e.tipo_atuacao === 'MEP' || e.tipo_atuacao === 'Ambos');
+  },
+};
+
 window.api = {
   client: _supabaseClient,
 
@@ -53,18 +75,18 @@ window.api = {
 
       // Se dentro do TTL de revalidação, retorna como fresh
       if (age <= ttl) {
-        console.log(`📦 Cache fresh: ${key} (idade: ${Math.round(age / 1000)}s)`);
+        _log(`📦 Cache fresh: ${key} (idade: ${Math.round(age / 1000)}s)`);
         return { data, isStale: false };
       }
 
       // Se expirado mas acceptStale=true (offline), retorna como stale
       if (acceptStale) {
-        console.log(`📦 Cache stale (offline): ${key} (idade: ${Math.round(age / 60000)}min)`);
+        _log(`📦 Cache stale (offline): ${key} (idade: ${Math.round(age / 60000)}min)`);
         return { data, isStale: true };
       }
 
       // Expirado e online - retorna null para forçar refresh
-      console.log(`⏰ Cache expirado: ${key} (idade: ${Math.round(age / 1000)}s)`);
+      _log(`⏰ Cache expirado: ${key} (idade: ${Math.round(age / 1000)}s)`);
       return null;
     } catch (e) {
       console.warn("Erro ao ler cache:", e);
@@ -87,22 +109,23 @@ window.api = {
    * @param {number} ttl - Tempo de vida em milissegundos (padrão: 2 minutos)
    */
   setCache: function (key, data, ttl = this.TTL_REVALIDATE) {
+    const payload = JSON.stringify({ data, timestamp: Date.now(), ttl });
     try {
-      localStorage.setItem(
-        key,
-        JSON.stringify({
-          data,
-          timestamp: Date.now(),
-          ttl,
-        }),
-      );
-      console.log(`💾 Cache salvo: ${key} (TTL: ${ttl / 1000}s)`);
-      
-      // Atualiza timestamp da última sync
+      localStorage.setItem(key, payload);
       localStorage.setItem('sacristia_last_sync', Date.now().toString());
+      _log(`💾 Cache salvo: ${key} (TTL: ${ttl / 1000}s)`);
     } catch (e) {
-      console.warn("Cache storage full ou erro:", e);
-      this.cleanOldCache();
+      // BUG-005 / RISCO-3: QuotaExceededError — libera espaço e tenta de novo
+      if (e.name === 'QuotaExceededError' || e.code === 22) {
+        this._evictOldestCache();
+        try {
+          localStorage.setItem(key, payload);
+        } catch {
+          console.warn('Cache indisponível — operando sem cache local');
+        }
+      } else {
+        console.warn('Erro ao salvar cache:', e);
+      }
     }
   },
 
@@ -146,7 +169,6 @@ window.api = {
         try {
           const item = JSON.parse(localStorage.getItem(key));
           const age = Date.now() - item.timestamp;
-          // Remove se tiver mais de 24 horas
           if (age > this.TTL_STALE) {
             localStorage.removeItem(key);
           }
@@ -155,6 +177,23 @@ window.api = {
         }
       }
     });
+  },
+
+  /**
+   * Remove as 3 entradas de cache mais antigas para liberar espaço (evicção LRU).
+   * Chamado automaticamente quando QuotaExceededError é detectado.
+   */
+  _evictOldestCache: function () {
+    const prefixos = ['eventos_', 'comunidades_'];
+    const entradas = Object.keys(localStorage)
+      .filter(k => prefixos.some(p => k.startsWith(p)))
+      .map(k => {
+        try { return { k, ts: JSON.parse(localStorage.getItem(k)).timestamp || 0 }; }
+        catch { return { k, ts: 0 }; }
+      })
+      .sort((a, b) => a.ts - b.ts);
+    entradas.slice(0, 3).forEach(({ k }) => localStorage.removeItem(k));
+    _log('🗑️ Evicção de cache: removidas entradas mais antigas', entradas.slice(0, 3).map(e => e.k));
   },
 
   // =============================
@@ -400,67 +439,35 @@ window.api = {
    */
   listarComunidades: async function () {
     const cacheKey = "comunidades_list";
-    
-    console.log("🔍 [API] Buscando comunidades...");
-    
-    // 🔧 Invalidar cache se forçado (para debug)
-    if (window.__FORCE_RELOAD_COMUNIDADES) {
-      console.warn("⚠️ [API] Cache de comunidades forçadamente invalidado");
-      localStorage.removeItem(cacheKey);
-      window.__FORCE_RELOAD_COMUNIDADES = false;
-    }
-    
-    const cached = this.getCacheLegacy(cacheKey);
-    if (cached) {
-      console.log("✅ [API] Comunidades retornadas do CACHE:", cached.length, "itens");
-      return cached;
-    }
 
-    console.log("🌐 [API] Buscando comunidades no BANCO DE DADOS...");
-    
+    const cached = this.getCacheLegacy(cacheKey);
+    if (cached) return cached;
+
     try {
-      // 🛠️ TESTE 1: Buscar TODAS as comunidades (sem filtro ativo)
+      // BUG-002: filtro .eq("ativo", true) funciona corretamente — coluna é boolean no banco.
+      // O filtro JS abaixo é camada adicional de defesa, não workaround.
       const { data, error } = await _supabaseClient
         .from("comunidades")
         .select("*")
-        // .eq("ativo", true)  // ⚠️ COMENTADO TEMPORARIAMENTE PARA DEBUG
+        .eq("ativo", true)
         .order("nome", { ascending: true });
 
       if (error) {
-        console.error("❌ [API] Erro ao listar comunidades:", error);
-        console.error("📋 [API] Detalhes do erro:", {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        });
+        console.error("❌ [API] Erro ao listar comunidades:", error.message);
         return [];
       }
 
-      console.log("✅ [API] Comunidades retornadas do BANCO:", data?.length || 0, "itens");
-      console.log("📋 [API] Dados completos:", JSON.stringify(data, null, 2));
-      
-      // 🛠️ FILTRO MANUAL: Filtra apenas ativas no JavaScript (workaround RLS)
-      const comunidadesAtivas = data ? data.filter(c => {
-        // 🔧 APRIMORADO: Usa Boolean() para cobrir mais casos (true, "true", 1, "1", etc.)
-        const isAtivo = Boolean(c.ativo) && c.ativo !== "false" && c.ativo !== 0;
-        console.log(`  🔹 ${c.nome}: ativo=${c.ativo} (tipo: ${typeof c.ativo}) -> ${isAtivo ? "✅" : "❌"}`);
-        return isAtivo;
-      }) : [];
-      
-      console.log("✅ [API] Comunidades ATIVAS filtradas:", comunidadesAtivas.length, "itens");
-      
-      // 🚨 ALERTA se nenhuma comunidade foi encontrada
+      // Defesa extra: garante que apenas booleano true passa (normaliza edge cases)
+      const comunidadesAtivas = (data || []).filter(c => c.ativo === true);
+
       if (comunidadesAtivas.length === 0 && data && data.length > 0) {
-        console.warn("⚠️ [API] ATENÇÃO: Todas as comunidades estão marcadas como inativas!");
-        console.warn("📊 [API] Total no banco:", data.length, "| Ativas:", comunidadesAtivas.length);
+        console.warn("[API] Comunidades retornadas mas todas marcadas inativas");
       }
 
       this.setCache(cacheKey, comunidadesAtivas);
       return comunidadesAtivas;
-    } catch (error) {
-      console.error("❌ [API] Exceção ao listar comunidades:", error);
-      console.error("📋 [API] Stack trace:", error.stack);
+    } catch (err) {
+      console.error("❌ [API] Exceção ao listar comunidades:", err.message);
       return [];
     }
   },
@@ -535,8 +542,8 @@ window.api = {
       throw result.error;
     }
 
-    // Invalida cache
-    sessionStorage.removeItem("comunidades_list");
+    // Invalida cache (localStorage — mesma camada que setCache usa)
+    localStorage.removeItem("comunidades_list");
     console.log("✅ Comunidade salva com sucesso:", result.data);
     return result;
   },
@@ -573,8 +580,8 @@ window.api = {
       return result;
     }
 
-    // Invalida cache
-    sessionStorage.removeItem("comunidades_list");
+    // Invalida cache (localStorage — mesma camada que setCache usa)
+    localStorage.removeItem("comunidades_list");
     console.log("✅ Comunidade marcada como inativa:", id);
     return result;
   },
@@ -595,8 +602,8 @@ window.api = {
       return result;
     }
 
-    // Invalida cache
-    sessionStorage.removeItem("comunidades_list");
+    // Invalida cache (localStorage — mesma camada que setCache usa)
+    localStorage.removeItem("comunidades_list");
     console.log("✅ Comunidade reativada:", id);
     return result;
   },
@@ -703,15 +710,18 @@ window.api = {
       if (errScales) console.error("Erro ao salvar escalas:", errScales);
     }
 
-    // 3. NOVO: Invalida cache do mês modificado
+    // Invalida cache do mês modificado (localStorage, não sessionStorage)
     const data = new Date(eventoPayload.data);
     const ano = data.getFullYear();
     const mes = data.getMonth() + 1;
     const cacheKey = `eventos_${ano}_${mes}`;
-    sessionStorage.removeItem(cacheKey);
-    console.log(`🗑️ Cache invalidado após salvar: ${cacheKey}`);
+    localStorage.removeItem(cacheKey);
+    _log(`🗑️ Cache invalidado após salvar: ${cacheKey}`);
+
+    import('wordpress-sync.js').then(m => m.notificarWP('salvo', eventoId));
 
     return eventoId;
+    
   },
 
   // =============================

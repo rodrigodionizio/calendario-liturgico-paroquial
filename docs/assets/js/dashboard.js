@@ -18,6 +18,7 @@ window.DashboardController = {
   agendaAno: new Date().getFullYear(),
   agendaMes: new Date().getMonth() + 1,
   meuPerfil: null,
+  _tipoToggleLock: false, // BUG-003: evita race condition no toggle Celebrante/MEP
 
   // ==========================================================================
   // 1. INICIALIZAÇÃO
@@ -64,18 +65,13 @@ window.DashboardController = {
         if (menuUser) menuUser.style.display = "flex";
       }
 
-      // Cache de equipes para seletores
+      // RISCO-1: usar AppState como fonte centralizada — evita undefined se listarEquipes falhar
       const equipes = await window.api.listarEquipes();
-      window.api.cacheEquipesLeitura = equipes.filter(
-        (e) => e.tipo_atuacao !== "Canto",
-      );
-      window.api.cacheEquipesCanto = equipes.filter(
-        (e) => e.tipo_atuacao !== "Leitura",
-      );
-      // 🔧 FIX: MEP pode ter tipo_atuacao "MEP" ou "Ambos"
-      window.api.cacheEquipesMEP = equipes.filter(
-        (e) => e.tipo_atuacao === "MEP" || e.tipo_atuacao === "Ambos",
-      );
+      window.AppState.setEquipes(equipes);
+      // Retrocompatibilidade com código que ainda lê de window.api diretamente
+      window.api.cacheEquipesLeitura = window.AppState.equipes.leitura;
+      window.api.cacheEquipesCanto   = window.AppState.equipes.canto;
+      window.api.cacheEquipesMEP     = window.AppState.equipes.mep;
 
       // Carregar filtro de comunidades
       await this.carregarFiltroComunidadesUI();
@@ -670,6 +666,10 @@ window.DashboardController = {
 
   executarExclusao: async function (id, dataISO) {
     await window.api.client.from("eventos_base").delete().eq("id", id);
+    // BUG-004 / RISCO-2: invalidar ambas as camadas de cache
+    window.api.clearCache();                          // limpa eventos_* no localStorage
+    window.ModalController?.invalidarCache(dataISO); // limpa sessionStorage do modal
+    import('./wordpress-sync.js').then(m => m.notificarWP('excluido', id)); // fix: era 'eventoId' (undefined)
     this.abrirGerenciadorAgenda(dataISO);
     window.CalendarEngine.carregarERenderizar();
   },
@@ -769,6 +769,8 @@ window.DashboardController = {
       });
     }
     await window.api.salvarEventoCompleto(payload, escalas);
+    // BUG-004 / RISCO-2: garantir que o modal não mostre dados antigos após salvar
+    window.ModalController?.invalidarCache(dataISO);
 
     // Sincronização de Salvamento (Replicador)
     const checkRecorrencia = document.getElementById("check-recorrencia");
@@ -783,13 +785,13 @@ window.DashboardController = {
   },
 
   gerarLinhasEscalaEditor: function (escalas = [], tipoCelebracao = "missa") {
-    const eL = window.api.cacheEquipesLeitura || [];
-    const eC = window.api.cacheEquipesCanto || [];
-    const eM = window.api.cacheEquipesMEP || [];
-    
-    // 🔍 Debug: Verificar se há equipes MEP disponíveis
+    // RISCO-1: preferir AppState; fallback para compat com código legado
+    const eL = window.AppState?.equipes.leitura || window.api.cacheEquipesLeitura || [];
+    const eC = window.AppState?.equipes.canto   || window.api.cacheEquipesCanto   || [];
+    const eM = window.AppState?.equipes.mep     || window.api.cacheEquipesMEP     || [];
+
     if (tipoCelebracao === "celebracao_palavra" && eM.length === 0) {
-      console.warn("⚠️ Nenhuma equipe MEP encontrada no cache. Verifique o cadastro de equipes.");
+      console.warn("Nenhuma equipe MEP encontrada. Verifique o cadastro de equipes.");
     }
 
     const build = (l, s, placeholder = "Selecionar...") =>
@@ -877,11 +879,15 @@ window.DashboardController = {
   },
 
   atualizarCamposEscala: function () {
+    // BUG-003: lock evita re-render duplo se usuário alternar tipo rapidamente
+    if (this._tipoToggleLock) return;
+    this._tipoToggleLock = true;
+    setTimeout(() => { this._tipoToggleLock = false; }, 300);
+
     const tipoCelebracao =
       document.getElementById("edit-tipo-celebracao")?.value || "missa";
     const container = document.getElementById("lista-escalas-editor");
 
-    // 🆕 Atualiza o hint explicativo
     const hintElement = document.getElementById("tipo-celebracao-hint");
     if (hintElement) {
       if (tipoCelebracao === "missa") {
