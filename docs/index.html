@@ -378,10 +378,9 @@
     <table class="print-table">
       <thead>
         <tr>
-          <th width="12%">Data</th>
-          <th width="10%">Hora</th>
-          <th width="40%">Evento / Liturgia</th>
-          <th width="38%">Detalhes / Equipes</th>
+          <th width="11%">Data</th>
+          <th width="44%">Evento / Liturgia</th>
+          <th width="45%">Detalhes / Equipes</th>
         </tr>
       </thead>
       <tbody id="print-table-body">
@@ -389,9 +388,17 @@
       </tbody>
     </table>
 
+    <div id="print-legend" class="print-legend">
+      <span class="print-legend__label">Cores litúrgicas:</span>
+      <span class="print-legend__item" style="background:#e8f5e9;color:#1b5e20;border-left:3px solid #2e7d32;">Verde – Tempo Comum</span>
+      <span class="print-legend__item" style="background:#ede7f6;color:#4a148c;border-left:3px solid #6a1b9a;">Roxo – Advento / Quaresma</span>
+      <span class="print-legend__item" style="background:#fff8dc;color:#7a5a00;border-left:3px solid #bfa15f;">Dourado – Solenidades / Domingos</span>
+      <span class="print-legend__item" style="background:#ffebee;color:#7b1526;border-left:3px solid #c62828;">Vermelho – Pentecostes</span>
+      <span class="print-legend__item" style="background:#fce4ec;color:#880e4f;border-left:3px solid #d81b60;">Rosa – Gaudete / Laetare</span>
+    </div>
+
     <footer class="print-footer">
-      <span>Gerado pelo Sistema Sacristia Digital • Paróquia Senhor Bom
-        Jesus</span>
+      <span>Gerado pelo Sistema Sacristia Digital • Paróquia Senhor Bom Jesus</span>
       <span id="print-footer-date"></span>
     </footer>
   </div>

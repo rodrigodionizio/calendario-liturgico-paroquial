@@ -1699,7 +1699,7 @@ window.gerarRelatorio = async function (tipo) {
 
     if (eventos.length === 0) {
       tbody.innerHTML =
-        '<tr><td colspan="4" style="text-align:center; padding:20px;">Nenhum evento encontrado neste período.</td></tr>';
+        '<tr><td colspan="3" style="text-align:center; padding:20px; font-style:italic; color:#666;">Nenhum evento encontrado neste período.</td></tr>';
     } else {
       let mesAtualProcessamento = -1;
 
@@ -1715,10 +1715,7 @@ window.gerarRelatorio = async function (tipo) {
           const anoSep = dataObj.getFullYear();
 
           const trSep = document.createElement("tr");
-          trSep.innerHTML = `
-                    <td colspan="4" style="background-color:#eee; color:#333; font-weight:bold; text-transform:uppercase; font-size:0.9rem; padding:8px 10px; border-bottom:2px solid #ccc;">
-                        ${nomeMesSep} DE ${anoSep}
-                    </td>`;
+          trSep.innerHTML = `<td colspan="3" class="print-mes-separator">${nomeMesSep} DE ${anoSep}</td>`;
           tbody.appendChild(trSep);
           mesAtualProcessamento = mesEv;
         }
@@ -1741,7 +1738,11 @@ window.gerarRelatorio = async function (tipo) {
             classeCategoria = "cat-festa";
             break;
           default: // Liturgia
-            if (isDomingo || isSolenidade) classeCategoria = "row-domingo";
+            if (isDomingo || isSolenidade) {
+              classeCategoria = "row-domingo";
+            } else {
+              classeCategoria = _classeTempoLiturgico(ev.liturgia_cores?.hex_code, ev.tempo_liturgico);
+            }
         }
 
         // Gera o HTML da linha
@@ -1770,7 +1771,42 @@ window.gerarRelatorio = async function (tipo) {
 };
 
 /**
- * Gera o HTML de uma linha da tabela de impressão
+ * Mapeia tempo litúrgico para a classe CSS de faixa lateral da linha.
+ * Retorna "" para tempos em branco (Pascal, Natal) que ficam sem faixa colorida.
+ */
+function _classeTempoLiturgico(hexCode, tempoLiturgico) {
+  const t = (tempoLiturgico || "").toLowerCase();
+  if (t.includes("quaresma") || t.includes("advento") || t.includes("semana santa") || t.includes("tríduo")) return "row-liturgia-roxo";
+  if (t.includes("pentecost") || t.includes("ramos") || t.includes("paixão")) return "row-liturgia-vermelho";
+  if (t.includes("rosa") || t.includes("gaudete") || t.includes("laetare")) return "row-liturgia-rosa";
+  if (t.includes("pascal") || t.includes("natal") || t.includes("epifan") || t.includes("batismo")) return "";
+  if (t === "paroquial" || !t || t === "liturgia") return "row-liturgia-verde";
+  return "row-liturgia-verde";
+}
+
+/**
+ * Gera badge inline com nome e cor semântica do tempo litúrgico.
+ */
+function _badgeTempoLiturgico(tempoTxt) {
+  const t = (tempoTxt || "").toLowerCase();
+  let bg, cor, border;
+  if (t.includes("quaresma") || t.includes("advento") || t.includes("semana santa") || t.includes("tríduo")) {
+    bg = "#ede7f6"; cor = "#4a148c"; border = "#6a1b9a";
+  } else if (t.includes("pentecost") || t.includes("ramos") || t.includes("paixão")) {
+    bg = "#ffebee"; cor = "#7b1526"; border = "#c62828";
+  } else if (t.includes("rosa") || t.includes("gaudete") || t.includes("laetare")) {
+    bg = "#fce4ec"; cor = "#880e4f"; border = "#d81b60";
+  } else if (t.includes("pascal") || t.includes("natal") || t.includes("epifan") || t.includes("batismo")) {
+    bg = "#fff8dc"; cor = "#7a5a00"; border = "#bfa15f";
+  } else {
+    bg = "#e8f5e9"; cor = "#1b5e20"; border = "#2e7d32";
+  }
+  return `<span style="display:inline-block;background:${bg};color:${cor};border-left:3px solid ${border};font-size:7pt;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;padding:2px 7px;margin-top:4px;">${window.api.escapeHtml(tempoTxt)}</span>`;
+}
+
+/**
+ * Gera o HTML de uma linha da tabela de impressão (3 colunas: Data | Evento | Escalas).
+ * Ativa a cor litúrgica do número do dia, badge de tempo litúrgico e badges de horário estilizados.
  */
 function gerarHTMLLinhaImpressao(evento) {
   if (!evento.titulo) return "";
@@ -1782,6 +1818,30 @@ function gerarHTMLLinhaImpressao(evento) {
     .toUpperCase()
     .replace(".", "");
 
+  // Cor do número da data: usa hex litúrgico quando disponível
+  let corDia = "#a41d31";
+  if (evento.tipo_compromisso !== "liturgia") {
+    corDia = "#444";
+  } else if (evento.liturgia_cores?.hex_code) {
+    const hex = evento.liturgia_cores.hex_code.toLowerCase();
+    corDia = (hex === "#ffffff" || hex === "#f5f5f5") ? "#a41d31" : evento.liturgia_cores.hex_code;
+  }
+
+  // Badge de tempo litúrgico com cor semântica
+  const tempoTxt = evento.tempo_liturgico || evento.tipo_compromisso || "";
+  const badgeTempo = _badgeTempoLiturgico(tempoTxt);
+
+  // Badge de comunidade — fundo sólido (rgba desaparece na impressão)
+  let badgeComunidade = "";
+  if (evento.comunidade_id) {
+    const comunidade = evento.comunidade || ESTADO.listaComunidades.find(c => c.id === evento.comunidade_id);
+    if (comunidade) {
+      const nome = window.api.escapeHtml(comunidade?.nome || "Comunidade");
+      badgeComunidade = ` <span style="display:inline-block;background:#fff3cd;color:#856404;border:1px solid #fbb558;padding:1px 7px;border-radius:3px;font-size:7.5pt;font-weight:700;margin-left:5px;">${nome}</span>`;
+    }
+  }
+
+  // Bloco de escalas / horários
   let htmlEscalas = "";
 
   if (
@@ -1791,67 +1851,42 @@ function gerarHTMLLinhaImpressao(evento) {
   ) {
     evento.escalas.forEach((esc) => {
       const hora = esc.hora_celebracao.substring(0, 5);
-      const leit = esc.equipe_leitura?.nome_equipe || "-";
-      const cant = esc.equipe_canto?.nome_equipe || "-";
+      const leit = window.api.escapeHtml(esc.equipe_leitura?.nome_equipe || "–");
+      const cant = window.api.escapeHtml(esc.equipe_canto?.nome_equipe || "–");
 
-      let detalhesExtra = `📖 ${leit} &nbsp; 🎵 ${cant}`;
+      let linhaEquipes = `<b style="color:#1b5e20;">Leit.</b> ${leit} &nbsp; <b style="color:#a41d31;">Canto</b> ${cant}`;
 
       if (evento.tipo_celebracao === "missa" && esc.celebrante_nome) {
-        detalhesExtra += `<br><small>🐑 <b>Celebrante:</b> ${esc.celebrante_nome}</small>`;
-      } else if (
-        evento.tipo_celebracao === "celebracao_palavra" &&
-        esc.equipe_mep
-      ) {
-        detalhesExtra += `<br><small>📜 <b>Presidência:</b> ${esc.equipe_mep.nome_equipe}</small>`;
+        linhaEquipes += `<br><span style="color:#555;font-size:8pt;">Celebrante: ${window.api.escapeHtml(esc.celebrante_nome)}</span>`;
+      } else if (evento.tipo_celebracao === "celebracao_palavra" && esc.equipe_mep) {
+        linhaEquipes += `<br><span style="color:#555;font-size:8pt;">Presidência: ${window.api.escapeHtml(esc.equipe_mep.nome_equipe)}</span>`;
       }
 
       if (esc.lista_mesce && esc.lista_mesce.length > 0) {
-        detalhesExtra += `<br><small>✨ <b>MESCE:</b> ${esc.lista_mesce.join(", ")}</small>`;
+        linhaEquipes += `<br><span style="color:#7a5a00;font-size:8pt;"><b>MESCE:</b> ${esc.lista_mesce.map(n => window.api.escapeHtml(n)).join(", ")}</span>`;
       }
 
       if (esc.lista_coroinhas && esc.lista_coroinhas.length > 0) {
-        detalhesExtra += `<br><small>🕯️ <b>Coroinhas:</b> ${esc.lista_coroinhas.join(", ")}</small>`;
+        linhaEquipes += `<br><span style="color:#555;font-size:8pt;"><b>Coroinhas:</b> ${esc.lista_coroinhas.map(n => window.api.escapeHtml(n)).join(", ")}</span>`;
       }
 
       htmlEscalas += `
-            <div class="print-escala-row" style="margin-bottom: 5px;">
+            <div class="print-escala-row" style="margin-bottom:6px;display:flex;align-items:flex-start;gap:7px;">
                 <span class="print-hora">${hora}</span>
-                <span class="print-equipes">${detalhesExtra}</span>
+                <span class="print-equipes">${linhaEquipes}</span>
             </div>`;
     });
   } else {
-    // Evento Comum / Reunião
     const hora = evento.hora_inicio
       ? evento.hora_inicio.substring(0, 5)
       : "--:--";
-    const local = evento.local ? `(${evento.local})` : "";
+    const local = evento.local ? window.api.escapeHtml(evento.local) : "";
 
     htmlEscalas = `
-        <div class="print-escala-row">
+        <div class="print-escala-row" style="display:flex;align-items:flex-start;gap:7px;">
             <span class="print-hora">${hora}</span>
-            <span class="print-equipes">${local}</span>
+            <span class="print-equipes" style="color:#555;">${local}</span>
         </div>`;
-  }
-
-  // Cor Litúrgica para o nome do dia (Visual Detail)
-  let corDia = "#a41d31"; // Default Vinho
-  // Se quiser usar a cor litúrgica no dia, descomente abaixo:
-  // if (evento.liturgia_cores?.hex_code) corDia = evento.liturgia_cores.hex_code;
-
-  // 🏛️ Identificação de Comunidade no Relatório (SEMPRE exibir)
-  let badgeComunidade = "";
-  if (evento.comunidade_id) {
-    // 🔧 PRIORIZA dados da API (evento.comunidade) ao invés de buscar na lista local
-    const comunidade = evento.comunidade || ESTADO.listaComunidades.find(c => c.id === evento.comunidade_id);
-    
-    if (comunidade) {
-      // 🛡️ Proteção contra undefined com optional chaining e fallback
-      const nomeComunidade = comunidade?.nome || 'Comunidade';
-      badgeComunidade = ` <span style="display:inline-block; background: rgba(251,181,88,0.2); color: #a67c00; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-left: 6px;">🏛️ ${nomeComunidade}</span>`;
-      console.log("✅ Badge impressão para:", nomeComunidade);
-    } else {
-      console.warn("⚠️ Comunidade não encontrada no relatório:", evento.comunidade_id);
-    }
   }
 
   return `
@@ -1860,15 +1895,9 @@ function gerarHTMLLinhaImpressao(evento) {
             <span class="dia-grande" style="color:${corDia}">${diaNum}</span>
             <span class="dia-sem">${diaSem}</span>
         </td>
-        <td style="vertical-align:top; padding-top:12px; font-weight:bold; color:#555;">
-             <!-- A hora é exibida na coluna de detalhes para alinhar com escalas, 
-                  mas se nao tiver escalas multiplas, poderia ser aqui. 
-                  Mantendo vazio ou ícone para limpeza visual -->
-             ${evento.tipo_compromisso === "liturgia" ? "✝️" : "📅"}
-        </td>
-        <td>
-            <div class="print-titulo">${evento.titulo}${badgeComunidade}</div>
-            <div class="print-liturgia">${evento.tempo_liturgico || evento.tipo_compromisso}</div>
+        <td style="vertical-align:top;padding-top:10px;">
+            <div class="print-titulo">${window.api.escapeHtml(evento.titulo)}${badgeComunidade}</div>
+            ${badgeTempo}
         </td>
         <td>
             ${htmlEscalas}

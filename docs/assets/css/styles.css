@@ -1736,28 +1736,53 @@ header {
     font-weight: 900 !important;
   }
 
-  /* --- NOVOS DESTAQUES POR CATEGORIA (Padre, Reunião, Festa) --- */
+  /* --- DESTAQUES POR CATEGORIA (fundos sólidos — rgba de baixa opacidade desaparece na impressão) --- */
   .cat-padre {
-    background-color: rgba(164, 29, 49, 0.05) !important;
-    /* Vinho bem suave */
-    border-left: 6px solid var(--cor-vinho) !important;
-    /* Borda Vinho de Hierarquia */
+    background-color: #fef6f7 !important;
+    border-left: 6px solid #a41d31 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
   .cat-reuniao {
-    background-color: rgba(0, 0, 0, 0.03) !important;
-    /* Cinza claro */
-    border-left: 6px solid #666 !important;
+    background-color: #f4f6f8 !important;
+    border-left: 6px solid #607d8b !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
   .cat-festa {
-    background-color: rgba(251, 181, 88, 0.1) !important;
-    /* Dourado suave */
+    background-color: #fffbf0 !important;
     border-left: 6px solid var(--cor-dourado) !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Faixas laterais coloridas por tempo litúrgico (missas feriais) */
+  .row-liturgia-verde {
+    background-color: #f0f7f1 !important;
+    border-left: 6px solid #2e7d32 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .row-liturgia-roxo {
+    background-color: #f5f0fa !important;
+    border-left: 6px solid #6a1b9a !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .row-liturgia-vermelho {
+    background-color: #fff0f0 !important;
+    border-left: 6px solid #c62828 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .row-liturgia-rosa {
+    background-color: #fce4ec !important;
+    border-left: 6px solid #d81b60 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
@@ -1832,15 +1857,45 @@ header {
 
   .print-escala-value {
     font-weight: 600 !important;
-    color: var(--text-main) !important;
+    color: #222 !important;
     font-size: 10.5pt !important;
   }
 
-  /* 7. RODAPÉ DO PAPEL */
+  /* Badge de horário de cada celebração */
+  .print-hora {
+    display: inline-block !important;
+    background: #a41d31 !important;
+    color: #ffffff !important;
+    font-size: 7.5pt !important;
+    font-weight: 700 !important;
+    padding: 2px 7px !important;
+    border-radius: 3px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Variantes de cor do badge por categoria de linha */
+  .cat-reuniao .print-hora {
+    background: #607d8b !important;
+  }
+
+  .cat-festa .print-hora {
+    background: #7a5a00 !important;
+  }
+
+  /* Texto de equipes ao lado do badge de horário */
+  .print-equipes {
+    font-size: 9pt !important;
+    line-height: 1.5 !important;
+    color: #333 !important;
+    flex: 1 !important;
+  }
+
+  /* 7. RODAPÉ DO PAPEL — usa fluxo normal para não sobrepor conteúdo em multi-páginas */
   .print-footer {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
+    margin-top: 24pt !important;
     border-top: 1px solid #ccc !important;
     padding: 10px 0 !important;
     font-size: 8pt !important;
@@ -1849,7 +1904,47 @@ header {
     justify-content: space-between !important;
   }
 
-  /* Força cada mês a começar em folha nova */
+  /* Separador de mês em relatórios multi-mês (trimestre / ano) */
+  .print-mes-separator {
+    background-color: #a41d31 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    font-size: 8pt !important;
+    letter-spacing: 1px !important;
+    padding: 7px 10px !important;
+    border-top: 10px solid white !important;
+    border-bottom: 3px solid #fbb558 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Legenda de cores litúrgicas no final do relatório */
+  .print-legend {
+    margin-top: 14pt !important;
+    padding-top: 8pt !important;
+    border-top: 1px solid #e0e0e0 !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    align-items: center !important;
+  }
+
+  .print-legend__label {
+    font-size: 7pt !important;
+    color: #777 !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+  }
+
+  .print-legend__item {
+    font-size: 7pt !important;
+    font-weight: 600 !important;
+    padding: 2px 7px !important;
+  }
+
+  /* Evita quebra de linha no meio de um evento */
   tr {
     page-break-inside: avoid;
   }
@@ -2336,7 +2431,7 @@ select:disabled {
     --text-main: #e0e0e0;
     --cor-fundo: #1a1a1a;
   }
-}
+
 
 /* ==========================================================================
    14. PWA SYNC STATUS - Indicadores de Sincronização
