@@ -4,15 +4,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
+
   <!-- SEO Básico -->
   <title>Calendário Litúrgico 2026 | Paróquia Senhor Bom Jesus - Itabirinha MG</title>
   <meta name="description" content="Acompanhe o calendário litúrgico, horários de missas, eventos e escalas da Paróquia Senhor Bom Jesus em Itabirinha, Minas Gerais. Sistema digital de gestão pastoral." />
   <meta name="keywords" content="paróquia, igreja católica, itabirinha, minas gerais, calendário litúrgico, horário de missa, eventos paroquiais, sacristia digital" />
   <meta name="author" content="Rodrigo Dionízio" />
   <link rel="canonical" href="https://rodrigodionizio.github.io/calendario-liturgico-paroquial/" />
-  
-  <!-- Open Graph / Facebook -->
+
+  <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://rodrigodionizio.github.io/calendario-liturgico-paroquial/" />
   <meta property="og:title" content="Paróquia Senhor Bom Jesus - Itabirinha MG" />
@@ -22,15 +22,15 @@
   <meta property="og:image:height" content="630" />
   <meta property="og:locale" content="pt_BR" />
   <meta property="og:site_name" content="Paróquia Senhor Bom Jesus" />
-  
+
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:url" content="https://rodrigodionizio.github.io/calendario-liturgico-paroquial/" />
   <meta name="twitter:title" content="Paróquia Senhor Bom Jesus - Itabirinha MG" />
   <meta name="twitter:description" content="Sistema digital de gestão pastoral com calendário litúrgico, escalas e eventos paroquiais." />
   <meta name="twitter:image" content="https://rodrigodionizio.github.io/calendario-liturgico-paroquial/assets/img/og-image.jpg" />
-  
-  <!-- Schema.org Markup para SEO -->
+
+  <!-- Schema.org -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -58,372 +58,304 @@
   }
   </script>
 
-  <!-- Preconnect para Performance -->
+  <!-- Preconnect -->
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
   <link rel="preconnect" href="https://gmfmebnodmtozpzhlgvk.supabase.co" crossorigin />
 
-  <!-- Supabase JS (CDN) -->
+  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Estilos CSS (Design System e Layout) -->
+  <!-- Estilos -->
   <link rel="stylesheet" href="assets/css/styles.css" />
-  <link rel="stylesheet" href="assets/css/badge-comunidades.css" />
 
-  <!-- Favicon Padrão -->
+  <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
-  <!-- Favicon em Alta Resolução -->
   <link rel="icon" type="image/png" href="assets/img/favicon.ico" />
-  
-  <!-- Configurações para PWA Mobile -->
+
+  <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#a41d31" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Sacristia" />
-
-  <!-- Ícones para iPhone/iOS -->
   <link rel="apple-touch-icon" href="assets/img/icon-192.png" />
   <link rel="apple-touch-icon" sizes="152x152" href="assets/img/icon-152.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="assets/img/icon-180.png" />
   <link rel="apple-touch-icon" sizes="167x167" href="assets/img/icon-167.png" />
 
-  <!-- Script de Registro do Service Worker com Detecção de Update -->
+  <!-- Service Worker -->
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        // Verifica se está rodando via HTTP/HTTPS (não file://)
-        if (location.protocol === 'http:' || location.protocol === 'https:') {
-          navigator.serviceWorker
-            .register("./sw.js")
-            .then((reg) => {
-              console.log("✅ PWA: Service Worker Ativo!", reg.scope);
-              
-              // Detecta quando há uma nova versão disponível
-              reg.addEventListener('updatefound', () => {
-                const newWorker = reg.installing;
-                console.log("🔄 PWA: Nova versão detectada, baixando...");
-                
-                newWorker.addEventListener('statechange', () => {
-                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                    // Nova versão pronta - mostra toast
-                    window.dispatchEvent(new CustomEvent('sacristia:swUpdate', { 
-                      detail: { registration: reg } 
-                    }));
+        if (location.protocol === "http:" || location.protocol === "https:") {
+          navigator.serviceWorker.register("./sw.js")
+            .then(reg => {
+              reg.addEventListener("updatefound", () => {
+                const nw = reg.installing;
+                nw.addEventListener("statechange", () => {
+                  if (nw.state === "installed" && navigator.serviceWorker.controller) {
+                    window.dispatchEvent(new CustomEvent("sacristia:swUpdate", { detail: { registration: reg } }));
                   }
                 });
               });
-              
-              // Verifica se já tem uma versão esperando
               if (reg.waiting) {
-                window.dispatchEvent(new CustomEvent('sacristia:swUpdate', { 
-                  detail: { registration: reg } 
-                }));
+                window.dispatchEvent(new CustomEvent("sacristia:swUpdate", { detail: { registration: reg } }));
               }
             })
-            .catch((err) => console.error("❌ PWA: Erro no registro", err));
-          
-          // Recarrega quando o SW assumir controle (após update)
+            .catch(err => console.error("PWA: Erro no registro", err));
           let refreshing = false;
-          navigator.serviceWorker.addEventListener('controllerchange', () => {
-            if (!refreshing) {
-              refreshing = true;
-              console.log("🚀 PWA: Nova versão ativa - recarregando...");
-              window.location.reload();
-            }
+          navigator.serviceWorker.addEventListener("controllerchange", () => {
+            if (!refreshing) { refreshing = true; window.location.reload(); }
           });
-        } else {
-          console.log("⚠️ PWA: Service Worker desabilitado (ambiente local)");
         }
       });
     }
   </script>
-  
-  <!-- Lucide Icons (para ícones do mural e sistema) -->
-  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body>
-  <!-- ==========================================================================
-         CABEÇALHO (HEADER)
-         Contém a Logo Principal e Botão de Login/Logout (via JS)
-    ========================================================================== -->
-  <header>
-    <!-- BOTÃO MENU MOBILE (Só aparece no celular) -->
-    <button id="btn-mobile-menu" onclick="toggleSidebarMobile()" aria-label="Abrir Menu">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="3" y1="12" x2="21" y2="12"></line>
-        <line x1="3" y1="6" x2="21" y2="6"></line>
-        <line x1="3" y1="18" x2="21" y2="18"></line>
+
+<!-- ARIA announcer para leitores de tela -->
+<div id="aria-announcer" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+<!-- ============================================================
+     CABEÇALHO
+============================================================ -->
+<header class="sd-header" data-print-hide="true">
+  <div class="sd-header-inner header-inner">
+    <img src="assets/img/logo-horizontal-negativa.png" alt="Paróquia Senhor Bom Jesus" class="sd-header-logo" />
+    <div class="sd-header-actions">
+      <a href="admin.html" class="sd-btn-admin" title="Acesso Administrativo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        Admin
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================================
+     BARRA DO MÊS (sticky)
+============================================================ -->
+<div class="sd-month-bar" data-print-hide="true">
+  <div class="sd-month-bar-inner">
+    <!-- Navegação -->
+    <div class="sd-month-nav" role="group" aria-label="Navegação do calendário">
+      <button id="sd-btn-ant" class="sd-btn-nav" aria-label="Mês anterior">&#8249;</button>
+      <span id="sd-month-title" class="sd-month-title">Carregando…</span>
+      <button id="sd-btn-prox" class="sd-btn-nav" aria-label="Próximo mês">&#8250;</button>
+      <button id="sd-btn-hoje" class="sd-btn-hoje" aria-label="Ir para hoje">HOJE</button>
+    </div>
+
+    <div class="sd-bar-spacer"></div>
+
+    <!-- Filtro de comunidade -->
+    <select id="sd-community-select" class="sd-community-select" aria-label="Filtrar por comunidade">
+      <option value="">📍 Todas as Comunidades</option>
+      <option value="matriz">⛪ Matriz</option>
+    </select>
+
+    <!-- Toggle de vista -->
+    <div class="sd-vista-group" role="group" aria-label="Modo de visualização">
+      <button id="sd-btn-grade"  class="sd-btn-vista" aria-pressed="false">GRADE</button>
+      <button id="sd-btn-agenda" class="sd-btn-vista" aria-pressed="false">AGENDA</button>
+    </div>
+
+    <!-- Botão impressão -->
+    <button id="sd-btn-imprimir" class="sd-btn-imprimir" aria-label="Imprimir escalas do mês" data-print-hide="true" title="Imprimir escalas">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M6 9V2h12v7"></path>
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+        <rect x="6" y="14" width="12" height="8"></rect>
       </svg>
     </button>
-    <div class="header-logo-container">
-      <!-- Logo Horizontal Negativa (Branca sobre Vinho) -->
-      <img src="assets/img/logo-horizontal-negativa.png" alt="Paróquia Senhor Bom Jesus" class="header-logo-img" />
+  </div>
+
+  <!-- Chips de equipes -->
+  <div id="sd-chips-bar" class="sd-chips-bar" role="group" aria-label="Filtrar por equipe">
+    <span class="sd-chips-label">Equipes</span>
+    <button class="sd-chip sd-ativo" aria-pressed="true">Todas</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     VISTA: GRADE
+============================================================ -->
+<div id="sd-grade-wrap" class="sd-grade-wrap">
+  <div id="sd-grade" class="sd-grade">
+    <!-- Cabeçalhos dos dias -->
+    <div class="sd-day-header">Dom</div>
+    <div class="sd-day-header">Seg</div>
+    <div class="sd-day-header">Ter</div>
+    <div class="sd-day-header">Qua</div>
+    <div class="sd-day-header">Qui</div>
+    <div class="sd-day-header">Sex</div>
+    <div class="sd-day-header">Sáb</div>
+    <!-- Células injetadas pelo JS -->
+  </div>
+  <p id="sd-grade-legenda" class="sd-legenda" aria-hidden="true"></p>
+</div>
+
+<!-- ============================================================
+     VISTA: AGENDA
+============================================================ -->
+<div id="sd-agenda-wrap" class="sd-agenda-wrap" style="display:none;">
+  <p class="sd-agenda-vazia">Carregando compromissos…</p>
+</div>
+
+<!-- ============================================================
+     MURAL DE AVISOS
+============================================================ -->
+<section id="sd-mural-wrap" class="sd-mural-wrap" data-screen-label="Mural paroquial">
+  <div class="sd-mural-header">
+    <h2 class="sd-mural-title">Mural Paroquial</h2>
+    <span id="sd-mural-count" class="sd-mural-count">0</span>
+  </div>
+  <div id="sd-mural-grid" class="sd-mural-grid"></div>
+</section>
+
+<!-- ============================================================
+     RODAPÉ
+============================================================ -->
+<footer class="sd-footer">
+  <div class="sd-footer-inner">
+    <div style="display:flex;flex-direction:column;gap:var(--space-2);">
+      <img src="assets/img/logo-horizontal-negativa.png" alt="Paróquia Senhor Bom Jesus" class="sd-footer-logo" />
+      <p class="sd-footer-subtitle">Itabirinha / MG</p>
+    </div>
+    <div>
+      <h4 class="sd-footer-heading">Informações</h4>
+      <p class="sd-footer-p"><strong>Pároco:</strong> Pe. Hugo Damião Leal</p>
+      <p class="sd-footer-p">Diocese de Teófilo Otoni</p>
+      <p class="sd-footer-destaque">Atendimento Paroquial<br><span>Todas as quartas-feiras</span></p>
+    </div>
+    <div>
+      <h4 class="sd-footer-heading">Fale Conosco</h4>
+      <a href="https://wa.me/553399428407" target="_blank" rel="noopener" class="sd-btn-whatsapp">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+        (33) 9942-8407
+      </a>
+      <div class="sd-social">
+        <a href="https://www.instagram.com/bomjesusdeitabirinha/" target="_blank" rel="noopener" aria-label="Instagram">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.85-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        </a>
+        <a href="https://www.youtube.com/@pascomdabomjesusitabirinha" target="_blank" rel="noopener" aria-label="YouTube">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+  <p class="sd-footer-copy">© 2026 Paróquia Senhor Bom Jesus — Itabirinha/MG</p>
+</footer>
+
+<!-- ============================================================
+     MODAL DE DETALHES DO DIA
+============================================================ -->
+<div id="sd-modal-overlay" class="sd-modal-overlay sd-hidden"
+     role="dialog" aria-modal="true" aria-label="Detalhes do dia" aria-hidden="true">
+  <div class="sd-modal-panel">
+    <div id="sd-modal-stripe" class="sd-modal-stripe" aria-hidden="true"></div>
+    <div class="sd-modal-content">
+      <button id="sd-modal-close" class="sd-modal-close" aria-label="Fechar detalhes">×</button>
+      <div class="sd-modal-date-row">
+        <span id="sd-modal-day-num" class="sd-modal-day-num"></span>
+        <div class="sd-modal-date-info">
+          <span id="sd-modal-month"   class="sd-modal-month"></span>
+          <span id="sd-modal-weekday" class="sd-modal-weekday"></span>
+        </div>
+      </div>
+      <!-- Eventos do dia (injetados pelo JS) -->
+      <div id="sd-modal-body"></div>
+      <!-- Adicionar ao calendário -->
+      <div class="sd-modal-cal-actions">
+        <p class="sd-modal-cal-title">Adicionar ao meu calendário</p>
+        <div class="sd-modal-cal-btns">
+          <button id="sd-btn-google" class="sd-btn-cal">📅 Google Agenda</button>
+          <button id="sd-btn-ics"    class="sd-btn-cal">🍎 iPhone / Outlook (.ics)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL DE IMPRESSÃO
+============================================================ -->
+<div id="sd-print-modal-overlay" class="sd-print-modal-overlay sd-hidden" role="dialog" aria-modal="true" aria-label="Opções de impressão">
+  <div class="sd-print-modal">
+    <h3>Imprimir Escalas</h3>
+    <div class="sd-print-opt-list">
+      <button class="sd-print-opt" onclick="window.gerarRelatorio('mes_atual')">
+        <span>📄</span>
+        <div><strong>Mês atual</strong><br><small style="color:var(--text-muted)">Gera o relatório do mês em exibição</small></div>
+      </button>
+      <button class="sd-print-opt" onclick="window.gerarRelatorio('trimestre')">
+        <span>📋</span>
+        <div><strong>Próximos 3 meses</strong><br><small style="color:var(--text-muted)">Relatório trimestral a partir do mês atual</small></div>
+      </button>
+      <button class="sd-print-opt" onclick="window.gerarRelatorio('ano_completo')">
+        <span>📚</span>
+        <div><strong>Ano litúrgico completo</strong><br><small style="color:var(--text-muted)">Gera o relatório de todo o ano</small></div>
+      </button>
+    </div>
+    <button id="sd-print-cancel" class="sd-print-cancel">Cancelar</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     ÁREA DE IMPRESSÃO (RELATÓRIO PDF — OCULTA NA TELA)
+============================================================ -->
+<div id="relatorio-impressao" class="print-only">
+  <header class="print-header">
+    <div class="print-header__logo">
+      <img src="assets/img/logo_paroquia_torre.png" alt="Logo" class="print-logo-circ" />
+    </div>
+    <div class="print-header__info">
+      <h1 class="print-header__title">Paróquia Senhor Bom Jesus</h1>
+      <h2 class="print-header__subtitle">Agenda Pastoral &amp; Litúrgica</h2>
+    </div>
+    <div class="print-header__period">
+      <h3 id="print-month-name" class="print-header__month">JANEIRO</h3>
+      <span id="print-year-val" class="print-header__year">2026</span>
     </div>
   </header>
 
-  <!-- ==========================================================================
-         LAYOUT PRINCIPAL (SIDEBAR + CONTEÚDO)
-         Estrutura Flexbox: Sidebar Fixa (Desktop) + Main Scrollável
-    ========================================================================== -->
-  <div class="app-layout">
-    <!-- SIDEBAR: FILTROS E NAVEGAÇÃO SECUNDÁRIA -->
-    <aside class="sidebar">
-      <!-- Botão de Impressão (Estilo Oficial) -->
-      <div class="filter-group" style="margin-top: 20px">
-        <button onclick="abrirOpcoesImpressao()" style="
-              width: 100%;
-              padding: 12px;
-              background-color: var(--cor-vinho);
-              color: #fff;
-              border: none;
-              border-radius: 8px;
-              cursor: pointer;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              gap: 10px;
-              font-family: 'AntennaCond', sans-serif;
-              font-weight: bold;
-              font-size: 1rem;
-              box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-              transition: transform 0.2s;
-            " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-          <!-- Ícone Impressora SVG -->
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 6 2 18 2 18 9"></polyline>
-            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-            <rect x="6" y="14" width="12" height="8"></rect>
-          </svg>
-          IMPRIMIR ESCALA
-        </button>
-      </div>
+  <table class="print-table">
+    <thead>
+      <tr>
+        <th width="11%">Data</th>
+        <th width="44%">Evento / Liturgia</th>
+        <th width="45%">Detalhes / Equipes</th>
+      </tr>
+    </thead>
+    <tbody id="print-table-body"></tbody>
+  </table>
 
-      <!-- ÁREA DINÂMICA DE FILTROS (EQUIPES) -->
-      <!-- O JS busca no banco e injeta os checkboxes aqui -->
-      <div class="filter-group" id="filtro-equipes">
-        <h3>Carregando Equipes...</h3>
-      </div>
-
-      
-    </aside>
-
-    <!-- ÁREA DE CONTEÚDO (COM SCROLL PRÓPRIO) -->
-    <main class="main-content">
-      <div class="scroll-wrapper">
-        <!-- NAVEGAÇÃO DO MÊS (Header Interno) -->
-        <div class="month-header">
-          <h1 class="month-name">Carregando...</h1>
-          
-          <!-- Filtro de Comunidades -->
-          <div id="public-community-filter-wrapper" style="display: flex; align-items: center; gap: 12px;">
-            <label for="public-community-filter" style="font-size: 0.95rem; font-weight: 600; color: var(--cor-vinho); white-space: nowrap;">
-              <i data-lucide="map-pin" style="width: 16px; height: 16px; vertical-align: middle; margin-right: 4px;"></i>
-              Local:
-            </label>
-            <select 
-              id="public-community-filter" 
-              class="sds-select"
-              onchange="filtrarPorComunidade(this.value)"
-              style="
-                min-width: 180px;
-                max-width: 280px;
-                padding: 8px 32px 8px 12px;
-                border: 2px solid #e5e7eb;
-                border-radius: 8px;
-                font-size: 0.95rem;
-                font-weight: 500;
-                background-color: white;
-                background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg width=%2714%27 height=%278%27 viewBox=%270 0 14 8%27 fill=%27none%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M1 1l6 6 6-6%27 stroke=%27%23a41d31%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3e%3c/svg%3e');
-                background-repeat: no-repeat;
-                background-position: right 10px center;
-                cursor: pointer;
-                transition: all 0.2s;
-                appearance: none;
-              "
-              onfocus="this.style.borderColor='#fbb558'; this.style.boxShadow='0 0 0 3px rgba(251,181,88,0.1)'"
-              onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'"
-            >
-              <option value="">📍 Todas as Comunidades</option>
-              <option value="matriz">⛪ Matriz</option>
-              <!-- Opções dinâmicas serão adicionadas via JavaScript -->
-            </select>
-          </div>
-          
-          <div class="nav-buttons" role="group" aria-label="Navegação do calendário">
-            <button class="btn-nav" aria-label="Mês Anterior" onclick="mesAnterior()">&lt;</button>
-            <button class="btn-nav" aria-label="Ir para hoje" onclick="irParaHoje()">Hoje</button>
-            <button class="btn-nav" aria-label="Próximo Mês" onclick="proximoMes()">&gt;</button>
-          </div>
-        </div>
-
-        <!-- GRID DO CALENDÁRIO (VISÃO MENSAL) -->
-        <!-- O JavaScript vai injetar os dias aqui dentro -->
-        <div class="calendar-wrapper">
-          <!-- Cabeçalhos dos Dias -->
-          <div class="day-header">Dom</div>
-          <div class="day-header">Seg</div>
-          <div class="day-header">Ter</div>
-          <div class="day-header">Qua</div>
-          <div class="day-header">Qui</div>
-          <div class="day-header">Sex</div>
-          <div class="day-header">Sáb</div>
-
-          <!-- Placeholder de Carregamento -->
-          <div style="
-                grid-column: 1 / -1;
-                padding: 50px;
-                text-align: center;
-                color: #999;
-                font-style: italic;
-              ">
-            Buscando dados litúrgicos...
-          </div>
-        </div>
-
-        <!-- ==========================================================================
-                     MURAL DE AVISOS PAROQUIAIS
-                     Posicionado abaixo do calendário principal
-                ========================================================================== -->
-        <div class="mural-avisos-wrapper"></div>
-
-        <!-- ==========================================================================
-                     RODAPÉ (FOOTER)
-                     Integrado ao scroll da página principal
-                ========================================================================== -->
-        <footer class="main-footer">
-          <div class="footer-container">
-            <!-- Coluna Identidade -->
-            <div class="footer-col">
-              <img src="assets/img/logo-horizontal-negativa.png" alt="Logo Rodapé" class="footer-logo" />
-              <p class="footer-subtitle">Itabirinha / MG</p>
-            </div>
-
-            <!-- Coluna Institucional -->
-            <div class="footer-col">
-              <h4 class="footer-heading">Informações</h4>
-              <p><strong>Pároco:</strong> Pe. Hugo Damião Leal</p>
-              <p>Diocese de Teófilo Otoni</p>
-              <p class="destaque-atendimento" style="margin-top: 10px">
-                Atendimento Paroquial<br /><span>Todas as quartas-feiras</span>
-              </p>
-            </div>
-
-            <!-- Coluna Contato -->
-            <div class="footer-col">
-              <h4 class="footer-heading">Fale Conosco</h4>
-              <a href="https://wa.me/553399428407" target="_blank" class="btn-whatsapp">
-                <!-- SVG Whatsapp -->
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path
-                    d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
-                </svg>
-                (33) 9942-8407
-              </a>
-              <div class="social-links">
-                <a href="https://www.instagram.com/bomjesusdeitabirinha/" target="_blank"><svg width="24" height="24"
-                    viewBox="0 0 24 24" fill="currentColor">
-                    <path
-                      d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.85-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-                  </svg></a>
-                <a href="https://www.youtube.com/@pascomdabomjesusitabirinha" target="_blank"><svg width="28"
-                    height="28" viewBox="0 0 24 24" fill="currentColor">
-                    <path
-                      d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
-                  </svg></a>
-              </div>
-            </div>
-          </div>
-          <div class="footer-copyright">
-            © 2026 Paróquia Senhor Bom Jesus - Itabirinha/MG
-          </div>
-        </footer>
-      </div>
-    </main>
+  <div id="print-legend" class="print-legend">
+    <span class="print-legend__label">Cores litúrgicas:</span>
+    <span class="print-legend__item" style="background:#e8f5e9;color:#1b5e20;border-left:3px solid #2e7d32;">Verde – Tempo Comum</span>
+    <span class="print-legend__item" style="background:#ede7f6;color:#4a148c;border-left:3px solid #6a1b9a;">Roxo – Advento / Quaresma</span>
+    <span class="print-legend__item" style="background:#fff8dc;color:#7a5a00;border-left:3px solid #bfa15f;">Dourado – Solenidades / Domingos</span>
+    <span class="print-legend__item" style="background:#ffebee;color:#7b1526;border-left:3px solid #c62828;">Vermelho – Pentecostes</span>
+    <span class="print-legend__item" style="background:#fce4ec;color:#880e4f;border-left:3px solid #d81b60;">Rosa – Gaudete / Laetare</span>
   </div>
 
-  <!-- ==========================================================================
-         MODAL OVERLAY (POPUP DE DETALHES)
-         O conteúdo é injetado via JavaScript
-    ========================================================================== -->
-  <!-- Região ARIA Live — anuncia mensagens para leitores de tela (A11Y-005) -->
-  <div id="aria-announcer" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+  <footer class="print-footer">
+    <span>Gerado pelo Sistema Sacristia Digital • Paróquia Senhor Bom Jesus</span>
+    <span id="print-footer-date"></span>
+  </footer>
+</div>
 
-  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-label="Detalhes do evento" aria-hidden="true">
-    <div id="modalContent"></div>
-  </div>
-  <!-- MÁSCARA ESCURA PARA FECHAR MENU MOBILE -->
-  <div id="sidebar-overlay" onclick="toggleSidebarMobile()"></div>
-  <!-- ==========================================================================
-         ÁREA DE IMPRESSÃO (RELATÓRIO OCULTO)
-    ========================================================================== -->
-  <div id="relatorio-impressao" class="print-only">
-    <header class="print-header">
-      <div class="print-header__logo">
-        <img src="assets/img/logo_paroquia_torre.png" alt="Logo" class="print-logo-circ" />
-      </div>
-      <div class="print-header__info">
-        <h1 class="print-header__title">Paróquia Senhor Bom Jesus</h1>
-        <h2 class="print-header__subtitle">Agenda Pastoral & Litúrgica</h2>
-      </div>
-      <div class="print-header__period">
-        <!-- <label class="print-header__label">Mês de Referência</label>-->
-        <h3 id="print-month-name" class="print-header__month">JANEIRO</h3>
-        <span id="print-year-val" class="print-header__year">2026</span>
-      </div>
-    </header>
+<!-- ============================================================
+     SCRIPTS (ordem: constantes → api → app)
+============================================================ -->
+<script src="assets/js/constants.js"></script>
+<script src="assets/js/error-handler.js"></script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/app-new.js" defer></script>
 
-    <table class="print-table">
-      <thead>
-        <tr>
-          <th width="11%">Data</th>
-          <th width="44%">Evento / Liturgia</th>
-          <th width="45%">Detalhes / Equipes</th>
-        </tr>
-      </thead>
-      <tbody id="print-table-body">
-        <!-- Injetado pelo JS -->
-      </tbody>
-    </table>
-
-    <div id="print-legend" class="print-legend">
-      <span class="print-legend__label">Cores litúrgicas:</span>
-      <span class="print-legend__item" style="background:#e8f5e9;color:#1b5e20;border-left:3px solid #2e7d32;">Verde – Tempo Comum</span>
-      <span class="print-legend__item" style="background:#ede7f6;color:#4a148c;border-left:3px solid #6a1b9a;">Roxo – Advento / Quaresma</span>
-      <span class="print-legend__item" style="background:#fff8dc;color:#7a5a00;border-left:3px solid #bfa15f;">Dourado – Solenidades / Domingos</span>
-      <span class="print-legend__item" style="background:#ffebee;color:#7b1526;border-left:3px solid #c62828;">Vermelho – Pentecostes</span>
-      <span class="print-legend__item" style="background:#fce4ec;color:#880e4f;border-left:3px solid #d81b60;">Rosa – Gaudete / Laetare</span>
-    </div>
-
-    <footer class="print-footer">
-      <span>Gerado pelo Sistema Sacristia Digital • Paróquia Senhor Bom Jesus</span>
-      <span id="print-footer-date"></span>
-    </footer>
-  </div>
-
-  <!-- ==========================================================================
-         SCRIPTS (ORDEM OBRIGATÓRIA: LIB -> API -> CONTROLLERS -> APP)
-    ========================================================================== -->
-
-  <!-- 1. Constantes de negócio centralizadas (CODE-001) -->
-  <script src="assets/js/constants.js"></script>
-
-  <!-- 2. Error Handler (Sistema de tratamento de erros) -->
-  <script src="assets/js/error-handler.js"></script>
-
-  <!-- 3. Módulo de Conexão (Cria window.api com cache) -->
-  <script src="assets/js/api.js"></script>
-
-  <!-- 3. Modal Controller (Sistema unificado de modais) -->
-  <script src="assets/js/modal-controller.js"></script>
-
-  <!-- 4. Módulo do Calendário (Essencial para Integrações) -->
-  <script src="assets/js/calendar-engine.js"></script>
-
-  <!-- 5. Aplicação Principal (Usa window.api) -->
-  <script src="assets/js/app.js" defer></script>
 </body>
-
 </html>

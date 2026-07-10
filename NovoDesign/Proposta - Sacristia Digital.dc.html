@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/gra-a-design-system-142ea7e1-e1d2-4948-bfc0-54cc28293eb4/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/gra-a-design-system-142ea7e1-e1d2-4948-bfc0-54cc28293eb4/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/gra-a-design-system-142ea7e1-e1d2-4948-bfc0-54cc28293eb4/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/gra-a-design-system-142ea7e1-e1d2-4948-bfc0-54cc28293eb4/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/gra-a-design-system-142ea7e1-e1d2-4948-bfc0-54cc28293eb4/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/gra-a-design-system-142ea7e1-e1d2-4948-bfc0-54cc28293eb4/tokens/base.css">
+  <link rel="stylesheet" href="_ds/gra-a-design-system-142ea7e1-e1d2-4948-bfc0-54cc28293eb4/styles.css">
+  <script src="_ds/gra-a-design-system-142ea7e1-e1d2-4948-bfc0-54cc28293eb4/_ds_bundle.js"></script>
+  <style>
+    @font-face { font-family: "Neulis"; src: url("assets/fonts/Neulis-Regular.otf") format("opentype"); font-weight: 400; font-display: swap; }
+    @font-face { font-family: "Neulis"; src: url("assets/fonts/Neulis-Medium.otf") format("opentype"); font-weight: 500; font-display: swap; }
+    @font-face { font-family: "Neulis"; src: url("assets/fonts/Neulis-SemiBold.otf") format("opentype"); font-weight: 600; font-display: swap; }
+    @font-face { font-family: "Neulis"; src: url("assets/fonts/Neulis-Bold.otf") format("opentype"); font-weight: 700; font-display: swap; }
+    @font-face { font-family: "Neulis"; src: url("assets/fonts/Neulis-Black.otf") format("opentype"); font-weight: 900; font-display: swap; }
+    @font-face { font-family: "AntennaCond"; src: url("assets/fonts/antennacond.otf") format("opentype"); font-weight: 400; font-display: swap; }
+    @font-face { font-family: "AntennaCond"; src: url("assets/fonts/antennacond-medium.otf") format("opentype"); font-weight: 500; font-display: swap; }
+    @font-face { font-family: "AntennaCond"; src: url("assets/fonts/antennacond-bold.otf") format("opentype"); font-weight: 700; font-display: swap; }
+    /* Mantendo a tipografia já pré-carregada da paróquia (Neulis + AntennaCond) por cima dos tokens do design system */
+    :root { --font-serif: "Neulis", Georgia, serif; --font-display: "Neulis", Georgia, serif; --font-sans: "AntennaCond", "Segoe UI", Tahoma, sans-serif; --font-body: "AntennaCond", "Segoe UI", Tahoma, sans-serif; }
+    body { margin: 0; background: var(--surface-page); background-image: var(--grad-ray); background-repeat: no-repeat; color: var(--text-strong); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+    a { color: var(--text-link); }
+    a:hover { color: var(--graca-red-700); }
+    *:focus { outline: none; }
+    *:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: var(--radius-xs); }
+    @keyframes sdFadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes sdRiseIn { from { opacity: 0; transform: translateY(14px) scale(0.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes sdPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+    @media print {
+      header, footer, [data-print-hide="true"] { display: none !important; }
+      body { background: #fff !important; }
+      main { padding: 0 !important; max-width: 100% !important; }
+    }
+    @keyframes sdSlideUp { from { transform: translateY(24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    /* ---- Mobile-first refinements: o modal vira uma folha inferior (bottom sheet) em telas pequenas ---- */
+    @media (max-width: 640px) {
+      [role="dialog"] { align-items: flex-end !important; padding: 0 !important; }
+      [data-role="modal-panel"] { flex-direction: column !important; width: 100% !important; max-width: 100% !important; max-height: 92vh !important; border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important; animation: sdSlideUp 0.3s var(--ease) !important; }
+      [data-role="modal-stripe"] { width: 100% !important; height: 6px !important; border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important; }
+      [data-role="modal-content"] { padding: var(--space-5) var(--space-4) var(--space-6) !important; }
+      [data-role="modal-cal-actions"] { grid-template-columns: 1fr !important; }
+      header .header-inner { padding: 0 var(--space-4) !important; }
+    }
+  </style>
+  <script src="sample-data.js"></script>
+</helmet>
+
+<div style="min-height: 100vh; display: flex; flex-direction: column;">
+
+  <!-- ===================== CABEÇALHO ===================== -->
+  <header data-screen-label="Cabeçalho" style="background: var(--grad-bold); border-bottom: 3px solid var(--gold); box-shadow: var(--shadow-md); position: relative; z-index: 60;">
+    <div class="header-inner" style="max-width: var(--container-xl); margin: 0 auto; padding: 0 var(--gutter); height: 68px; display: flex; align-items: center; justify-content: space-between; gap: var(--space-4);">
+      <img src="assets/img/logo-horizontal-negativa.png" alt="Paróquia Senhor Bom Jesus — Itabirinha/MG" style="height: 40px; width: auto; object-fit: contain; flex-shrink: 1; min-width: 0;">
+      <a href="admin.html" title="Acesso Administrativo" style="display: flex; align-items: center; gap: 7px; color: var(--text-on-bold); text-decoration: none; font-size: var(--text-sm); font-weight: var(--fw-bold); letter-spacing: var(--tracking-normal); padding: 9px var(--space-4); border: var(--bw-hair) solid var(--line-onbold); border-radius: var(--radius-pill); background: rgba(255,255,255,0.14); transition: background var(--dur) var(--ease), color var(--dur) var(--ease); flex-shrink: 0;" style-hover="background: rgba(255,255,255,0.26); color: #ffffff;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        <span style="white-space: nowrap;">Admin</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- ===================== BARRA DO MÊS (STICKY) ===================== -->
+  <div data-screen-label="Barra de navegação do mês" style="position: sticky; top: 0; z-index: 50; background: color-mix(in srgb, var(--cream) 88%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: var(--bw-hair) solid var(--border);">
+    <div style="max-width: var(--container-xl); margin: 0 auto; padding: var(--space-3) var(--gutter) 10px; display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-3);">
+      <h1 style="margin: 0; font-family: var(--font-serif); font-size: var(--text-xl); font-weight: var(--fw-semibold); color: var(--text-strong); text-transform: capitalize; letter-spacing: var(--tracking-tight); min-width: 180px;">{{ mesTitulo }}</h1>
+
+      <div role="group" aria-label="Navegação do calendário" style="display: flex; gap: 0; border: var(--bw-hair) solid var(--border); border-radius: var(--radius-pill); overflow: hidden; background: var(--surface-raised);">
+        <button onClick="{{ mesAnterior }}" aria-label="Mês anterior" style="min-width: 44px; min-height: 40px; border: none; background: transparent; cursor: pointer; font-size: 16px; color: var(--text-strong); opacity: {{ opAnterior }}; display: flex; align-items: center; justify-content: center; transition: background var(--dur-fast) var(--ease);" style-hover="background: var(--graca-red-100);">‹</button>
+        <button onClick="{{ irHoje }}" style="min-height: 40px; padding: 0 var(--space-4); border: none; border-left: var(--bw-hair) solid var(--border); border-right: var(--bw-hair) solid var(--border); background: transparent; cursor: pointer; font-family: var(--font-sans); font-weight: var(--fw-bold); font-size: var(--text-xs); letter-spacing: var(--tracking-wide); color: var(--graca-red); transition: background var(--dur-fast) var(--ease);" style-hover="background: var(--graca-red-100);">HOJE</button>
+        <button onClick="{{ mesProximo }}" aria-label="Próximo mês" style="min-width: 44px; min-height: 40px; border: none; background: transparent; cursor: pointer; font-size: 16px; color: var(--text-strong); opacity: {{ opProximo }}; display: flex; align-items: center; justify-content: center; transition: background var(--dur-fast) var(--ease);" style-hover="background: var(--graca-red-100);">›</button>
+      </div>
+
+      <div style="flex: 1;"></div>
+
+      <div role="group" aria-label="Modo de exibição" style="display: flex; gap: 3px; background: var(--cream-200); border-radius: var(--radius-pill); padding: 3px;">
+        <sc-for list="{{ vistaBtns }}" as="vb" hint-placeholder-count="2">
+          <button onClick="{{ vb.onClick }}" aria-pressed="{{ vb.ativo }}" style="min-height: 36px; padding: 0 var(--space-4); border: none; border-radius: var(--radius-pill); cursor: pointer; font-family: var(--font-sans); font-weight: var(--fw-bold); font-size: var(--text-xs); letter-spacing: var(--tracking-wide); background: {{ vb.bg }}; color: {{ vb.cor }}; box-shadow: {{ vb.sombra }}; transition: background var(--dur) var(--ease), color var(--dur) var(--ease);">{{ vb.label }}</button>
+        </sc-for>
+      </div>
+
+      <label style="display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); font-weight: var(--fw-bold); color: var(--graca-red);">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+        <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0);">Filtrar por comunidade</span>
+        <select value="{{ comunidadeSel }}" onChange="{{ aoMudarComunidade }}" aria-label="Filtrar por comunidade" style="min-height: 40px; padding: 6px 34px 6px 12px; border: var(--bw) solid var(--border); border-radius: var(--radius-sm); font-family: var(--font-sans); font-size: 13.5px; font-weight: var(--fw-medium); color: var(--text-strong); background-color: var(--surface-raised); background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg width=%2712%27 height=%277%27 viewBox=%270 0 14 8%27 fill=%27none%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M1 1l6 6 6-6%27 stroke=%27%23B53325%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 12px center; appearance: none; cursor: pointer; max-width: 220px;">
+          <option value="">Todas as comunidades</option>
+          <sc-for list="{{ comunidades }}" as="com" hint-placeholder-count="3">
+            <option value="{{ com.id }}">{{ com.nome }}</option>
+          </sc-for>
+        </select>
+      </label>
+
+      <button onClick="{{ imprimir }}" aria-label="Imprimir escalas do mês" title="Imprimir escalas" data-print-hide="true" style="min-width: 40px; min-height: 40px; border: var(--bw-hair) solid var(--border); border-radius: var(--radius-sm); background: var(--surface-raised); color: var(--text-body); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);" style-hover="background: var(--graca-red-100); border-color: var(--graca-red-300); color: var(--graca-red);">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7"></path><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+      </button>
+    </div>
+
+    <!-- Chips de equipes -->
+    <div style="max-width: var(--container-xl); margin: 0 auto; padding: 0 var(--gutter) var(--space-3); display: flex; gap: var(--space-2); overflow-x: auto; align-items: center;" role="group" aria-label="Filtrar por equipe">
+      <span style="font-size: var(--text-2xs); font-weight: var(--fw-bold); letter-spacing: var(--tracking-wider); color: var(--text-faint); text-transform: uppercase; white-space: nowrap;">Equipes</span>
+      <sc-for list="{{ chips }}" as="chip" hint-placeholder-count="6">
+        <button onClick="{{ chip.onClick }}" aria-pressed="{{ chip.ativo }}" style="display: flex; align-items: center; gap: 6px; min-height: 34px; padding: 0 13px; border-radius: var(--radius-pill); cursor: pointer; white-space: nowrap; font-family: var(--font-sans); font-size: 12.5px; font-weight: var(--fw-bold); border: var(--bw) solid {{ chip.borda }}; background: {{ chip.bg }}; color: {{ chip.cor }}; transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease);">{{ chip.label }}</button>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- ===================== VISTA: GRADE ===================== -->
+  <sc-if value="{{ mostraGrade }}" hint-placeholder-val="{{ true }}">
+    <main data-screen-label="Calendário — grade mensal" style="max-width: var(--container-xl); width: 100%; margin: 0 auto; padding: var(--space-4) var(--gutter) 8px; box-sizing: border-box; animation: sdFadeIn 0.35s var(--ease);">
+      <div style="border: var(--bw-hair) solid var(--border); border-radius: var(--radius-lg); overflow: hidden; background: var(--border); display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 1px; box-shadow: var(--shadow-lg); width: 100%; box-sizing: border-box;">
+        <sc-for list="{{ diasSemana }}" as="ds" hint-placeholder-count="7">
+          <div style="background: var(--surface-card); padding: var(--space-2) 0; text-align: center; font-size: var(--text-2xs); font-weight: var(--fw-bold); letter-spacing: var(--tracking-wider); color: var(--text-muted); text-transform: uppercase;">{{ ds.label }}</div>
+        </sc-for>
+        <sc-for list="{{ celulas }}" as="c" hint-placeholder-count="35">
+          <button onClick="{{ c.abrir }}" aria-label="{{ c.aria }}" style="text-align: left; font-family: inherit; border: none; background: {{ c.bg }}; min-height: {{ c.minH }}; width: 100%; min-width: 0; box-sizing: border-box; padding: 7px 8px; cursor: {{ c.cursor }}; position: relative; display: flex; flex-direction: column; align-items: stretch; gap: 4px; opacity: {{ c.op }}; box-shadow: {{ c.anel }}; transition: background var(--dur-fast) var(--ease); overflow: hidden;" style-hover="background: {{ c.bgHover }};">
+            <span style="display: flex; align-items: center; justify-content: space-between; gap: 4px; min-width: 0;">
+              <span style="font-family: var(--font-serif); font-weight: var(--fw-semibold); font-size: 15px; color: {{ c.corNum }}; flex-shrink: 0;">{{ c.num }}</span>
+              <sc-if value="{{ c.ehHoje }}" hint-placeholder-val="{{ false }}">
+                <span style="font-size: 9px; font-weight: var(--fw-extra); letter-spacing: var(--tracking-wide); color: var(--gold-deep); background: var(--gold-ray); border-radius: var(--radius-pill); padding: 2px 7px;">HOJE</span>
+              </sc-if>
+            </span>
+            <sc-for list="{{ c.pills }}" as="p" hint-placeholder-count="0">
+              <span title="{{ p.titulo }}" style="display: flex; align-items: center; gap: 5px; font-size: 12px; line-height: 1.25; padding: 3px 7px 3px 6px; border-radius: var(--radius-xs); background: {{ p.bg }}; border-left: 3px solid {{ p.cor }}; color: {{ p.txt }}; overflow: hidden; min-width: 0; max-width: 100%; box-sizing: border-box; font-weight: {{ p.peso }};">
+                <sc-if value="{{ p.hora }}" hint-placeholder-val="{{ false }}">
+                  <span style="font-size: 10.5px; opacity: 0.72; font-variant-numeric: tabular-nums; font-weight: var(--fw-bold); flex-shrink: 0;">{{ p.hora }}</span>
+                </sc-if>
+                <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;">{{ p.titulo }}</span>
+              </span>
+            </sc-for>
+            <sc-if value="{{ c.mais }}" hint-placeholder-val="{{ false }}">
+              <span style="font-size: 10.5px; font-weight: var(--fw-bold); color: var(--graca-red); padding-left: 6px;">{{ c.mais }}</span>
+            </sc-if>
+            <sc-if value="{{ c.temDots }}" hint-placeholder-val="{{ false }}">
+              <span style="display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; padding-top: 2px;">
+                <sc-for list="{{ c.dots }}" as="dot" hint-placeholder-count="0">
+                  <span style="width: 7px; height: 7px; border-radius: 50%; background: {{ dot.cor }};"></span>
+                </sc-for>
+              </span>
+            </sc-if>
+          </button>
+        </sc-for>
+      </div>
+      <p style="margin: var(--space-2) 2px 0; font-size: var(--text-xs); color: var(--text-muted); display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center;">
+        <sc-for list="{{ legenda }}" as="lg" hint-placeholder-count="4">
+          <span style="display: inline-flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; border-radius: var(--radius-xs); background: {{ lg.cor }};"></span>{{ lg.label }}</span>
+        </sc-for>
+      </p>
+    </main>
+  </sc-if>
+
+  <!-- ===================== VISTA: AGENDA ===================== -->
+  <sc-if value="{{ mostraAgenda }}" hint-placeholder-val="{{ false }}">
+    <main data-screen-label="Calendário — agenda" style="max-width: var(--container-md); width: 100%; margin: 0 auto; padding: var(--space-4) var(--gutter) 8px; box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-3); animation: sdFadeIn 0.35s var(--ease);">
+      <sc-for list="{{ agenda }}" as="dia" hint-placeholder-count="6">
+        <button onClick="{{ dia.abrir }}" aria-label="{{ dia.aria }}" style="font-family: inherit; text-align: left; display: flex; align-items: stretch; gap: 0; background: var(--surface-raised); border: var(--bw-hair) solid var(--border); border-left: 4px solid {{ dia.cor }}; border-radius: var(--radius-lg); overflow: hidden; cursor: pointer; padding: 0; box-shadow: {{ dia.sombra }}; transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);" style-hover="transform: translateY(-2px); box-shadow: var(--shadow-lg);">
+          <span style="width: 68px; flex-shrink: 0; background: {{ dia.bgData }}; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; padding: var(--space-3) 6px; border-right: var(--bw-hair) solid var(--border);">
+            <span style="font-family: var(--font-serif); font-weight: var(--fw-bold); font-size: 26px; line-height: 1; color: {{ dia.corNum }};">{{ dia.num }}</span>
+            <span style="font-size: 10px; font-weight: var(--fw-bold); letter-spacing: var(--tracking-wide); text-transform: uppercase; color: var(--text-muted);">{{ dia.diaSem }}</span>
+            <sc-if value="{{ dia.ehHoje }}" hint-placeholder-val="{{ false }}">
+              <span style="margin-top: 4px; font-size: 8.5px; font-weight: var(--fw-extra); letter-spacing: var(--tracking-wide); color: var(--gold-deep); background: var(--gold-ray); border-radius: var(--radius-pill); padding: 2px 7px;">HOJE</span>
+            </sc-if>
+          </span>
+          <span style="flex: 1; display: flex; flex-direction: column; padding: var(--space-2) var(--space-4); min-width: 0;">
+            <sc-for list="{{ dia.eventos }}" as="e" hint-placeholder-count="2">
+              <span style="display: flex; align-items: baseline; gap: var(--space-3); padding: var(--space-2) 0; border-top: {{ e.bt }}; min-width: 0;">
+                <span style="flex-shrink: 0; background: var(--cream-200); color: var(--gold-deep); border-radius: var(--radius-xs); font-size: 12px; font-weight: var(--fw-bold); font-variant-numeric: tabular-nums; padding: 3px 8px; min-width: 44px; text-align: center;">{{ e.hora }}</span>
+                <span style="min-width: 0; display: flex; flex-direction: column; gap: 1px;">
+                  <span style="font-size: 15px; font-weight: var(--fw-bold); color: var(--text-strong); line-height: 1.25;">{{ e.titulo }}</span>
+                  <span style="font-size: 12.5px; color: var(--text-muted);">{{ e.sub }}</span>
+                </span>
+              </span>
+            </sc-for>
+          </span>
+          <span aria-hidden="true" style="display: flex; align-items: center; padding: 0 var(--space-3); color: var(--graca-red-300); font-size: 18px;">›</span>
+        </button>
+      </sc-for>
+      <sc-if value="{{ agendaVazia }}" hint-placeholder-val="{{ false }}">
+        <div style="padding: var(--space-7) var(--space-4); text-align: center; color: var(--text-muted); font-style: italic; background: var(--surface-card); border: 1px dashed var(--border); border-radius: var(--radius-lg);">Nenhum compromisso encontrado com os filtros atuais.</div>
+      </sc-if>
+    </main>
+  </sc-if>
+
+  <!-- ===================== MURAL ===================== -->
+  <sc-if value="{{ mostrarMural }}" hint-placeholder-val="{{ true }}">
+    <section data-screen-label="Mural paroquial" style="max-width: var(--container-xl); width: 100%; margin: 0 auto; padding: var(--space-6) var(--gutter) 8px; box-sizing: border-box;">
+      <div style="display: flex; align-items: center; gap: var(--space-2); border-bottom: 2px solid var(--graca-red); padding-bottom: var(--space-2); margin-bottom: var(--space-4);">
+        <h2 style="margin: 0; font-family: var(--font-sans); font-size: var(--text-sm); font-weight: var(--fw-bold); letter-spacing: var(--tracking-wider); text-transform: uppercase; color: var(--graca-red);">Mural Paroquial</h2>
+        <span style="background: var(--graca-red); color: var(--text-on-bold); font-size: 11px; font-weight: var(--fw-bold); padding: 1px 8px; border-radius: var(--radius-pill);">{{ totalAvisos }}</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-4);">
+        <sc-for list="{{ avisos }}" as="av" hint-placeholder-count="3">
+          <article style="background: var(--surface-card); border: var(--bw-hair) solid var(--border); border-left: 4px solid {{ av.cor }}; border-radius: var(--radius-lg); padding: var(--space-3) var(--space-4); display: flex; flex-direction: column; gap: 6px; box-shadow: var(--shadow-sm);">
+            <span style="display: flex; justify-content: space-between; align-items: center; gap: var(--space-2);">
+              <span style="font-size: 10.5px; font-weight: var(--fw-extra); letter-spacing: var(--tracking-wide); text-transform: uppercase; color: {{ av.tagCor }}; background: {{ av.tagBg }}; padding: 2px 8px; border-radius: var(--radius-xs); animation: {{ av.anim }};">{{ av.tag }}</span>
+              <span style="font-size: var(--text-xs); color: var(--text-faint); font-variant-numeric: tabular-nums;">{{ av.dataFmt }}</span>
+            </span>
+            <h3 style="margin: 0; font-family: var(--font-serif); font-size: 17px; font-weight: var(--fw-semibold); color: var(--text-strong); line-height: 1.3;">{{ av.titulo }}</h3>
+            <p style="margin: 0; font-size: 12.5px; color: var(--text-muted); display: flex; align-items: center; gap: 5px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+              {{ av.local }} · {{ av.hora }}
+            </p>
+            <p style="margin: 0; font-size: var(--text-sm); line-height: var(--leading-relaxed); color: var(--text-body);">{{ av.descricao }}</p>
+          </article>
+        </sc-for>
+      </div>
+    </section>
+  </sc-if>
+
+  <!-- ===================== RODAPÉ ===================== -->
+  <footer data-screen-label="Rodapé" style="margin-top: var(--space-7); background: var(--grad-bold); color: var(--text-on-bold); border-top: 4px solid var(--gold); padding: var(--space-7) var(--gutter) var(--space-4);">
+    <div style="max-width: var(--container-md); margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-6);">
+      <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+        <img src="assets/img/logo-horizontal-negativa.png" alt="Paróquia Senhor Bom Jesus" style="max-width: 180px; opacity: 0.94;">
+        <p style="margin: 0; font-family: var(--font-serif); font-style: italic; font-size: 15px; opacity: 0.85;">Itabirinha / MG</p>
+      </div>
+      <div>
+        <h4 style="margin: 0 0 var(--space-3); color: var(--gold-ray); font-size: var(--text-sm); font-weight: var(--fw-extra); text-transform: uppercase; letter-spacing: var(--tracking-wide); border-bottom: var(--bw-hair) solid rgba(255,200,120,0.3); padding-bottom: 9px;">Informações</h4>
+        <p style="margin: 4px 0; font-size: 14.5px;"><strong>Pároco:</strong> Pe. Hugo Damião Leal</p>
+        <p style="margin: 4px 0; font-size: 14.5px;">Diocese de Teófilo Otoni</p>
+        <p style="margin: var(--space-3) 0 0; color: var(--gold-ray); font-weight: var(--fw-bold); font-size: 14.5px;">Atendimento Paroquial<br><span style="font-weight: 400; color: var(--text-on-bold);">Todas as quartas-feiras</span></p>
+      </div>
+      <div>
+        <h4 style="margin: 0 0 var(--space-3); color: var(--gold-ray); font-size: var(--text-sm); font-weight: var(--fw-extra); text-transform: uppercase; letter-spacing: var(--tracking-wide); border-bottom: var(--bw-hair) solid rgba(255,200,120,0.3); padding-bottom: 9px;">Fale Conosco</h4>
+        <a href="https://wa.me/553399428407" style="display: inline-flex; align-items: center; gap: var(--space-2); background: rgba(255,255,255,0.05); color: var(--text-on-bold); text-decoration: none; padding: 10px 15px; border-radius: var(--radius-sm); border: var(--bw-hair) solid rgba(255,255,255,0.12); font-size: 14px; transition: background var(--dur) var(--ease), border-color var(--dur) var(--ease), color var(--dur) var(--ease);" style-hover="background: #25d366; border-color: #25d366; color: #ffffff;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"></path></svg>
+          (33) 9942-8407
+        </a>
+        <div style="display: flex; gap: var(--space-3); margin-top: var(--space-3);">
+          <a href="https://www.instagram.com/bomjesusdeitabirinha/" aria-label="Instagram" style="color: var(--text-on-bold); transition: color var(--dur) var(--ease);" style-hover="color: var(--gold-ray);"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.85-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"></path></svg></a>
+          <a href="https://www.youtube.com/@pascomdabomjesusitabirinha" aria-label="YouTube" style="color: var(--text-on-bold); transition: color var(--dur) var(--ease);" style-hover="color: var(--gold-ray);"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"></path></svg></a>
+        </div>
+      </div>
+    </div>
+    <p style="text-align: center; font-size: 12.5px; opacity: 0.75; margin: var(--space-8) 0 0; padding-top: var(--space-4); border-top: var(--bw-hair) solid rgba(255,255,255,0.08);">© 2026 Paróquia Senhor Bom Jesus — Itabirinha/MG</p>
+  </footer>
+
+  <!-- ===================== MODAL ===================== -->
+  <sc-if value="{{ temModal }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Modal de detalhes do dia" onClick="{{ fecharModal }}" role="dialog" aria-modal="true" aria-label="{{ modal.aria }}" style="position: fixed; inset: 0; background: var(--scrim); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: var(--space-4); animation: sdFadeIn 0.18s var(--ease);">
+      <div data-role="modal-panel" onClick="{{ pararClique }}" style="background: var(--surface-raised); border-radius: var(--radius-lg); width: min(560px, 94vw); max-height: 86vh; overflow-y: auto; display: flex; position: relative; box-shadow: var(--shadow-xl); animation: sdRiseIn 0.28s var(--ease);">
+        <div data-role="modal-stripe" aria-hidden="true" style="width: 10px; flex-shrink: 0; background: {{ modal.cor }}; border-radius: var(--radius-lg) 0 0 var(--radius-lg);"></div>
+        <div data-role="modal-content" style="flex: 1; padding: var(--space-6) var(--space-6) var(--space-5); min-width: 0;">
+          <button onClick="{{ fecharModal }}" aria-label="Fechar detalhes" style="position: absolute; top: 14px; right: 14px; width: 36px; height: 36px; border-radius: 50%; border: none; background: var(--cream-200); color: var(--text-muted); font-size: 18px; font-weight: var(--fw-bold); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);" style-hover="background: var(--graca-red-100); color: var(--graca-red);">×</button>
+
+          <div style="display: flex; align-items: flex-end; gap: var(--space-3); border-bottom: var(--bw-hair) solid var(--border); padding-bottom: var(--space-3); margin-bottom: var(--space-4);">
+            <span style="font-family: var(--font-serif); font-weight: var(--fw-bold); font-size: 48px; line-height: 0.9; color: var(--text-strong);">{{ modal.num }}</span>
+            <span style="display: flex; flex-direction: column; gap: 1px; padding-bottom: 2px;">
+              <span style="font-size: var(--text-sm); font-weight: var(--fw-bold); text-transform: uppercase; letter-spacing: var(--tracking-wide); color: var(--graca-red);">{{ modal.mes }}</span>
+              <span style="font-size: 11.5px; text-transform: uppercase; letter-spacing: var(--tracking-wide); color: var(--text-faint);">{{ modal.diaSemana }}</span>
+            </span>
+          </div>
+
+          <sc-for list="{{ modal.eventos }}" as="mev" hint-placeholder-count="1">
+            <div style="border-top: {{ mev.bt }}; padding-top: {{ mev.pt }}; margin-top: {{ mev.mt }};">
+              <p style="margin: 0 0 2px; font-size: 12px; font-weight: var(--fw-bold); text-transform: uppercase; letter-spacing: var(--tracking-wide); color: {{ mev.corTxt }};">{{ mev.tempo }}</p>
+              <h3 style="margin: 0 0 var(--space-3); font-size: 21px; font-weight: var(--fw-semibold); color: var(--text-strong); line-height: 1.25; font-family: var(--font-serif);">{{ mev.titulo }}</h3>
+              <sc-if value="{{ mev.comunidade }}" hint-placeholder-val="{{ false }}">
+                <p style="margin: 0 0 var(--space-3); display: flex; align-items: center; gap: var(--space-2); background: var(--graca-red-100); border-left: 3px solid var(--gold); border-radius: var(--radius-sm); padding: 9px 12px; font-size: 13.5px; font-weight: var(--fw-bold); color: var(--graca-red-700);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  {{ mev.comunidade }}
+                </p>
+              </sc-if>
+
+              <sc-for list="{{ mev.infos }}" as="inf" hint-placeholder-count="0">
+                <p style="margin: 0 0 6px; font-size: 14px; color: var(--text-body); display: flex; gap: 6px;"><strong style="color: var(--text-strong); min-width: 92px; display: inline-block;">{{ inf.k }}</strong> {{ inf.v }}</p>
+              </sc-for>
+
+              <sc-for list="{{ mev.escalas }}" as="esc" hint-placeholder-count="0">
+                <div style="display: flex; gap: var(--space-3); align-items: flex-start; margin-bottom: var(--space-4);">
+                  <span style="flex-shrink: 0; background: var(--graca-red); color: var(--text-on-bold); border-radius: var(--radius-sm); font-size: 13px; font-weight: var(--fw-bold); font-variant-numeric: tabular-nums; padding: 5px 10px;">{{ esc.hora }}</span>
+                  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
+                    <sc-for list="{{ esc.linhas }}" as="ln" hint-placeholder-count="2">
+                      <span style="display: grid; grid-template-columns: 22px 92px 1fr; gap: var(--space-3); align-items: center; padding: 7px 0; border-bottom: 1px dashed var(--border);">
+                        <img src="{{ ln.icon }}" alt="" style="width: 18px; height: 18px; object-fit: contain; opacity: 0.85;">
+                        <span style="font-size: 10.5px; font-weight: var(--fw-extra); text-transform: uppercase; letter-spacing: var(--tracking-wide); color: var(--text-faint);">{{ ln.label }}</span>
+                        <span style="font-size: 14.5px; font-weight: var(--fw-bold); color: var(--text-strong);">{{ ln.valor }}</span>
+                      </span>
+                    </sc-for>
+                    <sc-for list="{{ esc.listas }}" as="ls" hint-placeholder-count="0">
+                      <span style="display: grid; grid-template-columns: 22px 92px 1fr; gap: var(--space-3); align-items: start; padding: 7px 0; border-bottom: 1px dashed var(--border);">
+                        <img src="{{ ls.icon }}" alt="" style="width: 18px; height: 18px; object-fit: contain; opacity: 0.85;">
+                        <span style="font-size: 10.5px; font-weight: var(--fw-extra); text-transform: uppercase; letter-spacing: var(--tracking-wide); color: var(--text-faint); padding-top: 3px;">{{ ls.label }}</span>
+                        <span style="display: flex; flex-wrap: wrap; gap: 5px;">
+                          <sc-for list="{{ ls.nomes }}" as="nm" hint-placeholder-count="0">
+                            <span style="background: {{ ls.pillBg }}; color: {{ ls.pillCor }}; border: 1px solid {{ ls.pillBorda }}; padding: 2px 10px; border-radius: var(--radius-pill); font-size: 12.5px; font-weight: var(--fw-bold);">{{ nm }}</span>
+                          </sc-for>
+                        </span>
+                      </span>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+
+          <div style="margin-top: var(--space-4); border-top: 1px dashed var(--border); padding-top: var(--space-3);">
+            <p style="margin: 0 0 var(--space-3); font-size: 11px; font-weight: var(--fw-extra); letter-spacing: var(--tracking-wide); color: var(--text-faint); text-transform: uppercase; text-align: center;">Adicionar ao meu calendário</p>
+            <div data-role="modal-cal-actions" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3);">
+              <button onClick="{{ syncGoogle }}" style="display: flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: 42px; border: var(--bw-hair) solid var(--border); border-radius: var(--radius-sm); background: var(--surface-raised); font-family: var(--font-sans); font-size: 13px; font-weight: var(--fw-bold); color: var(--text-strong); cursor: pointer; transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);" style-hover="border-color: var(--gold); background: var(--cream-50);">📅 Google Agenda</button>
+              <button onClick="{{ baixarIcs }}" style="display: flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: 42px; border: var(--bw-hair) solid var(--border); border-radius: var(--radius-sm); background: var(--surface-raised); font-family: var(--font-sans); font-size: 13px; font-weight: var(--fw-bold); color: var(--text-strong); cursor: pointer; transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);" style-hover="border-color: var(--gold); background: var(--cream-50);">🍎 iPhone / Outlook (.ics)</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;mostrarMural&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Conteúdo&quot;},&quot;densidadeGrade&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;confortável&quot;,&quot;compacta&quot;],&quot;default&quot;:&quot;compacta&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Calendário&quot;},&quot;inicioSemana&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;domingo&quot;,&quot;segunda&quot;],&quot;default&quot;:&quot;domingo&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Calendário&quot;}}">
+class Component extends DCLogic {
+  state = {
+    ano: 2026,
+    mes: 7,
+    vista: null,
+    comunidade: "",
+    equipe: 0,
+    diaSel: null,
+    largura: typeof window !== "undefined" ? window.innerWidth : 1200,
+  };
+
+  componentDidMount() {
+    this._onResize = () => this.setState({ largura: window.innerWidth });
+    window.addEventListener("resize", this._onResize);
+    this._onKey = (e) => {
+      if (e.key === "Escape" && this.state.diaSel) this.setState({ diaSel: null });
+    };
+    window.addEventListener("keydown", this._onKey);
+    if (!window.SACRISTIA_DADOS) {
+      this._poll = setInterval(() => {
+        if (window.SACRISTIA_DADOS) {
+          clearInterval(this._poll);
+          this.forceUpdate();
+        }
+      }, 60);
+    }
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this._onResize);
+    window.removeEventListener("keydown", this._onKey);
+    if (this._poll) clearInterval(this._poll);
+  }
+
+  _iso(a, m, d) {
+    return `${a}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  }
+
+  _tipoInfo(ev) {
+    switch (ev.tipo_compromisso) {
+      case "atendimento":
+        return { label: "Atendimento", cor: "#6E5C50", bg: "#EFEAE2", txt: "#4A3A30" };
+      case "reuniao":
+        return { label: "Reunião / Pastoral", cor: "#6E5C50", bg: "#EFEAE2", txt: "#4A3A30" };
+      case "evento":
+        return { label: "Evento / Festa", cor: "#D9A441", bg: "#FBF3E8", txt: "#A9772A" };
+      default:
+        return {
+          label: ev.tipo_celebracao === "celebracao_palavra" ? "Celebração da Palavra" : "Liturgia",
+          cor: ev.cor.hex,
+          bg: ev.is_solenidade ? "#FBF3E8" : "#FBF3E8",
+          txt: "#2A1E18",
+        };
+    }
+  }
+
+  _eventoBateEquipe(ev, nomeEquipe) {
+    if (!nomeEquipe) return true;
+    return (ev.escalas || []).some(
+      (esc) => esc.leitura === nomeEquipe || esc.canto === nomeEquipe,
+    );
+  }
+
+  _eventosDoDia(D, iso) {
+    const { comunidade, equipe } = this.state;
+    const nomeEq = equipe ? D.equipes.find((e) => e.id === equipe)?.nome : null;
+    let evs = D.eventosPorData[iso] || [];
+    if (comunidade) {
+      evs = evs.filter((ev) =>
+        comunidade === "matriz" ? !ev.comunidade_id : ev.comunidade_id === comunidade,
+      );
+    }
+    return { evs, nomeEq };
+  }
+
+  _horaDe(ev) {
+    return ev.hora_inicio || (ev.escalas && ev.escalas[0] && ev.escalas[0].hora) || "";
+  }
+
+  renderVals() {
+    const D = typeof window !== "undefined" ? window.SACRISTIA_DADOS : null;
+    const { ano, mes, diaSel, comunidade, equipe, largura } = this.state;
+    const mostrarMural = this.props.mostrarMural ?? true;
+    const densidade = this.props.densidadeGrade ?? "confortável";
+    const inicioSemana = this.props.inicioSemana ?? "domingo";
+
+    const ehMobile = largura < 768;
+    const vista = this.state.vista || (ehMobile ? "agenda" : "grade");
+
+    const nomeMes = new Date(ano, mes - 1).toLocaleString("pt-BR", { month: "long" });
+    const mesTitulo = `${nomeMes} ${ano}`;
+
+    const MIN = { a: 2026, m: 6 };
+    const MAX = { a: 2026, m: 8 };
+    const podeAnt = !(ano === MIN.a && mes === MIN.m);
+    const podeProx = !(ano === MAX.a && mes === MAX.m);
+
+    const diasSemanaBase = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+    const offset = inicioSemana === "segunda" ? 1 : 0;
+    const diasSemana = Array.from({ length: 7 }, (_, i) => ({
+      label: diasSemanaBase[(i + offset) % 7],
+    }));
+
+    const vals = {
+      mesTitulo,
+      opAnterior: podeAnt ? 1 : 0.3,
+      opProximo: podeProx ? 1 : 0.3,
+      mesAnterior: () => podeAnt && this.setState({ mes: mes - 1 || 12, ano: mes === 1 ? ano - 1 : ano }),
+      mesProximo: () => podeProx && this.setState({ mes: mes === 12 ? 1 : mes + 1, ano: mes === 12 ? ano + 1 : ano }),
+      irHoje: () => this.setState({ ano: 2026, mes: 7 }),
+      comunidadeSel: comunidade,
+      aoMudarComunidade: (e) => this.setState({ comunidade: e.target.value }),
+      fecharModal: () => this.setState({ diaSel: null }),
+      pararClique: (e) => e.stopPropagation(),
+      diasSemana,
+      mostraGrade: vista === "grade",
+      mostraAgenda: vista === "agenda",
+      mostrarMural,
+      temModal: false,
+      modal: {},
+      celulas: [],
+      agenda: [],
+      agendaVazia: false,
+      avisos: [],
+      totalAvisos: 0,
+      comunidades: [],
+      chips: [],
+      legenda: [],
+      vistaBtns: [
+        {
+          label: "GRADE",
+          ativo: vista === "grade",
+          bg: vista === "grade" ? "var(--graca-red)" : "transparent",
+          cor: vista === "grade" ? "var(--text-on-bold)" : "var(--text-body)",
+          sombra: vista === "grade" ? "var(--shadow-sm)" : "none",
+          onClick: () => this.setState({ vista: "grade" }),
+        },
+        {
+          label: "AGENDA",
+          ativo: vista === "agenda",
+          bg: vista === "agenda" ? "var(--graca-red)" : "transparent",
+          cor: vista === "agenda" ? "var(--text-on-bold)" : "var(--text-body)",
+          sombra: vista === "agenda" ? "var(--shadow-sm)" : "none",
+          onClick: () => this.setState({ vista: "agenda" }),
+        },
+      ],
+      syncGoogle: () => {},
+      baixarIcs: () => {},
+      imprimir: () => window.print(),
+    };
+
+    if (!D) return vals;
+
+    vals.comunidades = D.comunidades;
+
+    const chipDe = (id, label) => {
+      const ativo = equipe === id;
+      return {
+        label,
+        ativo,
+        bg: ativo ? "var(--graca-red)" : "var(--surface-raised)",
+        cor: ativo ? "var(--text-on-bold)" : "var(--text-body)",
+        borda: ativo ? "var(--graca-red)" : "var(--border)",
+        onClick: () => this.setState({ equipe: ativo && id !== 0 ? 0 : id }),
+      };
+    };
+    vals.chips = [chipDe(0, "Todas")].concat(
+      D.equipes.map((e) => chipDe(e.id, `${e.tipo === "Canto" ? "♪ " : ""}${e.nome}`)),
+    );
+
+    const nomeEqSel = equipe ? D.equipes.find((e) => e.id === equipe)?.nome : null;
+    const hojeIso = D.hoje;
+
+    const primeiroDow = new Date(ano, mes - 1, 1).getDay();
+    const lead = (primeiroDow - offset + 7) % 7;
+    const ultimo = new Date(ano, mes, 0).getDate();
+    const ultimoAnt = new Date(ano, mes - 1, 0).getDate();
+    const minH = ehMobile ? "64px" : densidade === "compacta" ? "92px" : "116px";
+    const maxPills = densidade === "compacta" ? 2 : 3;
+
+    const celulas = [];
+    for (let i = lead - 1; i >= 0; i--) {
+      celulas.push({
+        num: ultimoAnt - i, iso: "", aria: "Dia fora do mês", bg: "var(--cream-200)", bgHover: "var(--cream-200)",
+        corNum: "var(--text-faint)", minH, cursor: "default", op: 1, anel: "none", ehHoje: false,
+        pills: [], dots: [], temDots: false, mais: "", abrir: () => {},
+      });
+    }
+    for (let d = 1; d <= ultimo; d++) {
+      const iso = this._iso(ano, mes, d);
+      const { evs } = this._eventosDoDia(D, iso);
+      const bate = !nomeEqSel || evs.some((ev) => this._eventoBateEquipe(ev, nomeEqSel));
+      const ehHoje = iso === hojeIso;
+      const pills = [];
+      const dots = [];
+      evs.forEach((ev) => {
+        const t = this._tipoInfo(ev);
+        if (ehMobile) {
+          dots.push({ cor: t.cor });
+        } else {
+          pills.push({
+            hora: this._horaDe(ev),
+            titulo: ev.titulo,
+            cor: t.cor,
+            bg: t.bg,
+            txt: t.txt,
+            peso: ev.is_solenidade ? 700 : ev.tipo_compromisso === "liturgia" ? 600 : 400,
+          });
+        }
+      });
+      const extras = pills.length > maxPills ? pills.length - maxPills : 0;
+      celulas.push({
+        num: d,
+        iso,
+        aria: `${d} de ${nomeMes}${evs.length ? `, ${evs.length} compromisso${evs.length > 1 ? "s" : ""}` : ", sem compromissos"}`,
+        bg: ehHoje ? "var(--grad-dawn)" : "var(--surface-raised)",
+        bgHover: evs.length ? "var(--cream-50)" : "var(--cream-50)",
+        corNum: ehHoje ? "var(--graca-red)" : "var(--ink-700)",
+        minH,
+        cursor: evs.length ? "pointer" : "default",
+        op: bate ? 1 : 0.35,
+        anel: ehHoje ? "inset 0 0 0 2px var(--gold)" : "none",
+        ehHoje,
+        pills: pills.slice(0, maxPills),
+        mais: extras ? `+${extras} mais` : "",
+        dots,
+        temDots: ehMobile && dots.length > 0,
+        abrir: () => evs.length && this.setState({ diaSel: iso }),
+      });
+    }
+    const resto = celulas.length % 7;
+    if (resto) {
+      for (let i = 1; i <= 7 - resto; i++) {
+        celulas.push({
+          num: i, iso: "", aria: "Dia fora do mês", bg: "var(--cream-200)", bgHover: "var(--cream-200)",
+          corNum: "var(--text-faint)", minH, cursor: "default", op: 1, anel: "none", ehHoje: false,
+          pills: [], dots: [], temDots: false, mais: "", abrir: () => {},
+        });
+      }
+    }
+    vals.celulas = celulas;
+
+    vals.legenda = [
+      { cor: "#4C9E81", label: "Tempo Comum" },
+      { cor: "#D9A441", label: "Solenidade" },
+      { cor: "#B53325", label: "Festa / Mártires" },
+      { cor: "#6E5C50", label: "Reunião / Atendimento" },
+    ];
+
+    const agenda = [];
+    for (let d = 1; d <= ultimo; d++) {
+      const iso = this._iso(ano, mes, d);
+      let { evs } = this._eventosDoDia(D, iso);
+      if (nomeEqSel) evs = evs.filter((ev) => this._eventoBateEquipe(ev, nomeEqSel));
+      if (!evs.length) continue;
+      const dt = new Date(ano, mes - 1, d);
+      const primeiro = this._tipoInfo(evs[0]);
+      const ehHoje = iso === hojeIso;
+      agenda.push({
+        num: d,
+        diaSem: dt.toLocaleString("pt-BR", { weekday: "short" }).replace(".", ""),
+        ehHoje,
+        cor: primeiro.cor,
+        corNum: ehHoje ? "var(--graca-red)" : "var(--text-strong)",
+        bgData: ehHoje ? "var(--grad-dawn)" : "var(--cream-50)",
+        sombra: ehHoje ? "0 0 0 2px var(--gold), var(--shadow-md)" : "var(--shadow-sm)",
+        aria: `${d} de ${nomeMes}, ${evs.length} compromisso${evs.length > 1 ? "s" : ""}. Ver detalhes`,
+        abrir: () => this.setState({ diaSel: iso }),
+        eventos: evs.map((ev, i) => {
+          const t = this._tipoInfo(ev);
+          const com = ev.comunidade_id
+            ? D.comunidades.find((c) => c.id === ev.comunidade_id)?.nome
+            : null;
+          const partes = [t.label];
+          if (com) partes.push(com);
+          else if (ev.local) partes.push(ev.local);
+          if (ev.escalas && ev.escalas[0] && ev.escalas[0].leitura)
+            partes.push(`Leitura: ${ev.escalas[0].leitura}`);
+          return {
+            hora: this._horaDe(ev) || "—",
+            titulo: ev.titulo,
+            sub: partes.join(" · "),
+            bt: i === 0 ? "none" : "1px dashed var(--border)",
+          };
+        }),
+      });
+    }
+    vals.agenda = agenda;
+    vals.agendaVazia = agenda.length === 0;
+
+    const hojeDt = new Date(hojeIso + "T12:00:00");
+    vals.avisos = D.avisos.map((av) => {
+      const dt = new Date(av.data + "T12:00:00");
+      const diff = Math.round((dt - hojeDt) / 86400000);
+      let tag = `Faltam ${diff} dias`;
+      let urg = false;
+      if (diff <= 0) { tag = "HOJE"; urg = true; }
+      else if (diff === 1) { tag = "AMANHÃ"; urg = true; }
+      const prio = { 1: "#B53325", 2: "#D9A441", 3: "#343069" }[av.prioridade] || "#9C8A7C";
+      return {
+        titulo: av.titulo,
+        descricao: av.descricao,
+        local: av.local,
+        hora: av.hora_inicio,
+        dataFmt: dt.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
+        tag,
+        tagCor: urg ? "#ffffff" : "var(--text-body)",
+        tagBg: urg ? "var(--graca-red)" : "var(--cream-200)",
+        anim: urg ? "sdPulse 2.4s ease-in-out infinite" : "none",
+        cor: prio,
+      };
+    });
+    vals.totalAvisos = D.avisos.length;
+
+    if (diaSel) {
+      const { evs } = this._eventosDoDia(D, diaSel);
+      if (evs.length) {
+        const dt = new Date(diaSel + "T12:00:00");
+        const primeiro = this._tipoInfo(evs[0]);
+        const IC = {
+          leitura: "assets/img/icones/leitores.png",
+          canto: "assets/img/icones/canto.png",
+          celebrante: "assets/img/icones/celebrante.png",
+          mep: "assets/img/icones/mep.png",
+          mesce: "assets/img/icones/mesce.png",
+          coroinhas: "assets/img/icones/coroinhas.png",
+        };
+        vals.temModal = true;
+        vals.modal = {
+          num: dt.getDate(),
+          mes: dt.toLocaleString("pt-BR", { month: "long" }),
+          diaSemana: dt.toLocaleString("pt-BR", { weekday: "long" }),
+          cor: primeiro.cor,
+          aria: `Detalhes de ${dt.toLocaleDateString("pt-BR")}`,
+          eventos: evs.map((ev, i) => {
+            const t = this._tipoInfo(ev);
+            const com = ev.comunidade_id
+              ? D.comunidades.find((c) => c.id === ev.comunidade_id)
+              : null;
+            const ehLiturgia = !ev.tipo_compromisso || ev.tipo_compromisso === "liturgia";
+            const infos = [];
+            if (!ehLiturgia) {
+              infos.push({ k: "Horário", v: ev.hora_inicio || "—" });
+              if (ev.local) infos.push({ k: "Local", v: ev.local });
+              if (ev.responsavel) infos.push({ k: "Responsável", v: ev.responsavel });
+            }
+            return {
+              titulo: ev.titulo,
+              tempo: ehLiturgia ? (ev.tempo_liturgico || "Paroquial") + (ev.is_solenidade ? " · Solenidade" : "") : t.label,
+              corTxt: ehLiturgia ? (ev.cor.txt || ev.cor.hex) : t.cor,
+              comunidade: com ? `${com.nome} — ${com.endereco}` : null,
+              bt: i === 0 ? "none" : "2px dashed var(--border)",
+              pt: i === 0 ? "0" : "16px",
+              mt: i === 0 ? "0" : "16px",
+              infos,
+              escalas: (ev.escalas || []).map((esc) => {
+                const linhas = [];
+                if (esc.leitura) linhas.push({ icon: IC.leitura, label: "Leitores", valor: esc.leitura });
+                if (esc.canto) linhas.push({ icon: IC.canto, label: "Canto", valor: esc.canto });
+                if (esc.celebrante) linhas.push({ icon: IC.celebrante, label: "Celebrante", valor: esc.celebrante });
+                if (esc.mep) linhas.push({ icon: IC.mep, label: "Presidente", valor: esc.mep });
+                const listas = [];
+                if (esc.mesce && esc.mesce.length)
+                  listas.push({ icon: IC.mesce, label: "MESCE", nomes: esc.mesce, pillBg: "var(--graca-red-100)", pillCor: "var(--graca-red-700)", pillBorda: "var(--graca-red-300)" });
+                if (esc.coroinhas && esc.coroinhas.length)
+                  listas.push({ icon: IC.coroinhas, label: "Coroinhas", nomes: esc.coroinhas, pillBg: "#FBF3E8", pillCor: "var(--gold-deep)", pillBorda: "var(--gold-ray)" });
+                return { hora: esc.hora, linhas, listas };
+              }),
+            };
+          }),
+        };
+        const ev0 = evs[0];
+        const hora0 = (this._horaDe(ev0) || "08:00").replace(":", "") + "00";
+        const dataC = diaSel.replace(/-/g, "");
+        vals.syncGoogle = () => {
+          const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(ev0.titulo)}&dates=${dataC}T${hora0}/${dataC}T${hora0}&details=${encodeURIComponent("Paróquia Senhor Bom Jesus — Itabirinha/MG")}`;
+          window.open(url, "_blank");
+        };
+        vals.baixarIcs = () => {
+          const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "BEGIN:VEVENT",
+            `DTSTART:${dataC}T${hora0}`, `SUMMARY:${ev0.titulo}`,
+            "DESCRIPTION:Paróquia Senhor Bom Jesus — Itabirinha/MG",
+            "END:VEVENT", "END:VCALENDAR"].join("\r\n");
+          const blob = new Blob([ics], { type: "text/calendar" });
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = "compromisso-paroquia.ics";
+          a.click();
+          URL.revokeObjectURL(a.href);
+        };
+      }
+    }
+
+    return vals;
+  }
+}
+
+</script>
+</body>
+</html>
