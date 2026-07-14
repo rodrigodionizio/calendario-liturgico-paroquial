@@ -739,8 +739,6 @@ window.api = {
     localStorage.removeItem(cacheKey);
     _log(`🗑️ Cache invalidado após salvar: ${cacheKey}`);
 
-    import('wordpress-sync.js').then(m => m.notificarWP('salvo', eventoId));
-
     return eventoId;
     
   },

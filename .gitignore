@@ -11,6 +11,9 @@ Thumbs.db
 #Documentação
 backend_automacao/
 
+# Migração SaaS — docs locais, não versionar
+_saas-migration/
+
 # IDEs
 .vscode/
 .idea/

@@ -784,7 +784,6 @@ window.DashboardController = {
     // BUG-004 / RISCO-2: invalidar ambas as camadas de cache
     window.api.clearCache();                          // limpa eventos_* no localStorage
     window.ModalController?.invalidarCache(dataISO); // limpa sessionStorage do modal
-    import('./wordpress-sync.js').then(m => m.notificarWP('excluido', id));
     this.abrirGerenciadorAgenda(dataISO);
     window.CalendarEngine.carregarERenderizar();
   },

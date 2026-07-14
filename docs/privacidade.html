@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Política de Privacidade | Sacristia Digital</title>
+  <meta name="robots" content="noindex">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --vinho: #a41d31;
+      --dourado: #fbb558;
+      --fundo: #fff8e7;
+      --texto: #2c0e12;
+      --texto-muted: #64748b;
+      --borda: #e2d3c0;
+      --white: #ffffff;
+      --radius: 10px;
+      --max: 760px;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background: var(--fundo);
+      color: var(--texto);
+      line-height: 1.7;
+      font-size: 1rem;
+    }
+
+    header {
+      background: var(--vinho);
+      color: var(--white);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    header a {
+      color: rgba(255,255,255,0.75);
+      text-decoration: none;
+      font-size: 0.85rem;
+    }
+
+    header a:hover { color: var(--white); }
+
+    header h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      flex: 1;
+    }
+
+    main {
+      max-width: var(--max);
+      margin: 2.5rem auto;
+      padding: 0 1.25rem 4rem;
+    }
+
+    .atualizado {
+      color: var(--texto-muted);
+      font-size: 0.85rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--borda);
+    }
+
+    h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--vinho);
+      margin: 2rem 0 0.6rem;
+    }
+
+    h3 {
+      font-size: 0.97rem;
+      font-weight: 600;
+      margin: 1.2rem 0 0.4rem;
+    }
+
+    p, li { margin-bottom: 0.5rem; }
+    ul { padding-left: 1.4rem; }
+    li { margin-bottom: 0.3rem; }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--borda);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      margin: 1rem 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      margin: 1rem 0;
+    }
+
+    th {
+      background: var(--vinho);
+      color: var(--white);
+      padding: 0.6rem 0.8rem;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    td {
+      padding: 0.55rem 0.8rem;
+      border-bottom: 1px solid var(--borda);
+      vertical-align: top;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:nth-child(even) td { background: #fdf7ef; }
+
+    .contato {
+      background: var(--vinho);
+      color: var(--white);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .contato a {
+      color: var(--dourado);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .contato a:hover { text-decoration: underline; }
+
+    .voltar {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--vinho);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+    }
+
+    .voltar:hover { text-decoration: underline; }
+
+    @media (max-width: 600px) {
+      table { font-size: 0.82rem; }
+      th, td { padding: 0.45rem 0.55rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Sacristia Digital — Política de Privacidade</h1>
+  <a href="index.html">← Voltar ao calendário</a>
+</header>
+
+<main>
+  <p class="atualizado">Última atualização: <strong>10 de julho de 2026</strong></p>
+
+  <h2>1. Quem somos</h2>
+  <p>O <strong>Sacristia Digital</strong> é um sistema de gestão pastoral desenvolvido por <strong>Rodrigo Dionízio</strong> para comunidades e paróquias católicas. O responsável pelo tratamento dos dados é o próprio desenvolvedor, que pode ser contatado pelo e-mail abaixo.</p>
+
+  <h2>2. Quais dados coletamos e para quê</h2>
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Dado</th>
+          <th>Quem fornece</th>
+          <th>Finalidade</th>
+          <th>Base legal (LGPD)</th>
+          <th>Retenção</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Nome e e-mail do coordenador</td>
+          <td>Coordenador / admin</td>
+          <td>Acesso ao sistema</td>
+          <td>Execução de contrato (Art. 7, V)</td>
+          <td>Duração do contrato</td>
+        </tr>
+        <tr>
+          <td>Nome de membros de equipes</td>
+          <td>Coordenador</td>
+          <td>Organização de escalas</td>
+          <td>Legítimo interesse (Art. 7, IX)</td>
+          <td>2 anos após inatividade</td>
+        </tr>
+        <tr>
+          <td>Telefone de membros (opcional)</td>
+          <td>Coordenador</td>
+          <td>Notificações de escala</td>
+          <td>Consentimento (Art. 7, I)</td>
+          <td>2 anos após inatividade</td>
+        </tr>
+        <tr>
+          <td>Dados de sacramentos (nome, data)</td>
+          <td>Coordenador</td>
+          <td>Registro histórico paroquial</td>
+          <td>Exercício regular de direito (Art. 7, VI)</td>
+          <td>10 anos</td>
+        </tr>
+        <tr>
+          <td>IP de acesso</td>
+          <td>Automático</td>
+          <td>Segurança e auditoria</td>
+          <td>Segurança (Art. 7, IX)</td>
+          <td>6 meses</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>O calendário público (visualização das missas e eventos) é acessível <strong>sem cadastro</strong> e não coleta nenhum dado pessoal de quem apenas consulta o calendário.</p>
+
+  <h2>3. Com quem compartilhamos os dados</h2>
+  <p>Os dados são armazenados em serviços de terceiros que atuam como operadores de dados, todos com acordos de proteção de dados adequados:</p>
+  <ul>
+    <li><strong>Supabase</strong> (Supabase Inc.) — banco de dados e autenticação, servidores na AWS us-east-1</li>
+    <li><strong>Vercel</strong> (Vercel Inc.) — hospedagem do sistema</li>
+  </ul>
+  <p>Não vendemos, alugamos nem compartilhamos dados pessoais com terceiros para fins comerciais.</p>
+
+  <h2>4. Cookies e armazenamento local</h2>
+  <p>O Sacristia Digital utiliza <strong>armazenamento local do navegador (localStorage)</strong> exclusivamente para:</p>
+  <ul>
+    <li>Cache temporário de eventos do calendário (melhora a velocidade de carregamento)</li>
+    <li>Manutenção da sessão de login para coordenadores</li>
+  </ul>
+  <p>Não utilizamos cookies de rastreamento, publicidade ou análise de comportamento.</p>
+
+  <h2>5. Seus direitos (LGPD — Lei 13.709/2018)</h2>
+  <div class="card">
+    <h3>Você tem direito a:</h3>
+    <ul>
+      <li><strong>Confirmação e acesso</strong> — saber se tratamos seus dados e obter uma cópia</li>
+      <li><strong>Correção</strong> — corrigir dados incompletos, inexatos ou desatualizados</li>
+      <li><strong>Exclusão</strong> — solicitar a eliminação dos seus dados pessoais</li>
+      <li><strong>Portabilidade</strong> — receber seus dados em formato estruturado</li>
+      <li><strong>Revogação do consentimento</strong> — quando o tratamento for baseado em consentimento</li>
+      <li><strong>Oposição</strong> — se discordar de algum tratamento realizado</li>
+    </ul>
+    <p style="margin-top: 0.8rem;">Para exercer qualquer um desses direitos, envie um e-mail para <strong>contato@sacristiadigital.com.br</strong> com o assunto "LGPD — [seu direito]". Responderemos em até <strong>15 dias úteis</strong>.</p>
+  </div>
+
+  <h2>6. Segurança</h2>
+  <p>Adotamos as seguintes medidas de segurança para proteger os dados:</p>
+  <ul>
+    <li>Controle de acesso por autenticação (e-mail + senha) com sessões criptografadas</li>
+    <li>Isolamento de dados por paróquia — nenhuma paróquia acessa dados de outra</li>
+    <li>Registro de auditoria de todas as alterações nos dados</li>
+    <li>Comunicação exclusivamente via HTTPS</li>
+    <li>Senhas nunca armazenadas em texto simples (gerenciadas pelo Supabase Auth)</li>
+  </ul>
+
+  <h2>7. Menores de idade</h2>
+  <p>O Sacristia Digital não coleta dados de menores de 18 anos diretamente. Dados de sacramentos de crianças (ex.: batismo) são inseridos pelos responsáveis ou coordenadores adultos da paróquia, e tratados com base no legítimo interesse religioso.</p>
+
+  <h2>8. Alterações nesta política</h2>
+  <p>Esta política pode ser atualizada periodicamente. A data de atualização no topo indica a versão vigente. Alterações significativas serão comunicadas aos coordenadores cadastrados por e-mail.</p>
+
+  <div class="contato">
+    <strong>Dúvidas ou solicitações sobre privacidade?</strong><br><br>
+    Entre em contato: <a href="mailto:contato@sacristiadigital.com.br">contato@sacristiadigital.com.br</a><br>
+    <span style="font-size: 0.88rem; opacity: 0.85; margin-top: 0.4rem; display: block;">Sacristia Digital · Rodrigo Dionízio ·</span>
+  </div>
+</main>
+
+</body>
+</html>
