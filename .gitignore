@@ -14,6 +14,13 @@ backend_automacao/
 # Migração SaaS — docs locais, não versionar
 _saas-migration/
 
+# Node — instalar globalmente (pasta no Google Drive causa conflito com npm)
+node_modules/
+package-lock.json
+
+# Vercel
+.vercel/
+
 # IDEs
 .vscode/
 .idea/

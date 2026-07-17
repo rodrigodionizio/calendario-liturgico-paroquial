@@ -1,0 +1,11 @@
+{
+  "name": "sacristia-digital-calendario",
+  "version": "4.0.0",
+  "private": true,
+  "description": "Calendário litúrgico paroquial — Sacristia Digital",
+  "scripts": {
+    "dev": "npx serve docs --listen 5500",
+    "deploy:preview": "vercel deploy",
+    "deploy:prod": "vercel deploy --prod"
+  }
+}
