@@ -1,0 +1,43 @@
+name: Publicar release
+
+# Dispara ao enviar uma tag de versão:
+#   git tag -a v2.0.1 -m "v2.0.1" && git push origin v2.0.1
+# As notas saem da seção correspondente do CHANGELOG.md.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extrair as notas do CHANGELOG
+        id: notas
+        run: |
+          versao="${GITHUB_REF_NAME#v}"
+          # do cabeçalho da versão até o próximo cabeçalho de versão
+          awk -v v="$versao" '
+            $0 ~ "^## \\[" v "\\]" { dentro = 1; next }
+            dentro && /^## \[/      { exit }
+            dentro                   { print }
+          ' CHANGELOG.md > notas.md
+          if [ ! -s notas.md ]; then
+            echo "Nenhuma seção [$versao] encontrada em CHANGELOG.md." >&2
+            exit 1
+          fi
+          echo "Notas extraídas para a versão $versao:"
+          cat notas.md
+
+      - name: Publicar
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          body_path: notas.md
+          draft: false
+          prerelease: false
