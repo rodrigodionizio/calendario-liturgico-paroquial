@@ -7,6 +7,37 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ---
 
+## [2.0.1] - 2026-08-20
+
+### Corrigido
+
+- **Notificação do portal nunca disparava ao salvar evento.** `api.js` chamava
+  `import('wordpress-sync.js')` com especificador nu; o navegador não resolve
+  especificador sem `./` e lançava `TypeError`, de forma silenciosa. Alinhado com
+  `dashboard.js`, que já usava `./wordpress-sync.js`.
+- **Precache do service worker fora de sincronia com a aplicação.** A lista `ASSETS`
+  incluía `app.js` e `modal-controller.js`, que nenhuma página carrega, e omitia
+  `constants.js` e `app-new.js`, que `index.html` carrega — o modo offline dependia do
+  cache de runtime para justamente os arquivos essenciais. Lista corrigida e
+  `CACHE_NAME` incrementado para `sacristia-v3.3`.
+- Removido do precache `badge-comunidades.css`, que não é referenciado por nenhuma página.
+
+### Adicionado
+
+- Verificação automática (`scripts/verifica-precache.mjs`) que compara a lista `ASSETS`
+  do service worker com os recursos que `index.html` realmente carrega, impedindo a
+  volta do problema acima.
+- Workflow `Qualidade`: sintaxe de JavaScript e Python, coerência do precache, validação
+  de HTML e verificação de links quebrados a cada push e pull request.
+
+### Alterado
+
+- README reescrito: arquitetura real do sistema (frontend, Supabase, Edge Function em
+  Deno, scripts Python), diagrama de componentes, camadas de cache, nota sobre o modelo
+  de segurança da chave `anon` com RLS, e instruções de execução local.
+
+---
+
 ## [2.0.0] - 2026-01-28
 
 ### 🎉 Versão Refatorada - Otimização Completa

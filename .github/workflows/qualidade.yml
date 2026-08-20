@@ -1,0 +1,59 @@
+name: Qualidade
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  javascript:
+    name: Sintaxe e coerência do precache
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Conferir sintaxe dos scripts
+        run: |
+          erro=0
+          for f in docs/assets/js/*.js docs/sw.js; do
+            node --check "$f" || { echo "::error file=$f::erro de sintaxe"; erro=1; }
+          done
+          exit $erro
+
+      - name: Conferir precache do service worker
+        run: node scripts/verifica-precache.mjs
+
+  python:
+    name: Sintaxe dos scripts Python
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compilar os scripts
+        run: python -m compileall -q backend_automacao services
+
+  html:
+    name: HTML válido e links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validar HTML e procurar links quebrados
+        uses: anishathalye/proof-html@v2
+        with:
+          directory: ./docs
+          check_html: true
+          check_external_hash: false
+          enforce_https: false
+          # Instagram e WhatsApp bloqueiam robôs de verificação.
+          url_ignore_re: |
+            ^https://www\.instagram\.com/
+            ^https://wa\.me/
