@@ -26,6 +26,11 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   Imagem criada em 1200×630 com a identidade da paróquia.
 - **`icon-152.png` era referenciado como `apple-touch-icon` e não existia** — o iPad caía
   no ícone genérico. Arquivo gerado a partir de `icon-192.png`.
+- **HTML inválido no modal de impressão.** Cada opção tinha um `<div>` dentro de `<button>`,
+  o que o HTML5 não permite — `button` aceita apenas conteúdo de frase. Trocado por `<span>`,
+  com o ícone marcado como `aria-hidden` para o leitor de tela não anunciar o emoji.
+  Renderização conferida: dimensões e estilos computados idênticos aos anteriores.
+- Atributo `width` obsoleto nos `<th>` da tabela de impressão, substituído por `style`.
 
 ### Adicionado
 
