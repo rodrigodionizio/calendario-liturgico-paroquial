@@ -1,0 +1,70 @@
+name: Qualidade
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  javascript:
+    name: Sintaxe e coerência do precache
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Conferir sintaxe dos scripts
+        run: |
+          erro=0
+          for f in docs/assets/js/*.js docs/sw.js; do
+            node --check "$f" || { echo "::error file=$f::erro de sintaxe"; erro=1; }
+          done
+          exit $erro
+
+      - name: Conferir precache do service worker
+        run: node scripts/verifica-precache.mjs
+
+  python:
+    name: Sintaxe dos scripts Python
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compilar os scripts
+        run: python -m compileall -q backend_automacao services
+
+  html:
+    name: HTML válido e links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validar HTML
+        uses: Cyb3r-Jak3/html5validator-action@v7.2.0
+        with:
+          root: docs/
+          log_level: WARNING
+
+      - name: Procurar links quebrados
+        uses: lycheeverse/lychee-action@v2
+        with:
+          # Excluídos: o host do Supabase responde 404 na raiz (é preconnect, não
+          # link navegável) e Instagram/WhatsApp bloqueiam robôs de verificação.
+          args: >-
+            --no-progress
+            --max-concurrency 4
+            --accept 200,206,301,302,403
+            --exclude supabase[.]co
+            --exclude instagram[.]com
+            --exclude wa[.]me
+            --exclude whatsapp[.]com
+            'docs/**/*.html'
+          fail: true

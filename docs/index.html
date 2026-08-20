@@ -289,16 +289,16 @@
     <h3>Imprimir Escalas</h3>
     <div class="sd-print-opt-list">
       <button class="sd-print-opt" onclick="window.gerarRelatorio('mes_atual')">
-        <span>📄</span>
-        <div><strong>Mês atual</strong><br><small style="color:var(--text-muted)">Gera o relatório do mês em exibição</small></div>
+        <span class="sd-print-opt-icon" aria-hidden="true">📄</span>
+        <span class="sd-print-opt-text"><strong>Mês atual</strong><br><small style="color:var(--text-muted)">Gera o relatório do mês em exibição</small></span>
       </button>
       <button class="sd-print-opt" onclick="window.gerarRelatorio('trimestre')">
-        <span>📋</span>
-        <div><strong>Próximos 3 meses</strong><br><small style="color:var(--text-muted)">Relatório trimestral a partir do mês atual</small></div>
+        <span class="sd-print-opt-icon" aria-hidden="true">📋</span>
+        <span class="sd-print-opt-text"><strong>Próximos 3 meses</strong><br><small style="color:var(--text-muted)">Relatório trimestral a partir do mês atual</small></span>
       </button>
       <button class="sd-print-opt" onclick="window.gerarRelatorio('ano_completo')">
-        <span>📚</span>
-        <div><strong>Ano litúrgico completo</strong><br><small style="color:var(--text-muted)">Gera o relatório de todo o ano</small></div>
+        <span class="sd-print-opt-icon" aria-hidden="true">📚</span>
+        <span class="sd-print-opt-text"><strong>Ano litúrgico completo</strong><br><small style="color:var(--text-muted)">Gera o relatório de todo o ano</small></span>
       </button>
     </div>
     <button id="sd-print-cancel" class="sd-print-cancel">Cancelar</button>
@@ -326,9 +326,9 @@
   <table class="print-table">
     <thead>
       <tr>
-        <th width="11%">Data</th>
-        <th width="44%">Evento / Liturgia</th>
-        <th width="45%">Detalhes / Equipes</th>
+        <th style="width: 11%">Data</th>
+        <th style="width: 44%">Evento / Liturgia</th>
+        <th style="width: 45%">Detalhes / Equipes</th>
       </tr>
     </thead>
     <tbody id="print-table-body"></tbody>

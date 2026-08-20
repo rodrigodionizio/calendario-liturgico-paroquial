@@ -3614,7 +3614,8 @@ body.sd-active {
   transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease);
 }
 .sd-print-opt:hover { border-color: var(--graca-red); background: var(--graca-red-100); }
-.sd-print-opt span { font-size: 1.2rem; }
+.sd-print-opt .sd-print-opt-icon { font-size: 1.2rem; }
+.sd-print-opt .sd-print-opt-text { font-size: 14px; font-weight: var(--fw-bold); }
 .sd-print-cancel {
   margin-top: var(--space-3);
   width: 100%;

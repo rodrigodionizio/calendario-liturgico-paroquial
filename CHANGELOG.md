@@ -7,6 +7,47 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ---
 
+## [2.0.1] - 2026-08-20
+
+### Corrigido
+
+- **Notificação do portal nunca disparava ao salvar evento.** `api.js` chamava
+  `import('wordpress-sync.js')` com especificador nu; o navegador não resolve
+  especificador sem `./` e lançava `TypeError`, de forma silenciosa. Alinhado com
+  `dashboard.js`, que já usava `./wordpress-sync.js`.
+- **Precache do service worker fora de sincronia com a aplicação.** A lista `ASSETS`
+  incluía `app.js` e `modal-controller.js`, que nenhuma página carrega, e omitia
+  `constants.js` e `app-new.js`, que `index.html` carrega — o modo offline dependia do
+  cache de runtime para justamente os arquivos essenciais. Lista corrigida e
+  `CACHE_NAME` incrementado para `sacristia-v3.3`.
+- Removido do precache `badge-comunidades.css`, que não é referenciado por nenhuma página.
+- **`og:image` e `twitter:image` apontavam para `assets/img/og-image.jpg`, que não existia.**
+  Compartilhar o endereço do site no WhatsApp ou no Facebook não mostrava prévia nenhuma.
+  Imagem criada em 1200×630 com a identidade da paróquia.
+- **`icon-152.png` era referenciado como `apple-touch-icon` e não existia** — o iPad caía
+  no ícone genérico. Arquivo gerado a partir de `icon-192.png`.
+- **HTML inválido no modal de impressão.** Cada opção tinha um `<div>` dentro de `<button>`,
+  o que o HTML5 não permite — `button` aceita apenas conteúdo de frase. Trocado por `<span>`,
+  com o ícone marcado como `aria-hidden` para o leitor de tela não anunciar o emoji.
+  Renderização conferida: dimensões e estilos computados idênticos aos anteriores.
+- Atributo `width` obsoleto nos `<th>` da tabela de impressão, substituído por `style`.
+
+### Adicionado
+
+- Verificação automática (`scripts/verifica-precache.mjs`) que compara a lista `ASSETS`
+  do service worker com os recursos que `index.html` realmente carrega, impedindo a
+  volta do problema acima.
+- Workflow `Qualidade`: sintaxe de JavaScript e Python, coerência do precache, validação
+  de HTML e verificação de links quebrados a cada push e pull request.
+
+### Alterado
+
+- README reescrito: arquitetura real do sistema (frontend, Supabase, Edge Function em
+  Deno, scripts Python), diagrama de componentes, camadas de cache, nota sobre o modelo
+  de segurança da chave `anon` com RLS, e instruções de execução local.
+
+---
+
 ## [2.0.0] - 2026-01-28
 
 ### 🎉 Versão Refatorada - Otimização Completa

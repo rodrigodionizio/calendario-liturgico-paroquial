@@ -3,19 +3,17 @@
 
 // PERF-003: incrementar CACHE_NAME a cada deploy para forçar reinstalação
 // O activate event limpa caches com nome diferente automaticamente.
-const CACHE_NAME = 'sacristia-v3.2';
-const CACHE_VERSION = '3.2.0';
+const CACHE_NAME = 'sacristia-v3.3';
+const CACHE_VERSION = '3.3.0';
 
 // Assets essenciais para funcionamento offline
 const ASSETS = [
   './index.html',
   './assets/css/styles.css',
-  './assets/css/badge-comunidades.css',
-  './assets/js/api.js',
-  './assets/js/app.js',
-  './assets/js/calendar-engine.js',
-  './assets/js/modal-controller.js',
+  './assets/js/constants.js',
   './assets/js/error-handler.js',
+  './assets/js/api.js',
+  './assets/js/app-new.js',
   './manifest.json'
 ];
 
