@@ -21,6 +21,11 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
   cache de runtime para justamente os arquivos essenciais. Lista corrigida e
   `CACHE_NAME` incrementado para `sacristia-v3.3`.
 - Removido do precache `badge-comunidades.css`, que não é referenciado por nenhuma página.
+- **`og:image` e `twitter:image` apontavam para `assets/img/og-image.jpg`, que não existia.**
+  Compartilhar o endereço do site no WhatsApp ou no Facebook não mostrava prévia nenhuma.
+  Imagem criada em 1200×630 com a identidade da paróquia.
+- **`icon-152.png` era referenciado como `apple-touch-icon` e não existia** — o iPad caía
+  no ícone genérico. Arquivo gerado a partir de `icon-192.png`.
 
 ### Adicionado
 
